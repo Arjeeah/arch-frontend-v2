@@ -17,6 +17,10 @@ const router = createRouter({
         { path: '', component: PlaceholderPage },
       ],
     },
+    {
+      path: '/_dev',
+      component: () => import('@/pages/dev/ComponentGallery.vue'),
+    },
   ],
 })
 
