@@ -20,6 +20,8 @@ ARCH is a university archive management system. This repo is the frontend admin 
 | Pinia           | 3       | State management                                |
 | Axios           | 1.x     | HTTP — configured in `src/app/plugins/axios.ts` |
 | Vue Router      | 5       | Routing — defined in `src/app/router/index.ts`  |
+| vue-i18n        | 9       | Translations — files in `src/locales/`          |
+| Chart.js        | 4       | Charts via `vue-chartjs` wrapper                |
 | Lucide Vue Next | latest  | Icons only                                      |
 
 ## Always use the generators — never create files by hand
@@ -77,7 +79,7 @@ Always use Tailwind tokens from `tailwind.config.ts`:
 | `text-text-muted`        | #B6B6B6 | placeholder-level text    |
 | `bg-primary`             | #2F6FB2 | primary blue              |
 | `bg-primary-mid`         | #2F6297 | darker blue (buttons)     |
-| `bg-primary-dark`        | —       | sidebar/header background |
+| `bg-primary-dark`        | #30476D | sidebar/header background |
 | `border-border`          | #E4E4E4 | default borders           |
 | `border-border-dropdown` | #B8BBC2 | dropdown borders          |
 | `font-sans`              | Inter   | body text                 |
@@ -95,6 +97,14 @@ If you need a color not in the config, add it to `tailwind.config.ts` — don't 
 - `AppConfirmDialog` — confirm modal wrapping AppDialog
 - `AppButton` — standard button
 - `FormInput` — styled text input
+- `FormField` — label + input wrapper with error message slot
+- `SearchBar` — search input with magnifier icon
+- `FilterDropdown` — dropdown filter (check before building a new filter)
+- `DataTable` — generic table shell
+- `StatusBadge` — coloured pill badge for status values
+- `AppHeader` — top header bar (do not duplicate)
+- `AppSidebar` — left navigation sidebar (do not duplicate)
+- `SidebarNavItem` — single nav item used inside AppSidebar
 
 `src/composables/`:
 
