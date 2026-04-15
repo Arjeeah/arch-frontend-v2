@@ -7,6 +7,7 @@ This file is loaded automatically by Claude Code. Follow everything here exactly
 ARCH is a university archive management system. This repo is the frontend admin panel.
 
 **API base URL:** `http://64.23.135.78:8088/api` (configured in `src/app/config/env.ts`)
+**Override:** set `VITE_API_BASE_URL` in a local `.env.local` file to point at a different backend (file is gitignored)
 **Dev server:** `npm run dev` → `http://localhost:5173`
 
 ## Stack

@@ -6,7 +6,7 @@ Built with Vue 3, Vite, TypeScript, and Tailwind CSS.
 
 ## Prerequisites
 
-- **Node.js** v22 or later — [download](https://nodejs.org/)
+- **Node.js** v20.19 or later (v22 recommended) — [download](https://nodejs.org/)
 - **VS Code** — [download](https://code.visualstudio.com/)
   - Install the [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) extension
   - Disable Vetur if you have it installed
