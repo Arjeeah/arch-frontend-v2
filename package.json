@@ -65,7 +65,7 @@
       "oxlint --fix",
       "eslint --fix"
     ],
-    "*.{vue,ts,css,json,md}": [
+    "*.{vue,ts,js,cjs,mjs,css,json,md}": [
       "prettier --write"
     ]
   }
