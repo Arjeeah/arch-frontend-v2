@@ -1,46 +1,13 @@
+import { generateModule } from './tools/plop/generators/module'
 import type { NodePlopAPI } from 'plop'
 
 export default function (plop: NodePlopAPI) {
+  plop.setActionType('generateModule', generateModule)
+
   plop.setGenerator('module', {
     description: 'Create a new feature module',
     prompts: [{ type: 'input', name: 'name', message: 'Module name (kebab-case):' }],
-    actions: [
-      {
-        type: 'add',
-        path: 'src/modules/{{kebabCase name}}/index.ts',
-        templateFile: 'tools/plop/templates/module/index.ts.hbs',
-      },
-      {
-        type: 'add',
-        path: 'src/modules/{{kebabCase name}}/types.ts',
-        templateFile: 'tools/plop/templates/module/types.ts.hbs',
-      },
-      {
-        type: 'add',
-        path: 'src/modules/{{kebabCase name}}/pages/{{pascalCase name}}ListPage.vue',
-        templateFile: 'tools/plop/templates/module/page.vue.hbs',
-      },
-      {
-        type: 'add',
-        path: 'src/modules/{{kebabCase name}}/components/{{pascalCase name}}Table.vue',
-        templateFile: 'tools/plop/templates/module/table.vue.hbs',
-      },
-      {
-        type: 'add',
-        path: 'src/modules/{{kebabCase name}}/components/Create{{pascalCase name}}Dialog.vue',
-        templateFile: 'tools/plop/templates/module/dialog.vue.hbs',
-      },
-      {
-        type: 'add',
-        path: 'src/modules/{{kebabCase name}}/stores/use{{pascalCase name}}Store.ts',
-        templateFile: 'tools/plop/templates/module/store.ts.hbs',
-      },
-      {
-        type: 'add',
-        path: 'src/modules/{{kebabCase name}}/api/{{camelCase name}}Api.ts',
-        templateFile: 'tools/plop/templates/module/api.ts.hbs',
-      },
-    ],
+    actions: [{ type: 'generateModule' }],
   })
 
   plop.setGenerator('component', {
