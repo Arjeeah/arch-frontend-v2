@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import SidebarNavItem from './SidebarNavItem.vue'
+import logo from '@/assets/logo.svg'
 import {
   LayoutDashboard,
   Users,
@@ -35,8 +36,8 @@ function isActive(to: string) {
     class="flex flex-col w-[251px] min-h-screen bg-primary-dark shadow-[0px_2px_4px_rgba(0,0,0,0.25)] shrink-0 p-3 gap-[23px]"
   >
     <!-- Logo -->
-    <div class="flex items-center gap-3 py-2">
-      <span class="font-brand font-bold text-2xl text-white leading-none">ARCH system</span>
+    <div class="flex items-center py-2">
+      <img :src="logo" alt="ARCH system" class="h-9 w-auto" />
     </div>
 
     <!-- Nav -->
