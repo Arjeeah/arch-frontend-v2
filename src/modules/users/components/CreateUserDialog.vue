@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { reactive, ref, watch, computed } from 'vue'
-import { Eye, EyeOff, ChevronDown } from 'lucide-vue-next'
+import { Eye, EyeOff } from 'lucide-vue-next'
 import AppDialog from '@/shared/components/AppDialog.vue'
+import AppSelect from '@/shared/components/AppSelect.vue'
 import FormInput from '@/shared/components/FormInput.vue'
 import type { User } from '../types'
 import { ROLES, FACULTIES } from '../types'
@@ -69,6 +70,9 @@ function submit() {
     status: form.status,
   })
 }
+
+const roleOptions = ROLES.map(r => ({ value: r, label: r }))
+const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
 </script>
 
 <template>
@@ -101,32 +105,21 @@ function submit() {
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-base font-sans text-text-primary mb-[7px]">Role</label>
-          <div class="relative">
-            <select
-              v-model="form.role"
-              class="w-full h-[42px] pl-[18px] pr-10 bg-white border border-border-dropdown rounded-[8px] text-xs font-display font-medium text-[#313144] focus:outline-none appearance-none cursor-pointer"
-              style="border-width: 1.3px"
-            >
-              <option value="" disabled>select role</option>
-              <option v-for="r in ROLES" :key="r" :value="r">{{ r }}</option>
-            </select>
-            <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
-          </div>
+          <AppSelect
+            v-model="form.role"
+            :options="roleOptions"
+            placeholder="select role"
+            :placeholder-disabled="true"
+          />
           <p v-if="errors.role" class="mt-1 text-xs text-danger">{{ errors.role }}</p>
         </div>
         <div>
           <label class="block text-base font-sans text-text-primary mb-[7px]">Faculty</label>
-          <div class="relative">
-            <select
-              v-model="form.faculty"
-              class="w-full h-[42px] pl-[18px] pr-10 bg-white border border-border-dropdown rounded-[8px] text-xs font-display font-medium text-[#313144] focus:outline-none appearance-none cursor-pointer"
-              style="border-width: 1.3px"
-            >
-              <option value="">select faculty</option>
-              <option v-for="f in FACULTIES" :key="f" :value="f">{{ f }}</option>
-            </select>
-            <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
-          </div>
+          <AppSelect
+            v-model="form.faculty"
+            :options="facultyOptions"
+            placeholder="select faculty"
+          />
         </div>
       </div>
 
