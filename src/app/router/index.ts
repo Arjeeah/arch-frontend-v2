@@ -11,10 +11,17 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/login',
+      component: () => import('@/modules/auth/pages/LoginPage.vue'),
+      meta: { guest: true },
+    },
+    {
       path: '/',
       component: DashboardLayout,
+      meta: { requiresAuth: true },
       children: [
-        { path: '', component: PlaceholderPage },
+        { path: '', redirect: '/dashboard' },
+        { path: 'dashboard', component: PlaceholderPage },
       ],
     },
     {
@@ -22,6 +29,16 @@ const router = createRouter({
       component: () => import('@/pages/dev/ComponentGallery.vue'),
     },
   ],
+})
+
+router.beforeEach(to => {
+  const isAuthenticated = !!localStorage.getItem('auth_token')
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return { path: '/login', query: { redirect: to.fullPath } }
+  }
+  if (to.meta.guest && isAuthenticated) {
+    return { path: '/dashboard' }
+  }
 })
 
 export default router
