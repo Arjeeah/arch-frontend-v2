@@ -1,63 +1,57 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
-const props = withDefaults(
-  defineProps<{
-    currentPage: number
-    totalPages: number
-    maxVisible?: number
-  }>(),
-  { maxVisible: 7 },
-)
+const props = defineProps<{
+  currentPage: number
+  totalPages: number
+}>()
 
-const emit = defineEmits<{ change: [page: number] }>()
+const emit = defineEmits<{ 'update:currentPage': [page: number] }>()
 
-const pages = computed(() => {
-  const all = Array.from({ length: props.totalPages }, (_, i) => i + 1)
-  if (props.totalPages <= props.maxVisible) return all
-  // Simple window: show pages around current
-  const half = Math.floor(props.maxVisible / 2)
-  let start = Math.max(1, props.currentPage - half)
-  const end = Math.min(props.totalPages, start + props.maxVisible - 1)
-  start = Math.max(1, end - props.maxVisible + 1)
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+const visiblePages = computed((): (number | '...')[] => {
+  const { currentPage: cur, totalPages: total } = props
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  if (cur <= 4) return [1, 2, 3, 4, 5, '...', total]
+  if (cur >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total]
+  return [1, '...', cur - 1, cur, cur + 1, '...', total]
 })
 </script>
 
 <template>
-  <div class="flex items-center gap-3 font-sans">
-    <!-- Prev -->
+  <div class="flex items-center justify-center gap-1">
     <button
-      :disabled="currentPage <= 1"
-      class="w-8 h-8 flex items-center justify-center rounded bg-surface-table border border-border disabled:opacity-40"
-      @click="emit('change', currentPage - 1)"
+      class="w-8 h-8 flex items-center justify-center rounded border border-border text-text-secondary hover:bg-surface disabled:opacity-40"
+      :disabled="currentPage === 1"
+      @click="emit('update:currentPage', currentPage - 1)"
     >
-      <ChevronLeft class="w-4 h-4 text-text-secondary" />
+      ‹
     </button>
 
-    <!-- Page numbers -->
-    <div class="flex items-center gap-1">
+    <template v-for="page in visiblePages" :key="String(page)">
+      <span
+        v-if="page === '...'"
+        class="w-8 h-8 flex items-center justify-center text-text-muted text-sm"
+      >
+        …
+      </span>
       <button
-        v-for="page in pages"
-        :key="page"
-        class="w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors"
+        v-else
+        class="w-8 h-8 flex items-center justify-center rounded text-sm font-display font-medium transition-colors"
         :class="page === currentPage
-          ? 'bg-primary-accent text-white'
-          : 'text-text-primary hover:bg-surface'"
-        @click="emit('change', page)"
+          ? 'bg-primary text-white'
+          : 'border border-border text-text-secondary hover:bg-surface'"
+        @click="emit('update:currentPage', Number(page))"
       >
         {{ page }}
       </button>
-    </div>
+    </template>
 
-    <!-- Next -->
     <button
-      :disabled="currentPage >= totalPages"
-      class="w-8 h-8 flex items-center justify-center rounded bg-surface-table border border-border disabled:opacity-40"
-      @click="emit('change', currentPage + 1)"
+      class="w-8 h-8 flex items-center justify-center rounded border border-border text-text-secondary hover:bg-surface disabled:opacity-40"
+      :disabled="currentPage === totalPages"
+      @click="emit('update:currentPage', currentPage + 1)"
     >
-      <ChevronRight class="w-4 h-4 text-text-primary" />
+      ›
     </button>
   </div>
 </template>
