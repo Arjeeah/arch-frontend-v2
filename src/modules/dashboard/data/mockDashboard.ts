@@ -30,12 +30,12 @@ export const statCards = [
 export const filesPerMonth = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   data: [60, 75, 90, 105, 110, 95, 100, 115, 125, 130, 140, 150],
-}
+} as const
 
 export const borrowingsByFaculty = {
   labels: ['Medicine', 'Arts', 'Science', 'Business', 'Law'],
   data: [140, 80, 100, 60, 90],
-}
+} as const
 
 export const systemHealth = [
   { label: 'Database', value: '99.8% uptime', status: 'good' },
@@ -47,7 +47,7 @@ export const usersByRole = [
   { role: 'Super Admin', count: 3 },
   { role: 'Archivist', count: 12 },
   { role: 'Faculty Staff', count: 375 },
-]
+] as const
 
 export const weeklyDigest = [
   { label: 'Overdue Files', value: 8, color: 'danger' },
@@ -62,4 +62,4 @@ export const recentActivity = [
   { action: 'File Overdue', user: 'Mohammed', file: 'File: 2020215', timestamp: '14 hours ago' },
   { action: 'File Returned', user: 'Abdullah Omar', file: 'File: 2020216', timestamp: '2 hours ago' },
   { action: 'OCR Completed', user: 'Sara Ali', file: 'File: 2020217', timestamp: '7 hours ago' },
-]
+] as const
