@@ -10,7 +10,7 @@ defineProps<{
     <table class="w-full border-collapse font-sans">
       <!-- Header -->
       <thead>
-        <tr class="bg-surface-table border border-border rounded">
+        <tr class="bg-surface-table border border-border">
           <th
             v-for="col in columns"
             :key="col.key"
