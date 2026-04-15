@@ -44,7 +44,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown))
           class="relative bg-surface-card rounded-[10px] shadow-[4px_4px_4px_rgba(0,0,0,0.25)] font-sans flex flex-col"
           :class="{
             'w-full max-w-sm': size === 'sm',
-            'w-full max-w-lg': size === 'md',
+            'w-full max-w-[630px]': size === 'md',
             'w-full max-w-2xl': size === 'lg',
           }"
           @click.stop

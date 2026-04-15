@@ -26,7 +26,7 @@ export default {
         'text-placeholder': '#808080',
         border: {
           DEFAULT: '#E4E4E4',
-          input: '#ADADAD',
+          input: '#EBEBEB',
           dropdown: '#B8BBC2',
         },
         success: {

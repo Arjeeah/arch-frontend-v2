@@ -17,7 +17,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
     :value="modelValue"
     :placeholder="placeholder"
     :disabled="disabled"
-    class="w-full bg-surface-card border border-border-input rounded-lg px-4 py-2.5 font-sans text-sm text-text-primary placeholder:text-text-placeholder focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
+    class="w-full bg-surface-card border border-border-input rounded-[9px] px-4 py-3 font-sans text-sm text-text-primary placeholder:text-text-placeholder placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
     @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
   />
 </template>
