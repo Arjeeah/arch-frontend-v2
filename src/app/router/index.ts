@@ -16,6 +16,8 @@ const router = createRouter({
       children: [
         { path: '', redirect: '/dashboard' },
         { path: 'dashboard', component: () => import('@/modules/dashboard/pages/DashboardPage.vue') },
+        { path: 'users', component: () => import('@/modules/users/pages/UserListPage.vue') },
+        { path: 'users/:id', component: () => import('@/modules/users/pages/UserDetailPage.vue') },
       ],
     },
     {
