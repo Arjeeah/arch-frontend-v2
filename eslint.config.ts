@@ -72,10 +72,14 @@ export default defineConfigWithVueTs(
               from: { type: 'shared' },
               allow: { to: { type: 'shared' } },
             },
-            // app can import shared and app
+            // app can import shared, app, and module pages (router wires up all modules)
             {
               from: { type: 'app' },
-              allow: [{ to: { type: 'shared' } }, { to: { type: 'app' } }],
+              allow: [
+                { to: { type: 'shared' } },
+                { to: { type: 'app' } },
+                { to: { type: 'module' } },
+              ],
             },
           ],
         },

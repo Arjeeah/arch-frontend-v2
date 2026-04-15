@@ -60,6 +60,11 @@ export const recentActivity = [
   { action: 'File Borrowed', user: 'Nour Khalid', file: 'File: 2020213', timestamp: '2 hours ago' },
   { action: 'File Returned', user: 'Ahmed Ali', file: 'File: 2020214', timestamp: '4 hours ago' },
   { action: 'File Overdue', user: 'Mohammed', file: 'File: 2020215', timestamp: '14 hours ago' },
-  { action: 'File Returned', user: 'Abdullah Omar', file: 'File: 2020216', timestamp: '2 hours ago' },
+  {
+    action: 'File Returned',
+    user: 'Abdullah Omar',
+    file: 'File: 2020216',
+    timestamp: '2 hours ago',
+  },
   { action: 'OCR Completed', user: 'Sara Ali', file: 'File: 2020217', timestamp: '7 hours ago' },
 ] as const

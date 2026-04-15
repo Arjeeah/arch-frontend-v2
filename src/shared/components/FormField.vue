@@ -8,11 +8,7 @@ defineProps<{
 
 <template>
   <div class="flex flex-col gap-1.5">
-    <label
-      v-if="label"
-      :for="fieldId"
-      class="font-sans text-base font-medium text-text-primary"
-    >
+    <label v-if="label" :for="fieldId" class="font-sans text-base font-medium text-text-primary">
       {{ label }}
     </label>
     <slot />

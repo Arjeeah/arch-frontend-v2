@@ -65,7 +65,12 @@ const filterOptions = [
       <h2 class="text-lg font-semibold text-text-secondary font-sans">FormField + FormInput</h2>
       <div class="max-w-sm space-y-4">
         <FormField label="Email address" field-id="email">
-          <FormInput id="email" v-model="inputVal" type="email" placeholder="Enter your email address" />
+          <FormInput
+            id="email"
+            v-model="inputVal"
+            type="email"
+            placeholder="Enter your email address"
+          />
         </FormField>
         <FormField label="Password" field-id="password" error="Password is required">
           <FormInput id="password" type="password" placeholder="Enter your password" />
@@ -75,7 +80,9 @@ const filterOptions = [
 
     <!-- SearchBar + FilterDropdown -->
     <section class="space-y-3">
-      <h2 class="text-lg font-semibold text-text-secondary font-sans">SearchBar + FilterDropdown</h2>
+      <h2 class="text-lg font-semibold text-text-secondary font-sans">
+        SearchBar + FilterDropdown
+      </h2>
       <div class="flex gap-3 items-center">
         <div class="w-80">
           <SearchBar v-model="search" />
@@ -93,14 +100,20 @@ const filterOptions = [
         <template #rows>
           <tr class="bg-surface-card border border-border">
             <td class="px-3 py-3 text-sm text-text-primary font-sans">Ahmed Ali</td>
-            <td class="px-3 py-3 text-sm text-text-secondary font-sans text-center">a@limu.edu.ly</td>
+            <td class="px-3 py-3 text-sm text-text-secondary font-sans text-center">
+              a@limu.edu.ly
+            </td>
             <td class="px-3 py-3 text-center"><StatusBadge status="active">Active</StatusBadge></td>
             <td class="px-3 py-3 text-center text-text-secondary text-sm font-sans">—</td>
           </tr>
           <tr class="bg-surface-card border border-border">
             <td class="px-3 py-3 text-sm text-text-primary font-sans">Sara Ahmed</td>
-            <td class="px-3 py-3 text-sm text-text-secondary font-sans text-center">sara@limu.edu.ly</td>
-            <td class="px-3 py-3 text-center"><StatusBadge status="inactive">Inactive</StatusBadge></td>
+            <td class="px-3 py-3 text-sm text-text-secondary font-sans text-center">
+              sara@limu.edu.ly
+            </td>
+            <td class="px-3 py-3 text-center">
+              <StatusBadge status="inactive">Inactive</StatusBadge>
+            </td>
             <td class="px-3 py-3 text-center text-text-secondary text-sm font-sans">—</td>
           </tr>
         </template>
@@ -119,7 +132,9 @@ const filterOptions = [
       <h2 class="text-lg font-semibold text-text-secondary font-sans">AppDialog</h2>
       <AppButton variant="primary" @click="dialogOpen = true">Open Dialog</AppButton>
       <AppDialog :open="dialogOpen" title="Confirm Action" size="md" @close="dialogOpen = false">
-        <p class="text-sm text-text-secondary font-sans">Are you sure you want to perform this action? This cannot be undone.</p>
+        <p class="text-sm text-text-secondary font-sans">
+          Are you sure you want to perform this action? This cannot be undone.
+        </p>
         <template #footer>
           <AppButton variant="ghost" @click="dialogOpen = false">Cancel</AppButton>
           <AppButton variant="danger" @click="dialogOpen = false">Confirm</AppButton>

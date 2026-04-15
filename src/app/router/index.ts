@@ -15,7 +15,10 @@ const router = createRouter({
       meta: { requiresAuth: true },
       children: [
         { path: '', redirect: '/dashboard' },
-        { path: 'dashboard', component: () => import('@/modules/dashboard/pages/DashboardPage.vue') },
+        {
+          path: 'dashboard',
+          component: () => import('@/modules/dashboard/pages/DashboardPage.vue'),
+        },
         { path: 'users', component: () => import('@/modules/users/pages/UserListPage.vue') },
         { path: 'users/:id', component: () => import('@/modules/users/pages/UserDetailPage.vue') },
       ],
@@ -27,7 +30,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(to => {
+router.beforeEach((to) => {
   if (import.meta.env.DEV) return
   const isAuthenticated = !!localStorage.getItem('auth_token')
   if (to.meta.requiresAuth && !isAuthenticated) {

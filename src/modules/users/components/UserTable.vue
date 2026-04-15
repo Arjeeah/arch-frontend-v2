@@ -20,7 +20,9 @@ const router = useRouter()
 <template>
   <div class="flex flex-col gap-3">
     <!-- Header row -->
-    <div class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px]">
+    <div
+      class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px]"
+    >
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Name</span>
       </div>
@@ -57,7 +59,11 @@ const router = useRouter()
         <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
           <div class="h-4 bg-surface rounded animate-pulse w-[120px]" />
         </div>
-        <div v-for="j in 5" :key="j" class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+        <div
+          v-for="j in 5"
+          :key="j"
+          class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full"
+        >
           <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
         </div>
         <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
@@ -110,12 +116,16 @@ const router = useRouter()
 
         <!-- Last Login -->
         <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{ user.lastLogin }}</span>
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{
+            user.lastLogin
+          }}</span>
         </div>
 
         <!-- Created At -->
         <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{ user.createdAt }}</span>
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{
+            user.createdAt
+          }}</span>
         </div>
 
         <!-- Actions -->

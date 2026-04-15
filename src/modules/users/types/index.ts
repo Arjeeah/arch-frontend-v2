@@ -23,4 +23,11 @@ export interface User {
 }
 
 export const ROLES = ['Super admin', 'Admin', 'Archivist', 'Faculty staff'] as const
-export const FACULTIES = ['IT', 'Business', 'Architecture', 'Medicine', 'Law', 'Engineering'] as const
+export const FACULTIES = [
+  'IT',
+  'Business',
+  'Architecture',
+  'Medicine',
+  'Law',
+  'Engineering',
+] as const

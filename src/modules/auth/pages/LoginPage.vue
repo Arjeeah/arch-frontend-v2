@@ -14,12 +14,15 @@ const rememberMe = ref(false)
 const loginError = ref('')
 const fieldErrors = reactive({ email: '', password: '' })
 
-watch(() => authStore.error, err => {
-  if (err) {
-    loginError.value = err
-    authStore.clearError()
-  }
-})
+watch(
+  () => authStore.error,
+  (err) => {
+    if (err) {
+      loginError.value = err
+      authStore.clearError()
+    }
+  },
+)
 
 function validate() {
   fieldErrors.email = ''
@@ -59,7 +62,7 @@ async function handleLogin() {
     <!-- Curved blue shape — pinned to the right, scales to cover -->
     <svg
       class="absolute top-0 right-0 h-full pointer-events-none"
-      style="width: auto; aspect-ratio: 1172 / 800;"
+      style="width: auto; aspect-ratio: 1172 / 800"
       viewBox="0 0 1172 800"
       preserveAspectRatio="xMaxYMid slice"
       fill="none"
@@ -87,14 +90,11 @@ async function handleLogin() {
     <!-- Form — positioned exactly per Figma: left 49px, top 64px, width 751px -->
     <form
       class="absolute z-10"
-      style="left: 49px; top: 64px; width: 751px;"
+      style="left: 49px; top: 64px; width: 751px"
       @submit.prevent="handleLogin"
     >
       <!-- "Sign in" heading — Poppins 500, 55px -->
-      <h1
-        class="font-display font-medium text-black"
-        style="font-size: 55px; line-height: 82px;"
-      >
+      <h1 class="font-display font-medium text-black" style="font-size: 55px; line-height: 82px">
         Sign in
       </h1>
 
@@ -104,15 +104,14 @@ async function handleLogin() {
         class="mt-4 bg-danger/10 text-danger rounded-lg px-4 py-3 text-sm font-display flex items-center gap-2"
       >
         <span class="flex-1">{{ loginError }}</span>
-        <button type="button" class="opacity-60 hover:opacity-100" @click="loginError = ''">✕</button>
+        <button type="button" class="opacity-60 hover:opacity-100" @click="loginError = ''">
+          ✕
+        </button>
       </div>
 
       <!-- Email field group — top:173 on page, 27px below heading -->
-      <div style="margin-top: 27px;">
-        <p
-          class="font-display font-normal text-black"
-          style="font-size: 22px; line-height: 33px;"
-        >
+      <div style="margin-top: 27px">
+        <p class="font-display font-normal text-black" style="font-size: 22px; line-height: 33px">
           Enter your email address
         </p>
         <p v-if="fieldErrors.email" class="mt-1 text-xs text-danger font-display">
@@ -125,7 +124,7 @@ async function handleLogin() {
           class="mt-[10px] w-full bg-white rounded-[9px] px-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           style="
             height: 75px;
-            border: 1px solid #ADADAD;
+            border: 1px solid #adadad;
             font-family: 'Poppins', system-ui, sans-serif;
             font-weight: 300;
             font-size: 14px;
@@ -135,11 +134,8 @@ async function handleLogin() {
       </div>
 
       <!-- Password field group — top:319 on page, 22px below email -->
-      <div style="margin-top: 22px;">
-        <p
-          class="font-display font-normal text-black"
-          style="font-size: 22px; line-height: 33px;"
-        >
+      <div style="margin-top: 22px">
+        <p class="font-display font-normal text-black" style="font-size: 22px; line-height: 33px">
           Enter your Password
         </p>
         <p v-if="fieldErrors.password" class="mt-1 text-xs text-danger font-display">
@@ -153,7 +149,7 @@ async function handleLogin() {
             class="w-full bg-white rounded-[9px] px-4 pr-12 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             style="
               height: 75px;
-              border: 1px solid #ADADAD;
+              border: 1px solid #adadad;
               font-family: 'Poppins', system-ui, sans-serif;
               font-weight: 300;
               font-size: 14px;
@@ -172,21 +168,17 @@ async function handleLogin() {
       </div>
 
       <!-- Remember me + Forgot Password — top:496, 49px below password -->
-      <div class="flex items-center justify-between" style="margin-top: 49px;">
+      <div class="flex items-center justify-between" style="margin-top: 49px">
         <label class="flex items-center gap-3 cursor-pointer select-none">
           <div
             class="flex items-center justify-center bg-white shrink-0"
-            style="width: 30.55px; height: 25.09px; border: 1px solid #000;"
+            style="width: 30.55px; height: 25.09px; border: 1px solid #000"
           >
-            <input
-              v-model="rememberMe"
-              type="checkbox"
-              class="w-4 h-4 accent-[#3974D5]"
-            />
+            <input v-model="rememberMe" type="checkbox" class="w-4 h-4 accent-[#3974D5]" />
           </div>
           <span
             class="font-display font-medium"
-            style="font-size: 14px; line-height: 21px; color: #3974D5;"
+            style="font-size: 14px; line-height: 21px; color: #3974d5"
           >
             Remember me
           </span>
@@ -195,7 +187,7 @@ async function handleLogin() {
         <a
           href="#"
           class="font-display font-medium"
-          style="font-size: 14px; line-height: 21px; color: #3974D5;"
+          style="font-size: 14px; line-height: 21px; color: #3974d5"
           @click.prevent
         >
           Forgot Password
@@ -211,14 +203,14 @@ async function handleLogin() {
           margin-top: 64px;
           width: 100%;
           height: 70.96px;
-          background: #3974D5;
+          background: #3974d5;
           box-shadow: 0px 4px 19px rgba(119, 147, 65, 0.3);
           border-radius: 10px;
           font-family: 'Poppins', system-ui, sans-serif;
           font-weight: 500;
           font-size: 22px;
           line-height: 33px;
-          color: #FFFFFF;
+          color: #ffffff;
         "
       >
         <span

@@ -37,9 +37,11 @@ const visiblePages = computed((): (number | '...')[] => {
       <button
         v-else
         class="w-8 h-8 flex items-center justify-center rounded text-sm font-display font-medium transition-colors"
-        :class="page === currentPage
-          ? 'bg-primary text-white'
-          : 'border border-border text-text-secondary hover:bg-surface'"
+        :class="
+          page === currentPage
+            ? 'bg-primary text-white'
+            : 'border border-border text-text-secondary hover:bg-surface'
+        "
         @click="emit('update:currentPage', Number(page))"
       >
         {{ page }}

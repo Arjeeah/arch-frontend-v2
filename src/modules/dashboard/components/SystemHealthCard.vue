@@ -14,11 +14,7 @@ const badgeClass: Record<string, string> = {
   <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm flex flex-col gap-4">
     <h3 class="text-sm font-display font-medium text-text-primary">System Health</h3>
     <div class="flex flex-col gap-3 flex-1">
-      <div
-        v-for="item in systemHealth"
-        :key="item.label"
-        class="flex items-center justify-between"
-      >
+      <div v-for="item in systemHealth" :key="item.label" class="flex items-center justify-between">
         <span class="text-sm text-text-secondary font-sans">{{ item.label }}</span>
         <span
           class="text-xs font-display font-medium px-2 py-0.5 rounded"

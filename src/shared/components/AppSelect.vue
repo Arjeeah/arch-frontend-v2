@@ -27,9 +27,13 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
       style="border-width: 1.3px"
       @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
     >
-      <option v-if="placeholder" :value="''" :disabled="placeholderDisabled">{{ placeholder }}</option>
+      <option v-if="placeholder" :value="''" :disabled="placeholderDisabled">
+        {{ placeholder }}
+      </option>
       <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
     </select>
-    <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
+    <ChevronDown
+      class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]"
+    />
   </div>
 </template>

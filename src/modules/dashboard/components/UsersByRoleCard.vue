@@ -15,11 +15,7 @@ import { usersByRole } from '../data/mockDashboard'
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="row in usersByRole"
-          :key="row.role"
-          class="border-b border-border last:border-0"
-        >
+        <tr v-for="row in usersByRole" :key="row.role" class="border-b border-border last:border-0">
           <td class="py-2 text-sm text-text-primary font-sans">{{ row.role }}</td>
           <td class="py-2 text-sm text-text-primary font-sans text-right">{{ row.count }}</td>
         </tr>

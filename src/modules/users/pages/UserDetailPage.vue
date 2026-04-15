@@ -21,17 +21,25 @@ const userId = computed(() => {
   const n = parseInt(raw, 10)
   return isNaN(n) ? null : n
 })
-const user = computed(() => userId.value !== null ? (users.value.find(u => u.id === userId.value) ?? null) : null)
+const user = computed(() =>
+  userId.value !== null ? (users.value.find((u) => u.id === userId.value) ?? null) : null,
+)
 
 function initials(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
 }
 
 // Edit dialog
 const editOpen = ref(false)
 
 function handleSave(data: Partial<User>) {
-  const idx = users.value.findIndex(u => u.id === user.value?.id)
+  const idx = users.value.findIndex((u) => u.id === user.value?.id)
   if (idx !== -1) users.value[idx] = { ...users.value[idx], ...data } as User
   editOpen.value = false
 }
@@ -73,7 +81,9 @@ function handleSave(data: Partial<User>) {
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
         <p class="text-xs text-text-muted font-display mb-1">Faculties</p>
         <ul v-if="user.faculties.length" class="list-disc list-inside">
-          <li v-for="f in user.faculties" :key="f" class="text-sm font-sans text-text-primary">{{ f }}</li>
+          <li v-for="f in user.faculties" :key="f" class="text-sm font-sans text-text-primary">
+            {{ f }}
+          </li>
         </ul>
         <p v-else class="text-sm font-sans text-text-muted">—</p>
       </div>
@@ -113,10 +123,5 @@ function handleSave(data: Partial<User>) {
   </div>
 
   <!-- Edit dialog -->
-  <CreateUserDialog
-    :open="editOpen"
-    :user="user"
-    @close="editOpen = false"
-    @save="handleSave"
-  />
+  <CreateUserDialog :open="editOpen" :user="user" @close="editOpen = false" @save="handleSave" />
 </template>

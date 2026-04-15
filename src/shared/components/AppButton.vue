@@ -34,7 +34,10 @@ defineEmits<{ click: [e: MouseEvent] }>()
     }"
     @click="$emit('click', $event)"
   >
-    <span v-if="loading" class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+    <span
+      v-if="loading"
+      class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+    />
     <slot />
   </button>
 </template>

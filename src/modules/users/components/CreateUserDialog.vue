@@ -31,27 +31,30 @@ const form = reactive({
 const showPassword = ref(false)
 const errors = reactive({ name: '', email: '', role: '' })
 
-watch(() => props.open, (open) => {
-  if (!open) return
-  if (props.user) {
-    form.name = props.user.name
-    form.email = props.user.email
-    form.role = props.user.role
-    form.faculty = props.user.faculties[0] ?? ''
-    form.password = ''
-    form.status = props.user.status
-  } else {
-    form.name = ''
-    form.email = ''
-    form.role = ''
-    form.faculty = ''
-    form.password = ''
-    form.status = 'Active'
-  }
-  errors.name = ''
-  errors.email = ''
-  errors.role = ''
-})
+watch(
+  () => props.open,
+  (open) => {
+    if (!open) return
+    if (props.user) {
+      form.name = props.user.name
+      form.email = props.user.email
+      form.role = props.user.role
+      form.faculty = props.user.faculties[0] ?? ''
+      form.password = ''
+      form.status = props.user.status
+    } else {
+      form.name = ''
+      form.email = ''
+      form.role = ''
+      form.faculty = ''
+      form.password = ''
+      form.status = 'Active'
+    }
+    errors.name = ''
+    errors.email = ''
+    errors.role = ''
+  },
+)
 
 function validate() {
   errors.name = form.name.trim() ? '' : 'Full name is required'
@@ -71,8 +74,8 @@ function submit() {
   })
 }
 
-const roleOptions = ROLES.map(r => ({ value: r, label: r }))
-const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
+const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
+const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
 </script>
 
 <template>
@@ -83,7 +86,11 @@ const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
     @close="emit('close')"
   >
     <p class="text-sm font-sans text-[#6F6F6F] mb-5">
-      {{ isEdit ? 'Update user information and role assignment.' : 'Add a new user to the system and assign their role and permissions.' }}
+      {{
+        isEdit
+          ? 'Update user information and role assignment.'
+          : 'Add a new user to the system and assign their role and permissions.'
+      }}
     </p>
 
     <div class="flex flex-col gap-4">
@@ -125,7 +132,9 @@ const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
 
       <!-- Default Password (create only) -->
       <div v-if="!isEdit">
-        <label class="block text-base font-sans text-text-primary mb-[10px]">Default Password</label>
+        <label class="block text-base font-sans text-text-primary mb-[10px]"
+          >Default Password</label
+        >
         <div class="flex items-center gap-[14px]">
           <input
             v-model="form.password"

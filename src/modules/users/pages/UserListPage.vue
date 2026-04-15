@@ -23,7 +23,7 @@ const facultyFilter = ref('')
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
-  return users.value.filter(u => {
+  return users.value.filter((u) => {
     const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     const matchRole = !roleFilter.value || u.role === roleFilter.value
     const matchStatus = !statusFilter.value || u.status === statusFilter.value
@@ -37,24 +37,47 @@ watch([search, roleFilter, statusFilter, facultyFilter], resetPage)
 
 // Fake loading on mount
 const loading = ref(true)
-const loadingTimer = setTimeout(() => { loading.value = false }, 300)
+const loadingTimer = setTimeout(() => {
+  loading.value = false
+}, 300)
 onUnmounted(() => clearTimeout(loadingTimer))
 
 // Create/Edit dialog
 const dialogOpen = ref(false)
 const editingUser = ref<User | null>(null)
 
-function openCreate() { editingUser.value = null; dialogOpen.value = true }
-function openEdit(user: User) { editingUser.value = user; dialogOpen.value = true }
+function openCreate() {
+  editingUser.value = null
+  dialogOpen.value = true
+}
+function openEdit(user: User) {
+  editingUser.value = user
+  dialogOpen.value = true
+}
 
 function handleSave(data: Partial<User>) {
   if (editingUser.value) {
-    const idx = users.value.findIndex(u => u.id === editingUser.value!.id)
+    const idx = users.value.findIndex((u) => u.id === editingUser.value!.id)
     if (idx !== -1) users.value[idx] = Object.assign({}, users.value[idx], data) as User
   } else {
-    const newId = Math.max(0, ...users.value.map(u => u.id)) + 1
+    const newId = Math.max(0, ...users.value.map((u) => u.id)) + 1
     const newUser = Object.assign(
-      { id: newId, name: '', email: '', role: '', faculties: [], status: 'Active' as const, permissions: [], recentActivity: [], lastLogin: '-', createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) },
+      {
+        id: newId,
+        name: '',
+        email: '',
+        role: '',
+        faculties: [],
+        status: 'Active' as const,
+        permissions: [],
+        recentActivity: [],
+        lastLogin: '-',
+        createdAt: new Date().toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+      },
       data,
     ) as User
     users.value.unshift(newUser)
@@ -66,19 +89,22 @@ function handleSave(data: Partial<User>) {
 const deleteDialogOpen = ref(false)
 const deletingUser = ref<User | null>(null)
 
-function openDelete(user: User) { deletingUser.value = user; deleteDialogOpen.value = true }
+function openDelete(user: User) {
+  deletingUser.value = user
+  deleteDialogOpen.value = true
+}
 function confirmDelete() {
-  if (deletingUser.value) users.value = users.value.filter(u => u.id !== deletingUser.value!.id)
+  if (deletingUser.value) users.value = users.value.filter((u) => u.id !== deletingUser.value!.id)
   deleteDialogOpen.value = false
 }
 
 // Select options
-const roleOptions = ROLES.map(r => ({ value: r, label: r }))
+const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
 const statusOptions = [
   { value: 'Active', label: 'Active' },
   { value: 'Inactive', label: 'Inactive' },
 ]
-const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
+const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
 </script>
 
 <template>
@@ -87,7 +113,9 @@ const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
     <div class="flex items-start justify-between">
       <div>
         <h1 class="text-2xl font-display font-semibold text-text-primary">User Management</h1>
-        <p class="text-sm text-text-secondary font-sans mt-0.5">Manage system users and their roles</p>
+        <p class="text-sm text-text-secondary font-sans mt-0.5">
+          Manage system users and their roles
+        </p>
       </div>
       <button
         class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-display font-medium hover:bg-primary-mid transition-colors"
@@ -118,12 +146,7 @@ const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
     </div>
 
     <!-- Table -->
-    <UserTable
-      :users="paginated"
-      :loading="loading"
-      @edit="openEdit"
-      @delete="openDelete"
-    />
+    <UserTable :users="paginated" :loading="loading" @edit="openEdit" @delete="openDelete" />
 
     <!-- Pagination -->
     <AppPagination
@@ -151,7 +174,9 @@ const facultyOptions = FACULTIES.map(f => ({ value: f, label: f }))
     @confirm="confirmDelete"
   >
     <p class="text-sm text-text-secondary font-sans">
-      Are you sure you want to delete <strong class="text-text-primary">{{ deletingUser?.name }}</strong>? This action cannot be undone.
+      Are you sure you want to delete
+      <strong class="text-text-primary">{{ deletingUser?.name }}</strong
+      >? This action cannot be undone.
     </p>
   </AppConfirmDialog>
 </template>

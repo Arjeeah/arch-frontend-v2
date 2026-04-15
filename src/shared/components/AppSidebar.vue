@@ -49,11 +49,7 @@ function isActive(to: string) {
         custom
         v-slot="{ navigate }"
       >
-        <SidebarNavItem
-          :label="item.label"
-          :active="isActive(item.to)"
-          @click="navigate"
-        >
+        <SidebarNavItem :label="item.label" :active="isActive(item.to)" @click="navigate">
           <template #icon>
             <component :is="item.icon" class="w-5 h-5" />
           </template>

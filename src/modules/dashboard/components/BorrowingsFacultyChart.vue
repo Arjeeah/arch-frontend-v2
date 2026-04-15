@@ -2,14 +2,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-} from 'chart.js'
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip } from 'chart.js'
 import { borrowingsByFaculty } from '../data/mockDashboard'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip)

@@ -21,8 +21,8 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAuthenticated: state => !!state.token,
-    currentUser: state => state.user,
+    isAuthenticated: (state) => !!state.token,
+    currentUser: (state) => state.user,
   },
 
   actions: {
@@ -36,8 +36,9 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem(TOKEN_KEY, token)
         localStorage.setItem(USER_KEY, JSON.stringify(user))
         return { success: true }
-      } catch (err: any) {
-        this.error = err?.response?.data?.message ?? 'Login failed'
+      } catch (err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } }
+        this.error = axiosErr?.response?.data?.message ?? 'Login failed'
         return { success: false }
       } finally {
         this.loading = false
