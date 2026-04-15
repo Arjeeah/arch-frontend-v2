@@ -1,6 +1,6 @@
 <!-- src/modules/users/pages/UserListPage.vue -->
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { Search, UserPlus } from 'lucide-vue-next'
 import UserTable from '../components/UserTable.vue'
 import CreateUserDialog from '../components/CreateUserDialog.vue'
@@ -38,10 +38,12 @@ const paginated = computed(() => {
 })
 
 function resetPage() { currentPage.value = 1 }
+watch([search, roleFilter, statusFilter, facultyFilter], resetPage)
 
 // Fake loading on mount
 const loading = ref(true)
-setTimeout(() => { loading.value = false }, 300)
+const loadingTimer = setTimeout(() => { loading.value = false }, 300)
+onUnmounted(() => clearTimeout(loadingTimer))
 
 // Create/Edit dialog
 const dialogOpen = ref(false)
@@ -55,7 +57,7 @@ function handleSave(data: Partial<User>) {
     const idx = users.value.findIndex(u => u.id === editingUser.value!.id)
     if (idx !== -1) users.value[idx] = Object.assign({}, users.value[idx], data) as User
   } else {
-    const newId = Math.max(...users.value.map(u => u.id)) + 1
+    const newId = Math.max(0, ...users.value.map(u => u.id)) + 1
     const newUser = Object.assign({ id: newId, name: '', email: '', role: '', faculties: [], status: 'Active' as const, permissions: [], recentActivity: [], lastLogin: '-', createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }, data) as User
     users.value.unshift(newUser)
   }
@@ -73,14 +75,14 @@ function confirmDelete() {
 }
 
 // Pagination helpers
-function visiblePages() {
+const visiblePages = computed(() => {
   const total = totalPages.value
   const cur = currentPage.value
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
   if (cur <= 4) return [1, 2, 3, 4, 5, '...', total]
   if (cur >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total]
   return [1, '...', cur - 1, cur, cur + 1, '...', total]
-}
+})
 </script>
 
 <template>
@@ -109,13 +111,11 @@ function visiblePages() {
           type="text"
           placeholder="Search"
           class="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          @input="resetPage"
         />
       </div>
       <select
         v-model="roleFilter"
         class="px-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary focus:outline-none focus:border-primary"
-        @change="resetPage"
       >
         <option value="">All Roles</option>
         <option v-for="r in ROLES" :key="r" :value="r">{{ r }}</option>
@@ -123,7 +123,6 @@ function visiblePages() {
       <select
         v-model="statusFilter"
         class="px-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary focus:outline-none focus:border-primary"
-        @change="resetPage"
       >
         <option value="">All Status</option>
         <option value="Active">Active</option>
@@ -132,7 +131,6 @@ function visiblePages() {
       <select
         v-model="facultyFilter"
         class="px-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary focus:outline-none focus:border-primary"
-        @change="resetPage"
       >
         <option value="">All Faculties</option>
         <option v-for="f in FACULTIES" :key="f" :value="f">{{ f }}</option>
@@ -156,7 +154,7 @@ function visiblePages() {
       >
         ‹
       </button>
-      <template v-for="page in visiblePages()" :key="String(page)">
+      <template v-for="page in visiblePages" :key="String(page)">
         <span v-if="page === '...'" class="w-8 h-8 flex items-center justify-center text-text-muted text-sm">…</span>
         <button
           v-else
