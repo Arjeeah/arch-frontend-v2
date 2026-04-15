@@ -17,8 +17,18 @@ export default function (plop: NodePlopAPI) {
       },
       {
         type: 'add',
-        path: 'src/modules/{{kebabCase name}}/pages/{{pascalCase name}}Page.vue',
+        path: 'src/modules/{{kebabCase name}}/pages/{{pascalCase name}}ListPage.vue',
         templateFile: 'tools/plop/templates/module/page.vue.hbs',
+      },
+      {
+        type: 'add',
+        path: 'src/modules/{{kebabCase name}}/components/{{pascalCase name}}Table.vue',
+        templateFile: 'tools/plop/templates/module/table.vue.hbs',
+      },
+      {
+        type: 'add',
+        path: 'src/modules/{{kebabCase name}}/components/Create{{pascalCase name}}Dialog.vue',
+        templateFile: 'tools/plop/templates/module/dialog.vue.hbs',
       },
       {
         type: 'add',

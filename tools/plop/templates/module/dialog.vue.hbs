@@ -1,0 +1,84 @@
+<script setup lang="ts">
+import { reactive, watch, computed } from 'vue'
+import AppDialog from '@/shared/components/AppDialog.vue'
+import FormInput from '@/shared/components/FormInput.vue'
+import type { {{pascalCase name}} } from '../types'
+
+const props = defineProps<{
+  open: boolean
+  item?: {{pascalCase name}} | null
+}>()
+
+const emit = defineEmits<{
+  close: []
+  save: [data: Partial<{{pascalCase name}}>]
+}>()
+
+const isEdit = computed(() => !!props.item)
+
+const form = reactive({
+  name: '',
+  // TODO: add more fields
+})
+
+const errors = reactive({ name: '' })
+
+watch(() => props.open, (open) => {
+  if (!open) return
+  if (props.item) {
+    form.name = props.item.name
+  } else {
+    form.name = ''
+  }
+  errors.name = ''
+})
+
+function validate() {
+  errors.name = form.name.trim() ? '' : 'Name is required'
+  return !errors.name
+}
+
+function submit() {
+  if (!validate()) return
+  emit('save', { name: form.name.trim() })
+}
+</script>
+
+<template>
+  <AppDialog
+    :open="open"
+    :title="isEdit ? 'Edit {{pascalCase name}}' : 'Create {{pascalCase name}}'"
+    size="md"
+    @close="emit('close')"
+  >
+    <p class="text-sm font-sans text-[#6F6F6F] mb-5">
+      \{{ isEdit ? 'Update the record details.' : 'Fill in the details to create a new record.' }}
+    </p>
+
+    <div class="flex flex-col gap-4">
+      <div>
+        <label class="block text-base font-sans text-text-primary mb-[7px]">Name</label>
+        <FormInput v-model="form.name" placeholder="Enter name" />
+        <p v-if="errors.name" class="mt-1 text-xs text-danger">\{{ errors.name }}</p>
+      </div>
+      <!-- TODO: add more fields -->
+    </div>
+
+    <template #footer>
+      <button
+        type="button"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        @click="emit('close')"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        @click="submit"
+      >
+        \{{ isEdit ? 'Update {{pascalCase name}}' : 'Save {{pascalCase name}}' }}
+      </button>
+    </template>
+  </AppDialog>
+</template>

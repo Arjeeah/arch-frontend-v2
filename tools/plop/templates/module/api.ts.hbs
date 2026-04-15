@@ -1,5 +1,15 @@
-// import { http } from '@/app/plugins/axios'
+import { http } from '@/app/plugins/axios'
+import type { {{pascalCase name}} } from '../types'
 
 export const {{camelCase name}}Api = {
-  // add endpoints here
+  list: () =>
+    http.get<{{pascalCase name}}[]>('/v1/{{kebabCase name}}s').then(r => r.data),
+  show: (id: number) =>
+    http.get<{{pascalCase name}}>(`/v1/{{kebabCase name}}s/${id}`).then(r => r.data),
+  create: (data: Partial<{{pascalCase name}}>) =>
+    http.post<{{pascalCase name}}>('/v1/{{kebabCase name}}s', data).then(r => r.data),
+  update: (id: number, data: Partial<{{pascalCase name}}>) =>
+    http.put<{{pascalCase name}}>(`/v1/{{kebabCase name}}s/${id}`, data).then(r => r.data),
+  delete: (id: number) =>
+    http.delete(`/v1/{{kebabCase name}}s/${id}`),
 }

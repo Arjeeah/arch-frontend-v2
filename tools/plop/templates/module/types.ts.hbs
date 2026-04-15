@@ -1,6 +1,9 @@
-// Types local to the {{pascalCase name}} module
+// Types for the {{pascalCase name}} module
 
 export interface {{pascalCase name}} {
-  id: string
-  // add fields here
+  id: number
+  name: string
+  status: 'Active' | 'Inactive'
+  createdAt: string
+  // TODO: add module-specific fields
 }
