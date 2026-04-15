@@ -25,16 +25,16 @@ defineEmits<{ click: [e: MouseEvent] }>()
     :disabled="disabled || loading"
     class="inline-flex items-center justify-center gap-2 rounded font-sans font-medium transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
-      'bg-primary-mid text-white hover:opacity-90 px-3 py-1.5 text-sm': variant === 'primary',
-      'bg-primary-accent text-white hover:opacity-90 px-3 py-1.5 text-sm': variant === 'accent',
-      'bg-danger text-white hover:opacity-90 px-3 py-1.5 text-sm': variant === 'danger',
-      'bg-transparent text-text-secondary hover:bg-surface px-3 py-1.5 text-sm': variant === 'ghost',
-      'h-8 text-xs px-2.5': size === 'sm',
-      'h-9 text-sm px-3': size === 'md',
+      'bg-primary-mid text-white hover:opacity-90': variant === 'primary',
+      'bg-primary-accent text-white hover:opacity-90': variant === 'accent',
+      'bg-danger text-white hover:opacity-90': variant === 'danger',
+      'bg-transparent text-text-secondary hover:bg-surface': variant === 'ghost',
+      'h-8 text-xs px-2.5 py-1': size === 'sm',
+      'h-9 text-sm px-3 py-1.5': size === 'md',
     }"
     @click="$emit('click', $event)"
   >
-    <span v-if="loading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+    <span v-if="loading" class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
     <slot />
   </button>
 </template>
