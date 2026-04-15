@@ -21,28 +21,28 @@ const router = useRouter()
   <div class="flex flex-col gap-3">
     <!-- Header row -->
     <div class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px]">
-      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Name</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Email</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Role</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Faculty</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] w-[170px] shrink-0 h-full">
+      <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Last Login</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Created At</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+      <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Actions</span>
       </div>
     </div>
@@ -54,15 +54,17 @@ const router = useRouter()
         :key="i"
         class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px]"
       >
-        <div
-          v-for="j in 8"
-          :key="j"
-          class="flex justify-center items-center px-[13px] flex-1 h-full"
-        >
-          <div
-            class="h-4 bg-surface rounded animate-pulse"
-            :style="{ width: j === 1 ? '120px' : j === 8 ? '60px' : '80px' }"
-          />
+        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+          <div class="h-4 bg-surface rounded animate-pulse w-[120px]" />
+        </div>
+        <div v-for="j in 5" :key="j" class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
+        </div>
+        <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
+          <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
+        </div>
+        <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
+          <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
         </div>
       </div>
     </template>
@@ -72,12 +74,12 @@ const router = useRouter()
       <div
         v-for="user in users"
         :key="user.id"
-        class="flex flex-row items-stretch bg-white border border-border rounded-[4px] min-h-[48px]"
+        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px]"
       >
-        <!-- Name (left-aligned, black) -->
-        <div class="flex items-center px-[13px] flex-1">
+        <!-- Name -->
+        <div class="flex items-center px-[13px] flex-1 min-w-0 overflow-hidden">
           <button
-            class="text-[15px] font-sans text-black hover:text-primary transition-colors text-left w-full"
+            class="text-[15px] font-sans text-black hover:text-primary transition-colors text-left truncate w-full"
             @click="router.push(`/users/${user.id}`)"
           >
             {{ user.name }}
@@ -85,39 +87,39 @@ const router = useRouter()
         </div>
 
         <!-- Email -->
-        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
-          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.email }}</span>
+        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{ user.email }}</span>
         </div>
 
         <!-- Role -->
-        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
-          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.role }}</span>
+        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{ user.role }}</span>
         </div>
 
         <!-- Faculty -->
-        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
-          <span class="text-[15px] font-sans text-text-secondary text-center">
+        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+          <span class="text-[15px] font-sans text-text-secondary truncate">
             {{ user.faculties.length ? user.faculties.join(', ') : '-' }}
           </span>
         </div>
 
-        <!-- Status (fixed width, no flex-grow) -->
-        <div class="flex justify-center items-center px-[13px] py-[10px] w-[170px] shrink-0">
+        <!-- Status -->
+        <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0">
           <UserStatusBadge :status="user.status" />
         </div>
 
         <!-- Last Login -->
-        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
-          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.lastLogin }}</span>
+        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{ user.lastLogin }}</span>
         </div>
 
         <!-- Created At -->
-        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
-          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.createdAt }}</span>
+        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{ user.createdAt }}</span>
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-center items-center px-[13px] py-[10px] gap-[15px] flex-1">
+        <div class="flex justify-center items-center px-[13px] gap-[15px] w-[90px] shrink-0">
           <button
             class="text-[#4285F4] hover:opacity-70 transition-opacity"
             title="Edit user"
