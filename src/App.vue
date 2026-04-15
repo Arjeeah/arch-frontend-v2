@@ -1,7 +1,10 @@
 <script setup lang="ts">
-// App shell — feature pages render via RouterView
+import { useI18n } from 'vue-i18n'
+useI18n()
 </script>
 
 <template>
-  <RouterView />
+  <main class="min-h-screen">
+    <RouterView />
+  </main>
 </template>
