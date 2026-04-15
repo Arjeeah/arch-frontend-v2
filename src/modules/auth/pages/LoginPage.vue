@@ -3,6 +3,7 @@ import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff } from 'lucide-vue-next'
 import { useAuthStore } from '../store/useAuthStore'
+import pattern from '@/assets/login-pattern.png'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -50,14 +51,38 @@ async function handleLogin() {
 </script>
 
 <template>
-  <!-- Full screen container -->
-  <div class="relative min-h-screen bg-white overflow-hidden">
-
-    <!-- Blue gradient shape — covers from 268px to right edge -->
-    <div
-      class="absolute top-0 bottom-0 right-0"
-      style="left: 268px; background: linear-gradient(207.46deg, #2F6FB2 28.38%, #142F4C 79.8%);"
-    />
+  <!-- Full screen container with diamond pattern background -->
+  <div
+    class="relative min-h-screen overflow-hidden bg-white bg-no-repeat bg-cover bg-center"
+    :style="{ backgroundImage: `url(${pattern})` }"
+  >
+    <!-- Curved blue shape — pinned to the right, scales to cover -->
+    <svg
+      class="absolute top-0 right-0 h-full pointer-events-none"
+      style="width: auto; aspect-ratio: 1172 / 800;"
+      viewBox="0 0 1172 800"
+      preserveAspectRatio="xMaxYMid slice"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M1723 521.575C1723 910.588 1446.98 1225.94 1106.5 1225.94C766.016 1225.94 0 1449.73 0 1060.72C975 720.558 534.729 -17.0604 1036 -34.4522C1376.29 -46.2586 1723 132.563 1723 521.575Z"
+        fill="url(#sideShapeGradient)"
+      />
+      <defs>
+        <linearGradient
+          id="sideShapeGradient"
+          x1="908.728"
+          y1="211.08"
+          x2="551.937"
+          y2="1103.81"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#2F6FB2" />
+          <stop offset="1" stop-color="#142F4C" />
+        </linearGradient>
+      </defs>
+    </svg>
 
     <!-- Form — positioned exactly per Figma: left 49px, top 64px, width 751px -->
     <form
@@ -82,20 +107,17 @@ async function handleLogin() {
         <button type="button" class="opacity-60 hover:opacity-100" @click="loginError = ''">✕</button>
       </div>
 
-      <!-- Email field group — top:173, so margin-top from heading bottom (146px): 27px -->
+      <!-- Email field group — top:173 on page, 27px below heading -->
       <div style="margin-top: 27px;">
-        <!-- Label — Poppins 400, 22px -->
         <p
           class="font-display font-normal text-black"
           style="font-size: 22px; line-height: 33px;"
         >
           Enter your email address
         </p>
-        <!-- Inline validation error -->
         <p v-if="fieldErrors.email" class="mt-1 text-xs text-danger font-display">
           {{ fieldErrors.email }}
         </p>
-        <!-- Input — white bg, #ADADAD border, 9px radius, ~75px height -->
         <input
           v-model="credentials.email"
           type="email"
@@ -112,7 +134,7 @@ async function handleLogin() {
         />
       </div>
 
-      <!-- Password field group — top:319 from page. Email ends at 297, gap: 22px -->
+      <!-- Password field group — top:319 on page, 22px below email -->
       <div style="margin-top: 22px;">
         <p
           class="font-display font-normal text-black"
@@ -149,9 +171,8 @@ async function handleLogin() {
         </div>
       </div>
 
-      <!-- Remember me + Forgot Password — top:496. Password ends at ~447, gap: 49px -->
+      <!-- Remember me + Forgot Password — top:496, 49px below password -->
       <div class="flex items-center justify-between" style="margin-top: 49px;">
-        <!-- Remember me checkbox -->
         <label class="flex items-center gap-3 cursor-pointer select-none">
           <div
             class="flex items-center justify-center bg-white shrink-0"
@@ -171,7 +192,6 @@ async function handleLogin() {
           </span>
         </label>
 
-        <!-- Forgot Password -->
         <a
           href="#"
           class="font-display font-medium"
@@ -182,7 +202,7 @@ async function handleLogin() {
         </a>
       </div>
 
-      <!-- Login button — top:593. Remember ends at ~529, gap: 64px -->
+      <!-- Login button — top:593, 64px below remember -->
       <button
         type="submit"
         :disabled="authStore.loading"
