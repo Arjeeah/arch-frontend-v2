@@ -1,7 +1,7 @@
 <!-- src/modules/users/pages/UserListPage.vue -->
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { Search, UserPlus } from 'lucide-vue-next'
+import { Search, UserPlus, ChevronDown } from 'lucide-vue-next'
 import UserTable from '../components/UserTable.vue'
 import CreateUserDialog from '../components/CreateUserDialog.vue'
 import AppDialog from '@/shared/components/AppDialog.vue'
@@ -103,38 +103,58 @@ const visiblePages = computed(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex items-center gap-3 flex-wrap">
+    <div class="flex items-center gap-[15px] flex-wrap">
+      <!-- Search -->
       <div class="relative flex-1 min-w-[200px]">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
         <input
           v-model="search"
           type="text"
           placeholder="Search"
-          class="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          class="w-full h-[42px] pl-9 pr-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
+          style="border-width: 1.3px"
         />
       </div>
-      <select
-        v-model="roleFilter"
-        class="px-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary focus:outline-none focus:border-primary"
-      >
-        <option value="">All Roles</option>
-        <option v-for="r in ROLES" :key="r" :value="r">{{ r }}</option>
-      </select>
-      <select
-        v-model="statusFilter"
-        class="px-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary focus:outline-none focus:border-primary"
-      >
-        <option value="">All Status</option>
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
-      <select
-        v-model="facultyFilter"
-        class="px-4 py-2 bg-white border border-border rounded-lg text-sm font-sans text-text-primary focus:outline-none focus:border-primary"
-      >
-        <option value="">All Faculties</option>
-        <option v-for="f in FACULTIES" :key="f" :value="f">{{ f }}</option>
-      </select>
+
+      <!-- All Roles -->
+      <div class="relative">
+        <select
+          v-model="roleFilter"
+          class="h-[42px] pl-[18px] pr-10 bg-white border border-border-dropdown rounded-[8px] text-xs font-display font-medium text-[#313144] focus:outline-none appearance-none cursor-pointer"
+          style="border-width: 1.3px"
+        >
+          <option value="">All Roles</option>
+          <option v-for="r in ROLES" :key="r" :value="r">{{ r }}</option>
+        </select>
+        <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
+      </div>
+
+      <!-- All Status -->
+      <div class="relative">
+        <select
+          v-model="statusFilter"
+          class="h-[42px] pl-[18px] pr-10 bg-white border border-border-dropdown rounded-[8px] text-xs font-display font-medium text-[#313144] focus:outline-none appearance-none cursor-pointer"
+          style="border-width: 1.3px"
+        >
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
+      </div>
+
+      <!-- All Faculties -->
+      <div class="relative">
+        <select
+          v-model="facultyFilter"
+          class="h-[42px] pl-[18px] pr-10 bg-white border border-border-dropdown rounded-[8px] text-xs font-display font-medium text-[#313144] focus:outline-none appearance-none cursor-pointer"
+          style="border-width: 1.3px"
+        >
+          <option value="">All Faculties</option>
+          <option v-for="f in FACULTIES" :key="f" :value="f">{{ f }}</option>
+        </select>
+        <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
+      </div>
     </div>
 
     <!-- Table -->

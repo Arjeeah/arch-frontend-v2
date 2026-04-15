@@ -15,92 +15,133 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
-
-function initials(name: string) {
-  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 </script>
 
 <template>
-  <div class="bg-white rounded-[10px] border border-border overflow-hidden shadow-sm">
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead class="bg-surface-table border-b border-border">
-          <tr>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Name</th>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Email</th>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Role</th>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Faculty</th>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Status</th>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Last Login</th>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Created At</th>
-            <th class="text-left px-5 py-3 text-xs font-display font-medium text-text-muted">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Loading skeleton -->
-          <template v-if="loading">
-            <tr v-for="i in 6" :key="i" class="border-t border-border">
-              <td v-for="j in 8" :key="j" class="px-5 py-4">
-                <div class="h-4 bg-surface rounded animate-pulse" :style="{ width: j === 1 ? '120px' : j === 8 ? '60px' : '80px' }" />
-              </td>
-            </tr>
-          </template>
-
-          <!-- Data rows -->
-          <template v-else>
-            <tr
-              v-for="user in users"
-              :key="user.id"
-              class="border-t border-border hover:bg-surface transition-colors"
-            >
-              <td class="px-5 py-4">
-                <button
-                  class="text-sm font-sans font-medium text-text-primary hover:text-primary transition-colors text-left"
-                  @click="router.push(`/users/${user.id}`)"
-                >
-                  {{ user.name }}
-                </button>
-              </td>
-              <td class="px-5 py-4 text-sm text-text-secondary font-sans">{{ user.email }}</td>
-              <td class="px-5 py-4 text-sm text-text-primary font-sans">{{ user.role }}</td>
-              <td class="px-5 py-4 text-sm text-text-secondary font-sans">
-                {{ user.faculties.length ? user.faculties.join(', ') : '-' }}
-              </td>
-              <td class="px-5 py-4">
-                <UserStatusBadge :status="user.status" />
-              </td>
-              <td class="px-5 py-4 text-sm text-text-muted font-sans">{{ user.lastLogin }}</td>
-              <td class="px-5 py-4 text-sm text-text-muted font-sans">{{ user.createdAt }}</td>
-              <td class="px-5 py-4">
-                <div class="flex items-center gap-2">
-                  <button
-                    class="text-primary hover:text-primary-mid transition-colors"
-                    title="Edit user"
-                    @click="emit('edit', user)"
-                  >
-                    <SquarePen class="w-5 h-5" />
-                  </button>
-                  <button
-                    class="text-danger hover:opacity-70 transition-opacity"
-                    title="Delete user"
-                    @click="emit('delete', user)"
-                  >
-                    <Ban class="w-5 h-5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-
-            <!-- Empty state -->
-            <tr v-if="!users.length">
-              <td colspan="8" class="px-5 py-12 text-center text-sm text-text-muted font-sans">
-                No users match the current filters.
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
+  <div class="flex flex-col gap-3">
+    <!-- Header row -->
+    <div class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px]">
+      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Name</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Email</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Role</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Faculty</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] w-[170px] shrink-0 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Last Login</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Created At</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] flex-1 h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Actions</span>
+      </div>
     </div>
+
+    <!-- Loading skeleton -->
+    <template v-if="loading">
+      <div
+        v-for="i in 6"
+        :key="i"
+        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px]"
+      >
+        <div
+          v-for="j in 8"
+          :key="j"
+          class="flex justify-center items-center px-[13px] flex-1 h-full"
+        >
+          <div
+            class="h-4 bg-surface rounded animate-pulse"
+            :style="{ width: j === 1 ? '120px' : j === 8 ? '60px' : '80px' }"
+          />
+        </div>
+      </div>
+    </template>
+
+    <!-- Data rows -->
+    <template v-else>
+      <div
+        v-for="user in users"
+        :key="user.id"
+        class="flex flex-row items-stretch bg-white border border-border rounded-[4px] min-h-[48px]"
+      >
+        <!-- Name (left-aligned, black) -->
+        <div class="flex items-center px-[13px] flex-1">
+          <button
+            class="text-[15px] font-sans text-black hover:text-primary transition-colors text-left w-full"
+            @click="router.push(`/users/${user.id}`)"
+          >
+            {{ user.name }}
+          </button>
+        </div>
+
+        <!-- Email -->
+        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
+          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.email }}</span>
+        </div>
+
+        <!-- Role -->
+        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
+          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.role }}</span>
+        </div>
+
+        <!-- Faculty -->
+        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
+          <span class="text-[15px] font-sans text-text-secondary text-center">
+            {{ user.faculties.length ? user.faculties.join(', ') : '-' }}
+          </span>
+        </div>
+
+        <!-- Status (fixed width, no flex-grow) -->
+        <div class="flex justify-center items-center px-[13px] py-[10px] w-[170px] shrink-0">
+          <UserStatusBadge :status="user.status" />
+        </div>
+
+        <!-- Last Login -->
+        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
+          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.lastLogin }}</span>
+        </div>
+
+        <!-- Created At -->
+        <div class="flex justify-center items-center px-[13px] py-[10px] flex-1">
+          <span class="text-[15px] font-sans text-text-secondary text-center">{{ user.createdAt }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-center items-center px-[13px] py-[10px] gap-[15px] flex-1">
+          <button
+            class="text-[#4285F4] hover:opacity-70 transition-opacity"
+            title="Edit user"
+            @click="emit('edit', user)"
+          >
+            <SquarePen class="w-6 h-6" />
+          </button>
+          <button
+            class="text-danger hover:opacity-70 transition-opacity"
+            title="Delete user"
+            @click="emit('delete', user)"
+          >
+            <Ban class="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div
+        v-if="!users.length"
+        class="flex justify-center items-center bg-white border border-border rounded-[4px] py-12"
+      >
+        <span class="text-sm text-text-muted font-sans">No users match the current filters.</span>
+      </div>
+    </template>
   </div>
 </template>

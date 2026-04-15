@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, watch, computed } from 'vue'
-import { Eye, EyeOff } from 'lucide-vue-next'
+import { Eye, EyeOff, ChevronDown } from 'lucide-vue-next'
 import AppDialog from '@/shared/components/AppDialog.vue'
 import FormInput from '@/shared/components/FormInput.vue'
 import type { User } from '../types'
@@ -78,21 +78,21 @@ function submit() {
     size="md"
     @close="emit('close')"
   >
-    <p class="text-sm text-text-secondary font-sans mb-5">
+    <p class="text-sm font-sans text-[#6F6F6F] mb-5">
       {{ isEdit ? 'Update user information and role assignment.' : 'Add a new user to the system and assign their role and permissions.' }}
     </p>
 
     <div class="flex flex-col gap-4">
       <!-- Full Name -->
       <div>
-        <label class="block text-sm font-display font-medium text-text-primary mb-1">Full Name</label>
+        <label class="block text-base font-sans text-text-primary mb-[7px]">Full Name</label>
         <FormInput v-model="form.name" placeholder="Enter full name" />
         <p v-if="errors.name" class="mt-1 text-xs text-danger">{{ errors.name }}</p>
       </div>
 
       <!-- Email -->
       <div>
-        <label class="block text-sm font-display font-medium text-text-primary mb-1">Email</label>
+        <label class="block text-base font-sans text-text-primary mb-[7px]">Email</label>
         <FormInput v-model="form.email" type="email" placeholder="User@limu.edu.ly" />
         <p v-if="errors.email" class="mt-1 text-xs text-danger">{{ errors.email }}</p>
       </div>
@@ -100,65 +100,76 @@ function submit() {
       <!-- Role + Faculty -->
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-sm font-display font-medium text-text-primary mb-1">Role</label>
-          <select
-            v-model="form.role"
-            class="w-full bg-surface-card border border-border-input rounded-[9px] px-4 py-3 font-sans text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          >
-            <option value="" disabled>select role</option>
-            <option v-for="r in ROLES" :key="r" :value="r">{{ r }}</option>
-          </select>
+          <label class="block text-base font-sans text-text-primary mb-[7px]">Role</label>
+          <div class="relative">
+            <select
+              v-model="form.role"
+              class="w-full h-[42px] pl-[18px] pr-10 bg-white border border-border-dropdown rounded-[8px] text-xs font-display font-medium text-[#313144] focus:outline-none appearance-none cursor-pointer"
+              style="border-width: 1.3px"
+            >
+              <option value="" disabled>select role</option>
+              <option v-for="r in ROLES" :key="r" :value="r">{{ r }}</option>
+            </select>
+            <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
+          </div>
           <p v-if="errors.role" class="mt-1 text-xs text-danger">{{ errors.role }}</p>
         </div>
         <div>
-          <label class="block text-sm font-display font-medium text-text-primary mb-1">Faculty</label>
-          <select
-            v-model="form.faculty"
-            class="w-full bg-surface-card border border-border-input rounded-[9px] px-4 py-3 font-sans text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          >
-            <option value="">select faculty</option>
-            <option v-for="f in FACULTIES" :key="f" :value="f">{{ f }}</option>
-          </select>
+          <label class="block text-base font-sans text-text-primary mb-[7px]">Faculty</label>
+          <div class="relative">
+            <select
+              v-model="form.faculty"
+              class="w-full h-[42px] pl-[18px] pr-10 bg-white border border-border-dropdown rounded-[8px] text-xs font-display font-medium text-[#313144] focus:outline-none appearance-none cursor-pointer"
+              style="border-width: 1.3px"
+            >
+              <option value="">select faculty</option>
+              <option v-for="f in FACULTIES" :key="f" :value="f">{{ f }}</option>
+            </select>
+            <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none text-[#313144]" />
+          </div>
         </div>
       </div>
 
       <!-- Default Password (create only) -->
       <div v-if="!isEdit">
-        <label class="block text-sm font-display font-medium text-text-primary mb-1">Default Password</label>
-        <div class="relative">
-          <FormInput
+        <label class="block text-base font-sans text-text-primary mb-[10px]">Default Password</label>
+        <div class="flex items-center gap-[14px]">
+          <input
             v-model="form.password"
             :type="showPassword ? 'text' : 'password'"
             placeholder="••••••••"
+            class="flex-1 h-[38px] bg-white border border-border-input rounded-[5px] px-4 font-sans text-sm text-text-primary placeholder:text-text-placeholder placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
           />
           <button
             type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
+            class="shrink-0 w-[34px] h-[29px] bg-[#ACC6E8] border border-border-input rounded-[5px] flex items-center justify-center"
             @click="showPassword = !showPassword"
           >
-            <EyeOff v-if="showPassword" class="w-4 h-4" />
-            <Eye v-else class="w-4 h-4" />
+            <EyeOff v-if="showPassword" class="w-3.5 h-3.5 text-[#71839B]" />
+            <Eye v-else class="w-3.5 h-3.5 text-[#71839B]" />
           </button>
         </div>
       </div>
 
-      <!-- Status toggle -->
+      <!-- Status -->
       <div>
-        <label class="block text-sm font-display font-medium text-text-primary mb-1">Status</label>
-        <p class="text-xs text-text-muted font-sans mb-2">set user account as active or inactive</p>
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
-            :class="form.status === 'Active' ? 'bg-primary' : 'bg-border'"
-            @click="form.status = form.status === 'Active' ? 'Inactive' : 'Active'"
-          >
-            <span
-              class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
-              :class="form.status === 'Active' ? 'translate-x-6' : 'translate-x-1'"
-            />
-          </button>
-          <span class="text-sm font-sans text-text-primary">{{ form.status }}</span>
+        <label class="block text-base font-sans text-text-primary mb-1">Status</label>
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-sans text-[#6F6F6F]">set user account as active or inactive</p>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="text-sm font-sans text-[#595959]">{{ form.status }}</span>
+            <button
+              type="button"
+              class="relative inline-flex h-[25px] w-[46px] items-center rounded-[16px] transition-colors focus:outline-none"
+              :class="form.status === 'Active' ? 'bg-[#ACC6E8]' : 'bg-border'"
+              @click="form.status = form.status === 'Active' ? 'Inactive' : 'Active'"
+            >
+              <span
+                class="inline-block h-[19px] w-[19px] transform rounded-[16px] bg-white shadow-[0px_3px_7px_rgba(0,0,0,0.12)] transition-transform"
+                :class="form.status === 'Active' ? 'translate-x-[24px]' : 'translate-x-[2px]'"
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -166,14 +177,14 @@ function submit() {
     <template #footer>
       <button
         type="button"
-        class="px-5 py-2 rounded-lg border border-border text-sm font-display font-medium text-text-secondary hover:bg-surface transition-colors"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
         @click="emit('close')"
       >
         Cancel
       </button>
       <button
         type="button"
-        class="px-5 py-2 rounded-lg bg-primary text-white text-sm font-display font-medium hover:bg-primary-mid transition-colors"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
         @click="submit"
       >
         {{ isEdit ? 'Update User' : 'Save User' }}
