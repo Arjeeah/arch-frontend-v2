@@ -15,10 +15,16 @@ const router = useRouter()
 
 // Find user in mock data — keep a local ref so edits reflect immediately
 const users = ref<User[]>([...mockUsers])
-const user = computed(() => users.value.find(u => u.id === Number(route.params.id)) ?? null)
+const userId = computed(() => {
+  const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
+  if (!raw) return null
+  const n = parseInt(raw, 10)
+  return isNaN(n) ? null : n
+})
+const user = computed(() => userId.value !== null ? (users.value.find(u => u.id === userId.value) ?? null) : null)
 
 function initials(name: string) {
-  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+  return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
 
 // Edit dialog
