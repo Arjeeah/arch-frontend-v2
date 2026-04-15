@@ -28,12 +28,12 @@ const badgeClass: Record<string, string> = {
         </span>
       </div>
     </div>
-    <RouterLink
-      to="/settings"
-      class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-primary text-white text-sm font-display font-medium hover:bg-primary-mid transition-colors"
+    <button
+      disabled
+      class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-primary/40 text-white text-sm font-display font-medium cursor-not-allowed"
     >
       <Settings class="w-4 h-4" />
       System Settings
-    </RouterLink>
+    </button>
   </div>
 </template>

@@ -24,7 +24,7 @@ const getIcon = (name: string): Component => iconMap[name]!
     </div>
 
     <!-- Stat cards -->
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       <StatCard
         v-for="card in statCards"
         :key="card.label"
@@ -36,7 +36,7 @@ const getIcon = (name: string): Component => iconMap[name]!
     </div>
 
     <!-- Charts row -->
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
       <div class="col-span-2">
         <FilesMonthChart />
       </div>
@@ -44,7 +44,7 @@ const getIcon = (name: string): Component => iconMap[name]!
     </div>
 
     <!-- Info cards row -->
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <SystemHealthCard />
       <UsersByRoleCard />
       <WeeklyDigestCard />

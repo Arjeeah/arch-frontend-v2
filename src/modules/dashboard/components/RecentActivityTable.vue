@@ -27,8 +27,8 @@ const actionColor: Record<string, string> = {
         </thead>
         <tbody>
           <tr
-            v-for="(row, i) in recentActivity"
-            :key="i"
+            v-for="row in recentActivity"
+            :key="`${row.action}-${row.user}-${row.timestamp}`"
             class="border-t border-border hover:bg-surface transition-colors"
           >
             <td class="px-5 py-3 text-sm font-sans font-medium" :class="actionColor[row.action] ?? 'text-text-primary'">

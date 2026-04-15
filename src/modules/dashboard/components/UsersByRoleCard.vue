@@ -25,12 +25,12 @@ import { usersByRole } from '../data/mockDashboard'
         </tr>
       </tbody>
     </table>
-    <RouterLink
-      to="/users"
-      class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-primary text-white text-sm font-display font-medium hover:bg-primary-mid transition-colors"
+    <button
+      disabled
+      class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-primary/40 text-white text-sm font-display font-medium cursor-not-allowed"
     >
       <Users class="w-4 h-4" />
       View Users
-    </RouterLink>
+    </button>
   </div>
 </template>
