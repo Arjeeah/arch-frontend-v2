@@ -8,17 +8,17 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-surface font-sans">
-    <!-- Sidebar -->
+  <div class="flex h-screen overflow-hidden bg-surface font-sans">
+    <!-- Sidebar (never scrolls) -->
     <AppSidebar />
 
     <!-- Main area -->
-    <div class="flex flex-col flex-1 min-w-0">
-      <!-- Top header -->
+    <div class="flex flex-col flex-1 min-w-0 h-screen">
+      <!-- Top header (never scrolls) -->
       <AppHeader :user-name="userName" />
 
-      <!-- Page content -->
-      <main class="flex-1 p-6 overflow-auto">
+      <!-- Page content (only this scrolls) -->
+      <main class="flex-1 p-6 overflow-y-auto">
         <RouterView />
       </main>
     </div>
