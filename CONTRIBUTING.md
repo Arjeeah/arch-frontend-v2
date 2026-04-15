@@ -24,8 +24,10 @@ src/
 │   ├── components/    # UI used by 2+ features (Button, Modal, Table…)
 │   ├── composables/   # hooks used by 2+ features
 │   └── utils/         # pure helpers used by 2+ features
+├── locales/           # i18n translation files (en.json, ar.json…)
 └── app/
     ├── router/        # route definitions
+    ├── layouts/       # page layout components (sidebar, header shells)
     ├── plugins/       # axios, i18n setup
     └── config/        # env variables
 ```
