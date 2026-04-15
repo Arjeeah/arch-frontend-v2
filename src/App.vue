@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-useI18n()
+// i18n is available globally via app.use(i18n) in main.ts
 </script>
 
 <template>
