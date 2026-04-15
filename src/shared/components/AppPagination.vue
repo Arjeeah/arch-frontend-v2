@@ -18,8 +18,9 @@ const pages = computed(() => {
   if (props.totalPages <= props.maxVisible) return all
   // Simple window: show pages around current
   const half = Math.floor(props.maxVisible / 2)
-  const start = Math.max(1, props.currentPage - half)
+  let start = Math.max(1, props.currentPage - half)
   const end = Math.min(props.totalPages, start + props.maxVisible - 1)
+  start = Math.max(1, end - props.maxVisible + 1)
   return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 </script>
