@@ -12,7 +12,11 @@
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/"
+    "format": "prettier --write --experimental-cli src/",
+    "gen:module": "plop module",
+    "gen:page": "plop page",
+    "gen:component": "plop component",
+    "gen:store": "plop store"
   },
   "dependencies": {
     "axios": "^1.15.0",
@@ -37,6 +41,7 @@
     "jiti": "^2.6.1",
     "npm-run-all2": "^8.0.4",
     "oxlint": "~1.57.0",
+    "plop": "^4.0.5",
     "postcss": "^8.5.9",
     "prettier": "3.8.1",
     "tailwindcss": "^3.4.19",
