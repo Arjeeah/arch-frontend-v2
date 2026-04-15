@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AppButton from '@/shared/components/AppButton.vue'
+import AppDialog from '@/shared/components/AppDialog.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import FormInput from '@/shared/components/FormInput.vue'
 import FormField from '@/shared/components/FormField.vue'
@@ -13,6 +14,7 @@ const search = ref('')
 const filter = ref('')
 const page = ref(1)
 const inputVal = ref('')
+const dialogOpen = ref(false)
 
 const columns = [
   { key: 'name', label: 'Name' },
@@ -110,6 +112,19 @@ const filterOptions = [
       <h2 class="text-lg font-semibold text-text-secondary font-sans">AppPagination</h2>
       <AppPagination :current-page="page" :total-pages="10" @change="page = $event" />
       <p class="text-sm text-text-secondary font-sans">Current: page {{ page }}</p>
+    </section>
+
+    <!-- AppDialog -->
+    <section class="space-y-3">
+      <h2 class="text-lg font-semibold text-text-secondary font-sans">AppDialog</h2>
+      <AppButton variant="primary" @click="dialogOpen = true">Open Dialog</AppButton>
+      <AppDialog :open="dialogOpen" title="Confirm Action" size="md" @close="dialogOpen = false">
+        <p class="text-sm text-text-secondary font-sans">Are you sure you want to perform this action? This cannot be undone.</p>
+        <template #footer>
+          <AppButton variant="ghost" @click="dialogOpen = false">Cancel</AppButton>
+          <AppButton variant="danger" @click="dialogOpen = false">Confirm</AppButton>
+        </template>
+      </AppDialog>
     </section>
   </div>
 </template>

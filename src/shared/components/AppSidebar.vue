@@ -32,15 +32,15 @@ function isActive(to: string) {
 
 <template>
   <aside
-    class="flex flex-col w-[251px] min-h-screen bg-primary-dark shadow-[0px_2px_4px_rgba(0,0,0,0.25)] shrink-0"
+    class="flex flex-col w-[251px] min-h-screen bg-primary-dark shadow-[0px_2px_4px_rgba(0,0,0,0.25)] shrink-0 p-3 gap-[23px]"
   >
     <!-- Logo -->
-    <div class="flex items-center gap-3 px-3 py-4">
+    <div class="flex items-center gap-3 py-2">
       <span class="font-brand font-bold text-2xl text-white leading-none">ARCH system</span>
     </div>
 
     <!-- Nav -->
-    <nav class="flex flex-col gap-3 px-3 flex-1">
+    <nav class="flex flex-col gap-3 flex-1">
       <RouterLink
         v-for="item in navItems"
         :key="item.key"
