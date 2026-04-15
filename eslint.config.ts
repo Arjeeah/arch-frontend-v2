@@ -44,9 +44,10 @@ export default defineConfigWithVueTs(
         },
       ],
       'boundaries/ignore': ['**/*.test.ts', '**/*.spec.ts'],
+      // Required for boundaries plugin to resolve @-aliased imports (defined in tsconfig.app.json)
       'import/resolver': {
-        node: {
-          extensions: ['.ts', '.tsx', '.vue', '.js', '.mjs'],
+        typescript: {
+          project: './tsconfig.app.json',
         },
       },
     },
@@ -56,7 +57,7 @@ export default defineConfigWithVueTs(
         {
           default: 'disallow',
           rules: [
-            // modules can import shared and app
+            // modules can import shared and app/config (e.g. env.ts for apiBaseUrl)
             {
               from: { type: 'module' },
               allow: [
