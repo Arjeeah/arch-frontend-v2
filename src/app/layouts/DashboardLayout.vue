@@ -19,7 +19,7 @@ defineProps<{
 
       <!-- Page content -->
       <main class="flex-1 p-6 overflow-auto">
-        <slot />
+        <RouterView />
       </main>
     </div>
   </div>
