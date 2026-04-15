@@ -11,7 +11,7 @@ export default {
           mid: '#2F6297',
           light: '#B5D2F7',
           subtle: '#536F8A',
-          accent: '#4285F4',
+          accent: '#3974D5',
         },
         highlight: '#D1F3F6',
         surface: {
