@@ -1,48 +1,47 @@
-# arch-frontend-v2
+# ARCH Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Admin panel for the ARCH university archive management system.
 
-## Recommended IDE Setup
+Built with Vue 3, Vite, TypeScript, and Tailwind CSS.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Prerequisites
 
-## Recommended Browser Setup
+- **Node.js** v22 or later — [download](https://nodejs.org/)
+- **VS Code** — [download](https://code.visualstudio.com/)
+  - Install the [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) extension
+  - Disable Vetur if you have it installed
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Quick start
 
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+```bash
+git clone https://github.com/Arjeeah/arch-frontend-v2.git
+cd arch-frontend-v2
+npm install          # also installs git hooks automatically
+npm run dev          # http://localhost:5173
 ```
 
-### Compile and Hot-Reload for Development
+> **Note:** `npm install` sets up git hooks automatically via Husky. You don't need to do anything extra.
 
-```sh
-npm run dev
+## Useful commands
+
+```bash
+npm run dev          # start dev server
+npm run build        # type-check + production build
+npm run lint         # lint and auto-fix
+npm run type-check   # TypeScript check only
+
+# Code generators (always use these instead of creating files by hand)
+npm run gen:module   # new feature module
+npm run gen:page     # new page in a module
+npm run gen:component # new shared component
+npm run gen:store    # new Pinia store
+npm run gen:api      # new API file
 ```
 
-### Type-Check, Compile and Minify for Production
+## Contributing
 
-```sh
-npm run build
-```
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) before writing any code.
 
-### Lint with [ESLint](https://eslint.org/)
+## Design
 
-```sh
-npm run lint
-```
+Figma designs are shared privately with team members. Ask Arjeeah for access.
