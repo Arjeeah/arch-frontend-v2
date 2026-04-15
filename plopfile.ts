@@ -35,7 +35,7 @@ export default function (plop: NodePlopAPI) {
 
   plop.setGenerator('component', {
     description: 'Create a shared component',
-    prompts: [{ type: 'input', name: 'name', message: 'Component name (PascalCase):' }],
+    prompts: [{ type: 'input', name: 'name', message: 'Component name (e.g. AppButton):' }],
     actions: [
       {
         type: 'add',
@@ -71,6 +71,21 @@ export default function (plop: NodePlopAPI) {
         type: 'add',
         path: 'src/modules/{{kebabCase module}}/stores/use{{pascalCase name}}Store.ts',
         templateFile: 'tools/plop/templates/module/store.ts.hbs',
+      },
+    ],
+  })
+
+  plop.setGenerator('api', {
+    description: 'Create an api file inside an existing module',
+    prompts: [
+      { type: 'input', name: 'module', message: 'Module (kebab-case):' },
+      { type: 'input', name: 'name', message: 'Api name (kebab-case):' },
+    ],
+    actions: [
+      {
+        type: 'add',
+        path: 'src/modules/{{kebabCase module}}/api/{{camelCase name}}Api.ts',
+        templateFile: 'tools/plop/templates/module/api.ts.hbs',
       },
     ],
   })

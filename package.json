@@ -16,7 +16,8 @@
     "gen:module": "plop module",
     "gen:page": "plop page",
     "gen:component": "plop component",
-    "gen:store": "plop store"
+    "gen:store": "plop store",
+    "gen:api": "plop api"
   },
   "dependencies": {
     "axios": "^1.15.0",
