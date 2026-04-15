@@ -97,7 +97,7 @@ When you commit, **Husky runs automatically** — you don't need to do anything:
 
 2. **Pre-push** (~10 seconds): runs the full TypeScript type-check before your code reaches GitHub. This catches type errors that ESLint misses.
 
-If a hook fails: read the error message, fix the problem, `git add` the fix, then try committing again.
+If a hook fails: read the error message, fix the problem, `git add` the fix, then try committing again. **Never use `git commit --no-verify` to skip the hooks** — that defeats the whole system.
 
 ## Submitting a PR
 
