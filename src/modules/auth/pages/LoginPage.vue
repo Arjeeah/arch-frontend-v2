@@ -7,6 +7,7 @@ import pattern from '@/assets/login-pattern.png'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const isDev = import.meta.env.DEV
 
 const credentials = reactive({ email: '', password: '' })
 const showPassword = ref(false)
@@ -218,6 +219,15 @@ async function handleLogin() {
           class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
         />
         <span v-else>Log in</span>
+      </button>
+      <!-- Dev-only shortcut -->
+      <button
+        v-if="isDev"
+        type="button"
+        class="mt-4 w-full text-center text-xs font-display text-text-muted hover:text-text-secondary transition-colors"
+        @click="router.push('/dashboard')"
+      >
+        [dev] skip login → dashboard
       </button>
     </form>
   </div>
