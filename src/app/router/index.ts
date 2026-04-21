@@ -31,7 +31,6 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  if (import.meta.env.DEV) return
   const isAuthenticated = !!localStorage.getItem('auth_token')
   if (to.meta.requiresAuth && !isAuthenticated) {
     return { path: '/login', query: { redirect: to.fullPath } }
