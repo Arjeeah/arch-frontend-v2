@@ -5,16 +5,18 @@ import AppDialog from '@/shared/components/AppDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import FormInput from '@/shared/components/FormInput.vue'
 import type { User } from '../types'
-import { ROLES, FACULTIES } from '../types'
+import { ROLES } from '../types'
 
 const props = defineProps<{
   open: boolean
   user?: User | null
+  loading?: boolean
+  error?: string | null
 }>()
 
 const emit = defineEmits<{
   close: []
-  save: [data: Partial<User>]
+  save: [data: Partial<User> & { password?: string }]
 }>()
 
 const isEdit = computed(() => !!props.user)
@@ -23,7 +25,6 @@ const form = reactive({
   name: '',
   email: '',
   role: '',
-  faculty: '',
   password: '',
   status: 'Active' as 'Active' | 'Inactive',
 })
@@ -39,14 +40,12 @@ watch(
       form.name = props.user.name
       form.email = props.user.email
       form.role = props.user.role
-      form.faculty = props.user.faculties[0] ?? ''
       form.password = ''
       form.status = props.user.status
     } else {
       form.name = ''
       form.email = ''
       form.role = ''
-      form.faculty = ''
       form.password = ''
       form.status = 'Active'
     }
@@ -65,17 +64,21 @@ function validate() {
 
 function submit() {
   if (!validate()) return
-  emit('save', {
+  const payload: Partial<User> & { password?: string } = {
     name: form.name.trim(),
     email: form.email.trim(),
-    role: form.role,
-    faculties: form.faculty ? [form.faculty] : [],
+    role: form.role as User['role'],
     status: form.status,
-  })
+  }
+
+  if (form.password) {
+    payload.password = form.password
+  }
+
+  emit('save', payload)
 }
 
 const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
-const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
 </script>
 
 <template>
@@ -108,26 +111,16 @@ const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
         <p v-if="errors.email" class="mt-1 text-xs text-danger">{{ errors.email }}</p>
       </div>
 
-      <!-- Role + Faculty -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-base font-sans text-text-primary mb-[7px]">Role</label>
-          <AppSelect
-            v-model="form.role"
-            :options="roleOptions"
-            placeholder="select role"
-            :placeholder-disabled="true"
-          />
-          <p v-if="errors.role" class="mt-1 text-xs text-danger">{{ errors.role }}</p>
-        </div>
-        <div>
-          <label class="block text-base font-sans text-text-primary mb-[7px]">Faculty</label>
-          <AppSelect
-            v-model="form.faculty"
-            :options="facultyOptions"
-            placeholder="select faculty"
-          />
-        </div>
+      <!-- Role -->
+      <div>
+        <label class="block text-base font-sans text-text-primary mb-[7px]">Role</label>
+        <AppSelect
+          v-model="form.role"
+          :options="roleOptions"
+          placeholder="select role"
+          :placeholder-disabled="true"
+        />
+        <p v-if="errors.role" class="mt-1 text-xs text-danger">{{ errors.role }}</p>
       </div>
 
       <!-- Default Password (create only) -->
@@ -176,17 +169,24 @@ const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
       </div>
     </div>
 
+    <!-- Error Message -->
+    <div v-if="error" class="mt-4 p-3 bg-danger/10 border border-danger/20 rounded-lg">
+      <p class="text-sm font-sans text-danger">{{ error }}</p>
+    </div>
+
     <template #footer>
       <button
         type="button"
-        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+        :disabled="loading"
         @click="emit('close')"
       >
         Cancel
       </button>
       <button
         type="button"
-        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50 flex items-center gap-2"
+        :disabled="loading"
         @click="submit"
       >
         {{ isEdit ? 'Update User' : 'Save User' }}

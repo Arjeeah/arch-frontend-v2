@@ -4,17 +4,19 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Pencil } from 'lucide-vue-next'
 import UserStatusBadge from '../components/UserStatusBadge.vue'
-import UserPermissionsCard from '../components/UserPermissionsCard.vue'
-import UserActivityCard from '../components/UserActivityCard.vue'
-import CreateUserDialog from '../components/CreateUserDialog.vue'
-import { mockUsers } from '../data/mockUsers'
+import { useUsersStore } from '../stores/useUsersStore'
 import type { User } from '../types'
+
+const store = useUsersStore()
+
+if (store.users.length === 0) {
+  store.fetchUsers()
+}
 
 const route = useRoute()
 const router = useRouter()
 
-// Find user in mock data — keep a local ref so edits reflect immediately
-const users = ref<User[]>([...mockUsers])
+const users = computed(() => store.users)
 const userId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
   if (!raw) return null
@@ -38,10 +40,15 @@ function initials(name: string) {
 // Edit dialog
 const editOpen = ref(false)
 
-function handleSave(data: Partial<User>) {
-  const idx = users.value.findIndex((u) => u.id === user.value?.id)
-  if (idx !== -1) users.value[idx] = { ...users.value[idx], ...data } as User
-  editOpen.value = false
+async function handleSave(data: Partial<User>) {
+  if (user.value) {
+    try {
+      await store.updateUser(user.value.id, data)
+      editOpen.value = false
+    } catch {
+      // store handles error
+    }
+  }
 }
 </script>
 
@@ -79,29 +86,12 @@ function handleSave(data: Partial<User>) {
         <p class="text-base font-display font-semibold text-text-primary">{{ user.role }}</p>
       </div>
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
-        <p class="text-xs text-text-muted font-display mb-1">Faculties</p>
-        <ul v-if="user.faculties.length" class="list-disc list-inside">
-          <li v-for="f in user.faculties" :key="f" class="text-sm font-sans text-text-primary">
-            {{ f }}
-          </li>
-        </ul>
-        <p v-else class="text-sm font-sans text-text-muted">—</p>
-      </div>
-      <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
-        <p class="text-xs text-text-muted font-display mb-1">Last Login</p>
-        <p class="text-sm font-display font-semibold text-text-primary">{{ user.lastLogin }}</p>
-      </div>
-      <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
         <p class="text-xs text-text-muted font-display mb-1">Created At</p>
-        <p class="text-sm font-display font-semibold text-text-primary">{{ user.createdAt }}</p>
+        <p class="text-sm font-display font-semibold text-text-primary">{{ user.created_at }}</p>
       </div>
     </div>
 
-    <!-- Permissions + Activity -->
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-      <UserPermissionsCard :permissions="user.permissions" />
-      <UserActivityCard :activities="user.recentActivity" />
-    </div>
+    <!-- Permissions + Activity removed as per new User model -->
 
     <!-- Bottom actions -->
     <div class="flex items-center justify-end gap-3 pt-2">
