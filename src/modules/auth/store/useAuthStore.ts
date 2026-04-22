@@ -45,11 +45,33 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    logout() {
-      this.token = null
-      this.user = null
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(USER_KEY)
+    async logout(): Promise<void> {
+      try {
+        await AuthService.logout()
+      } catch {
+        // ignore errors — always clear local state
+      } finally {
+        this.token = null
+        this.user = null
+        localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(USER_KEY)
+      }
+    },
+
+    async init(): Promise<void> {
+      if (!this.token) return
+      try {
+        const user = await AuthService.me()
+        this.user = user
+        localStorage.setItem(USER_KEY, JSON.stringify(user))
+      } catch (err) {
+        const status = (err as { response?: { status?: number } })?.response?.status
+        if (status === 401) {
+          // Token is expired/invalid — clear everything and redirect to login
+          await this.logout()
+        }
+        // Network error or 5xx → keep the token, user stays logged in
+      }
     },
 
     clearError() {
