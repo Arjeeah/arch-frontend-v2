@@ -64,9 +64,13 @@ export const useAuthStore = defineStore('auth', {
         const user = await AuthService.me()
         this.user = user
         localStorage.setItem(USER_KEY, JSON.stringify(user))
-      } catch {
-        // Token is expired/invalid — clear everything and redirect to login
-        this.logout()
+      } catch (err) {
+        const status = (err as { response?: { status?: number } })?.response?.status
+        if (status === 401) {
+          // Token is expired/invalid — clear everything and redirect to login
+          await this.logout()
+        }
+        // Network error or 5xx → keep the token, user stays logged in
       }
     },
 
