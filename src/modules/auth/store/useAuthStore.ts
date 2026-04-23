@@ -4,6 +4,13 @@ import type { AuthUser, LoginCredentials } from '../types'
 
 const TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
+const DEMO_TOKEN = 'demo-auth-token'
+const DEMO_USER = {
+  id: 0,
+  name: 'Demo User',
+  email: 'demo@arch.local',
+  role: 'Administrator',
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -43,6 +50,13 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false
       }
+    },
+
+    bypassLogin(): void {
+      this.token = DEMO_TOKEN
+      this.user = DEMO_USER
+      localStorage.setItem(TOKEN_KEY, DEMO_TOKEN)
+      localStorage.setItem(USER_KEY, JSON.stringify(DEMO_USER))
     },
 
     async logout(): Promise<void> {

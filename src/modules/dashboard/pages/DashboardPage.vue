@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import { File, Users, BookOpen, AlertCircle } from 'lucide-vue-next'
-import StatCard from '../components/StatCard.vue'
+import StatCard from '@/shared/components/StatCard.vue'
 import FilesMonthChart from '../components/FilesMonthChart.vue'
 import BorrowingsFacultyChart from '../components/BorrowingsFacultyChart.vue'
 import SystemHealthCard from '../components/SystemHealthCard.vue'

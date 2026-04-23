@@ -51,6 +51,12 @@ async function handleLogin() {
     router.push(redirect)
   }
 }
+
+function handleBypassLogin() {
+  authStore.bypassLogin()
+  const redirect = (router.currentRoute.value.query.redirect as string) || '/dashboard'
+  router.push(redirect)
+}
 </script>
 
 <template>
@@ -218,6 +224,27 @@ async function handleLogin() {
           class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
         />
         <span v-else>Log in</span>
+      </button>
+
+      <button
+        type="button"
+        class="mt-4 flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+        :disabled="authStore.loading"
+        style="
+          width: 100%;
+          height: 54px;
+          background: rgba(255, 255, 255, 0.88);
+          border: 1px solid rgba(57, 116, 213, 0.35);
+          border-radius: 10px;
+          font-family: 'Poppins', system-ui, sans-serif;
+          font-weight: 500;
+          font-size: 16px;
+          line-height: 24px;
+          color: #3974d5;
+        "
+        @click="handleBypassLogin"
+      >
+        Bypass login
       </button>
     </form>
   </div>
