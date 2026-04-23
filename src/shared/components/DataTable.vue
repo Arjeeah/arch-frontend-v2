@@ -2,23 +2,29 @@
 defineProps<{
   columns: Array<{ key: string; label: string; align?: 'left' | 'center' | 'right' }>
   loading?: boolean
+  variant?: 'default' | 'plain'
 }>()
 </script>
 
 <template>
   <div class="w-full overflow-x-auto">
-    <table class="w-full border-collapse font-sans">
+    <table class="w-full border-collapse font-sans" :class="{ 'border-t-0': variant === 'plain' }">
       <!-- Header -->
       <thead>
-        <tr class="bg-surface-table border border-border">
+        <tr
+          :class="variant === 'plain' ? 'bg-transparent' : 'bg-surface-table border border-border'"
+        >
           <th
             v-for="col in columns"
             :key="col.key"
-            class="px-3 py-3 text-sm font-bold text-text-secondary border border-border"
+            class="px-3 py-3 font-display"
             :class="{
               'text-left': col.align === 'left' || !col.align,
               'text-center': col.align === 'center',
               'text-right': col.align === 'right',
+              'text-sm font-bold text-text-secondary border border-border': variant !== 'plain',
+              'text-xs font-semibold text-black border-b border-border bg-white':
+                variant === 'plain',
             }"
           >
             {{ col.label }}

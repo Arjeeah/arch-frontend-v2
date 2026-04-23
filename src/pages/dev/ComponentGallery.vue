@@ -9,6 +9,8 @@ import DataTable from '@/shared/components/DataTable.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import SearchBar from '@/shared/components/SearchBar.vue'
 import FilterDropdown from '@/shared/components/FilterDropdown.vue'
+import ExportButton from '@/shared/components/ExportButton.vue'
+import LiveBadge from '@/shared/components/LiveBadge.vue'
 
 const search = ref('')
 const filter = ref('')
@@ -45,6 +47,22 @@ const filterOptions = [
         <AppButton variant="ghost">Cancel</AppButton>
         <AppButton variant="primary" :loading="true">Loading…</AppButton>
         <AppButton variant="primary" :disabled="true">Disabled</AppButton>
+      </div>
+    </section>
+
+    <!-- ExportButton -->
+    <section class="space-y-3">
+      <h2 class="text-lg font-semibold text-text-secondary font-sans">ExportButton</h2>
+      <div class="flex flex-wrap gap-3 items-center">
+        <ExportButton />
+      </div>
+    </section>
+
+    <!-- LiveBadge -->
+    <section class="space-y-3">
+      <h2 class="text-lg font-semibold text-text-secondary font-sans">LiveBadge</h2>
+      <div class="flex flex-wrap gap-3 items-center">
+        <LiveBadge />
       </div>
     </section>
 
