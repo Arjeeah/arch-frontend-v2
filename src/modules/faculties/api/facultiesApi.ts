@@ -18,15 +18,18 @@ export const facultiesApi = {
   */
 
 // Mock api calls
+
 export const facultiesApi = {
   list: async (): Promise<Faculties[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 300))
     return [...mockFaculties]
   },
 
   create: async (data: Partial<Faculties>): Promise<Faculties> => {
+    //ensure ID generation handles empty array case
+    const currentMaxId = mockFaculties.length > 0 ? Math.max(...mockFaculties.map((f) => f.id)) : 0
     const newFaculty = {
-      id: Math.max(...mockFaculties.map((f) => f.id)) + 1,
+      id: currentMaxId + 1,
       ...data,
     } as Faculties
     mockFaculties.push(newFaculty)
