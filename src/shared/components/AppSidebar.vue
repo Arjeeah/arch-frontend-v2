@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SidebarNavItem from './SidebarNavItem.vue'
 import logo from '@/assets/logo.svg'
 import { ref } from 'vue'
@@ -17,6 +17,7 @@ import {
 } from 'lucide-vue-next'
 
 const route = useRoute()
+const router = useRouter()
 
 // for type safety
 interface NavItem {
@@ -25,7 +26,6 @@ interface NavItem {
   icon: Component
   to?: string
   children?: { label: string; to: string }[]
-  hasChildren?: boolean
 }
 
 const navItems: NavItem[] = [
@@ -37,10 +37,9 @@ const navItems: NavItem[] = [
     key: 'faculty-management',
     label: 'Faculty Management',
     icon: GraduationCap,
-    hasChildren: true,
     children: [
-      { label: '• Faculties', to: '/faculties' },
-      { label: '• Programs', to: '/programs' },
+      { label: 'Faculties', to: '/faculties' },
+      { label: 'Programs', to: '/programs' },
     ],
   },
   { key: 'audit', label: 'Audit Logs', icon: ScrollText, to: '/audit' },
@@ -55,10 +54,10 @@ function toggleDropdown(key: string) {
 }
 
 function isActive(item: NavItem): boolean {
-  if (item.children) {
-    return item.children.some((child) => route.path.startsWith(child.to))
+  if (item.children?.some((child) => route.path.startsWith(child.to))) {
+    return true
   }
-  return item.to ? route.path.startsWith(item.to) : false
+  return item.to ? route.path === item.to || route.path.startsWith(item.to + '/') : false
 }
 </script>
 <template>
@@ -77,13 +76,15 @@ function isActive(item: NavItem): boolean {
         <SidebarNavItem
           :label="item.label"
           :active="isActive(item)"
-          :has-chevron="item.hasChildren"
-          @click="item.hasChildren ? toggleDropdown(item.key) : item.to && $router.push(item.to)"
+          :has-chevron="Boolean(item.children?.length)"
+          @click="
+            item.children?.length ? toggleDropdown(item.key) : item.to && router.push(item.to)
+          "
         >
           <template #icon>
             <component :is="item.icon" class="w-5 h-5" />
           </template>
-          <template #chevron v-if="item.hasChildren">
+          <template #chevron v-if="item.children?.length">
             <ChevronDown
               class="transition-transform duration-200"
               :class="{ 'rotate-180': openDropdown === item.key }"
@@ -91,7 +92,7 @@ function isActive(item: NavItem): boolean {
           </template>
         </SidebarNavItem>
 
-        <div v-if="item.hasChildren && openDropdown === item.key" class="flex flex-col">
+        <div v-if="item.children?.length && openDropdown === item.key" class="flex flex-col">
           <RouterLink
             v-for="child in item.children"
             :key="child.to"
@@ -101,6 +102,7 @@ function isActive(item: NavItem): boolean {
           >
             <SidebarNavItem
               :label="child.label"
+              class="pl-7 before:content-['•'] before:ml-2"
               :sub-active="route.path === child.to"
               :indent="true"
               @click="navigate()"
