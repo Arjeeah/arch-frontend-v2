@@ -18,14 +18,16 @@ export const facultiesApi = {
   */
 
 // Mock api calls
+const delay = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 300))
 
 export const facultiesApi = {
   list: async (): Promise<Faculties[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    await delay()
     return [...mockFaculties]
   },
 
   create: async (data: Partial<Faculties>): Promise<Faculties> => {
+    await delay()
     //ensure ID generation handles empty array case
     const currentMaxId = mockFaculties.length > 0 ? Math.max(...mockFaculties.map((f) => f.id)) : 0
     const newFaculty = {
@@ -37,6 +39,7 @@ export const facultiesApi = {
   },
 
   update: async (id: number, data: Partial<Faculties>): Promise<Faculties> => {
+    await delay()
     const index = mockFaculties.findIndex((f) => f.id === id)
     if (index === -1) throw new Error('Faculty not found')
     mockFaculties[index] = {
@@ -47,6 +50,7 @@ export const facultiesApi = {
   },
 
   delete: async (id: number): Promise<void> => {
+    await delay()
     const index = mockFaculties.findIndex((f) => f.id === id)
     if (index !== -1) {
       mockFaculties.splice(index, 1)
