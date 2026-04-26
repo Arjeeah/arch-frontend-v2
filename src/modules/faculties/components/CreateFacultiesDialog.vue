@@ -55,12 +55,12 @@ watch(
 
 function validate() {
   console.log('form object state:', form)
-  errors.code = form.code.trim() ? '' : 'Code is required'
-  errors.nameAR = form.nameAR.trim() ? '' : 'Name AR is required'
-  errors.nameEN = form.nameEN.trim() ? '' : 'Name EN is required'
-  errors.programs = form.programs.trim() ? '' : 'Programs is required'
-  errors.files = form.files.trim() ? '' : 'Files is required'
-  errors.status = form.status.trim() ? '' : 'Status is required'
+  errors.code = (form.code || '').trim() ? '' : 'Code is required'
+  errors.nameAR = (form.nameAR || '').trim() ? '' : 'Name AR is required'
+  errors.nameEN = (form.nameEN || '').trim() ? '' : 'Name EN is required'
+  errors.programs = (form.programs || '').trim() ? '' : 'Programs is required'
+  errors.files = (form.files || '').trim() ? '' : 'Files is required'
+  errors.status = (form.status || '').trim() ? '' : 'Status is required'
   return (
     !errors.code &&
     !errors.nameAR &&

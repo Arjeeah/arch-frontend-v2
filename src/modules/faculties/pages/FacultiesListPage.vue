@@ -12,7 +12,6 @@ import type { Faculties } from '../types'
 
 const store = useFacultiesStore()
 
-// Loading
 onMounted(() => {
   store.fetchAll()
 })

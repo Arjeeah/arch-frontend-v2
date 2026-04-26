@@ -19,19 +19,19 @@ const emit = defineEmits<{
     <div
       class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px] min-w-[800px]"
     >
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-150 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Code</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-150 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Name (AR)</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-150 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Name (EN)</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-150 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Programs</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-150 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Files</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
@@ -81,25 +81,35 @@ const emit = defineEmits<{
         class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px] min-w-[800px]"
       >
         <!-- Code -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.code }}</span>
         </div>
         <!-- Name A R -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.nameAR }}</span>
         </div>
         <!-- Name E N -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.nameEN }}</span>
         </div>
         <!-- Programs -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
             item.programs
           }}</span>
         </div>
         <!-- Files -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.files }}</span>
         </div>
         <!-- Status -->
