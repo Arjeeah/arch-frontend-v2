@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Borrowing } from '../types'
-// import { borrowingApi } from '../api/borrowingApi'
+import { borrowingApi } from '../api/borrowingApi'
 
 export const useBorrowingStore = defineStore('borrowing', () => {
   const items = ref<Borrowing[]>([])
@@ -10,7 +10,7 @@ export const useBorrowingStore = defineStore('borrowing', () => {
   async function fetchAll() {
     loading.value = true
     try {
-      // items.value = await borrowingApi.list()
+      items.value = await borrowingApi.list()
     } finally {
       loading.value = false
     }

@@ -75,7 +75,7 @@ function validate() {
   errors.purpose = form.purpose.trim() ? '' : 'Purpose is required'
   errors.borrowDate = form.borrowDate.trim() ? '' : 'Borrow Date is required'
   errors.dueDate = form.dueDate.trim() ? '' : 'Due Date is required'
-  errors.returnDate = form.returnDate.trim() ? '' : 'Return Date is required'
+  errors.returnDate = '' // No longer required
   errors.status = form.status.trim() ? '' : 'Status is required'
   return (
     !errors.fileNumber &&
@@ -84,7 +84,6 @@ function validate() {
     !errors.purpose &&
     !errors.borrowDate &&
     !errors.dueDate &&
-    !errors.returnDate &&
     !errors.status
   )
 }

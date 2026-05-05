@@ -131,12 +131,12 @@ const emit = defineEmits<{
         <!-- Status -->
         <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0">
           <span
-            class="px-3 py-1 rounded-full text-xs font-medium"
-            :class="
-              item.status === 'borrowed'
-                ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                : 'bg-surface text-text-secondary'
-            "
+            class="px-3 py-1 rounded-full text-xs font-medium capitalize"
+            :class="{
+              'bg-success-bg text-success-text': item.status === 'borrowed',
+              'bg-surface border border-border text-text-secondary': item.status === 'returned',
+              'bg-danger/10 text-danger': item.status === 'overdue',
+            }"
           >
             {{ item.status }}
           </span>

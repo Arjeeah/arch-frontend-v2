@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { useBorrowingStore } from '../stores/useBorrowingStore'
 import BorrowingTable from '../components/BorrowingTable.vue'
@@ -9,8 +9,30 @@ import CreateBorrowingDialog from '../components/CreateBorrowingDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import { usePagination } from '@/composables/usePagination'
 import type { Borrowing } from '../types'
+import { BookOpen, AlertCircle, Clock, CheckCircle } from 'lucide-vue-next'
+import AppStatCard from '@/shared/components/AppStatCard.vue'
+import { http } from '@/app/plugins/axios'
 
 const store = useBorrowingStore()
+
+const stats = ref({
+  active: 0,
+  overdue: 0,
+  dueSoon: 0,
+  returnedThisWeek: 0,
+})
+
+onMounted(async () => {
+  store.fetchAll()
+
+  try {
+    const { data } = await http.get('/api/v1/borrowings/stats')
+    // Update our stats object when the API responds successfully
+    stats.value = data
+  } catch (error) {
+    console.error('Failed to fetch stats:', error)
+  }
+})
 
 const search = ref('')
 const statusFilter = ref('')
@@ -115,7 +137,33 @@ function confirmDelete() {
         Add Borrowing
       </button>
     </div>
-
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <AppStatCard
+        :icon="BookOpen"
+        :value="stats.active"
+        label="Active Borrowings"
+        sub-label="Currently borrowed items"
+      />
+      <AppStatCard
+        :icon="AlertCircle"
+        :value="stats.overdue"
+        label="Overdue Items"
+        sub-label="Items past their due date"
+      />
+      <AppStatCard
+        :icon="Clock"
+        :value="stats.dueSoon"
+        label="Due Soon"
+        sub-label="Items due within the next 7 days"
+      />
+      <AppStatCard
+        :icon="CheckCircle"
+        :value="stats.returnedThisWeek"
+        label="Returned This Week"
+        sub-label="Items returned in the past week"
+      />
+    </div>
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
       <div class="relative flex-1 min-w-[200px]">

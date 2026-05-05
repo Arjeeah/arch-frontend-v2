@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import { File, Users, BookOpen, AlertCircle } from 'lucide-vue-next'
-import StatCard from '../components/StatCard.vue'
+import AppStatCard from '@/shared/components/AppStatCard.vue'
 import FilesMonthChart from '../components/FilesMonthChart.vue'
 import BorrowingsFacultyChart from '../components/BorrowingsFacultyChart.vue'
 import SystemHealthCard from '../components/SystemHealthCard.vue'
@@ -25,7 +25,7 @@ const getIcon = (name: string): Component => iconMap[name]!
 
     <!-- Stat cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      <StatCard
+      <AppStatCard
         v-for="card in statCards"
         :key="card.label"
         :label="card.label"
