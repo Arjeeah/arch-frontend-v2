@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { auditApi } from '../api/AuditApi'
-import type { AuditLog, TimelineEntry, AuditStat } from '../types/types'
+import { auditApi } from '../api/auditApi'
+import type { AuditLog, TimelineEntry, AuditStat } from '../types'
 
 export const useAuditStore = defineStore('audit', () => {
   const stats = ref<AuditStat | null>(null)
@@ -27,7 +27,12 @@ export const useAuditStore = defineStore('audit', () => {
     }
   }
 
-  const fetchLogs = async (params: { search?: string; role?: string; page?: number }) => {
+  const fetchLogs = async (params: {
+    search?: string
+    role?: string
+    page?: number
+    order?: string
+  }) => {
     logsLoading.value = true
     try {
       const res = await auditApi.getLogs(params)
