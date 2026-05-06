@@ -9,7 +9,7 @@ import AppSelect from '@/shared/components/AppSelect.vue'
 import DataTable from '@/shared/components/DataTable.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import { useAuditStore } from '../stores/useAuditStore'
-import { auditApi } from '../api/AuditApi'
+import { auditApi } from '../api/auditApi'
 
 const auditStore = useAuditStore()
 
@@ -39,7 +39,11 @@ onMounted(() => {
   fetchLogs()
 })
 
-watch([search, role, currentPage], () => {
+watch([search, role, order], () => {
+  currentPage.value = 1
+})
+
+watch([search, role, order, currentPage], () => {
   fetchLogs()
 })
 
@@ -47,6 +51,7 @@ const fetchLogs = () => {
   auditStore.fetchLogs({
     search: search.value,
     role: role.value,
+    order: order.value,
     page: currentPage.value,
   })
 }
@@ -54,10 +59,21 @@ const fetchLogs = () => {
 const handleExport = async () => {
   try {
     const response = await auditApi.exportReport()
+
+    let filename = 'audit-report.csv'
+    const disposition = response.headers['content-disposition']
+    if (disposition && disposition.includes('attachment')) {
+      const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+      const matches = filenameRegex.exec(disposition)
+      if (matches != null && matches[1]) {
+        filename = matches[1].replace(/['"]/g, '')
+      }
+    }
+
     const url = window.URL.createObjectURL(new Blob([response.data as Blob]))
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', 'audit-report.csv')
+    link.setAttribute('download', filename)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -79,16 +95,16 @@ const handleExport = async () => {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
       <StatCard
         label="Total Operations Today"
-        :value="auditStore.stats?.totalOperationsToday ?? '1,524'"
-        :sub-label="auditStore.stats?.operationsChange ?? '+12% from yesterday'"
+        :value="auditStore.stats?.totalOperationsToday ?? '-'"
+        :sub-label="auditStore.stats?.operationsChange ?? '-'"
         :icon="Clock"
       />
       <StatCard
         label="Users logged in"
-        :value="auditStore.stats?.usersLoggedIn ?? '41'"
+        :value="auditStore.stats?.usersLoggedIn ?? '-'"
         :icon="LogIn"
       />
-      <StatCard label="Total Users" :value="auditStore.stats?.totalUsers ?? '90'" :icon="User" />
+      <StatCard label="Total Users" :value="auditStore.stats?.totalUsers ?? '-'" :icon="User" />
     </div>
 
     <!-- Main Content Grid -->
