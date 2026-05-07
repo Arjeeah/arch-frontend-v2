@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { SquarePen, Ban } from 'lucide-vue-next'
-import type { Faculties } from '../types'
+import type { Faculty } from '../types'
 
 defineProps<{
-  items: Faculties[]
+  items: Faculty[]
   loading?: boolean
 }>()
 
 const emit = defineEmits<{
-  edit: [item: Faculties]
-  delete: [item: Faculties]
+  edit: [item: Faculty]
+  delete: [item: Faculty]
 }>()
 </script>
 

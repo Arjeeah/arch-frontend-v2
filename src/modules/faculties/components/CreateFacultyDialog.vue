@@ -2,16 +2,16 @@
 import { reactive, watch, computed } from 'vue'
 import AppDialog from '@/shared/components/AppDialog.vue'
 import FormInput from '@/shared/components/FormInput.vue'
-import type { Faculties } from '../types'
+import type { Faculty } from '../types'
 
 const props = defineProps<{
   open: boolean
-  item?: Faculties | null
+  item?: Faculty | null
 }>()
 
 const emit = defineEmits<{
   close: []
-  save: [data: Partial<Faculties>]
+  save: [data: Partial<Faculty>]
 }>()
 
 const isEdit = computed(() => !!props.item)
@@ -22,7 +22,7 @@ const form = reactive({
   nameEN: '',
   programs: '',
   files: '',
-  status: 'Acitve' as 'Active' | 'Inactive',
+  status: 'Active' as 'Active' | 'Inactive',
 })
 
 const errors = reactive({
@@ -54,7 +54,6 @@ watch(
 )
 
 function validate() {
-  console.log('form object state:', form)
   errors.code = (form.code || '').trim() ? '' : 'Code is required'
   errors.nameAR = (form.nameAR || '').trim() ? '' : 'Name AR is required'
   errors.nameEN = (form.nameEN || '').trim() ? '' : 'Name EN is required'

@@ -1,11 +1,11 @@
-import type { Faculties } from '../types'
+import type { Faculty } from '../types'
 
-export const mockFaculties: Faculties[] = [
+export const mockFaculties: Faculty[] = [
   {
     id: 1,
     code: '124',
     nameAR: 'تقنية المعلومات',
-    nameEN: 'Information Teachnology',
+    nameEN: 'Information Technology',
     programs: 5,
     files: 240,
     status: 'Active',
@@ -19,7 +19,7 @@ export const mockFaculties: Faculties[] = [
     programs: 8,
     files: 300,
     status: 'Active',
-    createdAt: 'nov 30, 2025',
+    createdAt: 'Nov 30, 2025',
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ export const mockFaculties: Faculties[] = [
     programs: 6,
     files: 1200,
     status: 'Inactive',
-    createdAt: 'dec 30, 2025',
+    createdAt: 'Dec 30, 2025',
   },
   {
     id: 4,

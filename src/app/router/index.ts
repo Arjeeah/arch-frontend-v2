@@ -23,7 +23,7 @@ const router = createRouter({
         { path: 'users/:id', component: () => import('@/modules/users/pages/UserDetailPage.vue') },
         {
           path: 'faculties',
-          component: () => import('@/modules/faculties/pages/FacultiesListPage.vue'),
+          component: () => import('@/modules/faculties/pages/FacultyListPage.vue'),
         },
       ],
     },

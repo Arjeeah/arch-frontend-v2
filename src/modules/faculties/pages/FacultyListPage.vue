@@ -5,10 +5,10 @@ import { useFacultiesStore } from '../stores/useFacultiesStore'
 import FacultiesTable from '../components/FacultiesTable.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
-import CreateFacultiesDialog from '../components/CreateFacultiesDialog.vue'
+import CreateFacultyDialog from '../components/CreateFacultyDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import { usePagination } from '@/composables/usePagination'
-import type { Faculties } from '../types'
+import type { Faculty } from '../types'
 
 const store = useFacultiesStore()
 
@@ -20,9 +20,9 @@ const search = ref('')
 const statusFilter = ref('')
 
 const dialogOpen = ref(false)
-const editingItem = ref<Faculties | null>(null)
+const editingItem = ref<Faculty | null>(null)
 const deleteDialogOpen = ref(false)
-const deletingItem = ref<Faculties | null>(null)
+const deletingItem = ref<Faculty | null>(null)
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
@@ -49,49 +49,27 @@ function openCreate() {
   editingItem.value = null
   dialogOpen.value = true
 }
-function openEdit(item: Faculties) {
+function openEdit(item: Faculty) {
   editingItem.value = item
   dialogOpen.value = true
 }
-function openDelete(item: Faculties) {
+function openDelete(item: Faculty) {
   deletingItem.value = item
   deleteDialogOpen.value = true
 }
 
-function handleSave(data: Partial<Faculties>) {
+async function handleSave(data: Partial<Faculty>) {
   if (editingItem.value) {
-    const idx = store.items.findIndex((i) => i.id === editingItem.value!.id)
-    if (idx !== -1)
-      store.items.splice(idx, 1, Object.assign({}, store.items[idx], data) as Faculties)
+    await store.update(editingItem.value.id, data)
   } else {
-    const newId = Math.max(0, ...store.items.map((i) => i.id)) + 1
-    store.items.unshift(
-      Object.assign(
-        {
-          id: newId,
-          code: '',
-          nameAR: '',
-          nameEN: '',
-          programs: 0,
-          files: 0,
-          status: '' as Faculties['status'],
-          createdAt: new Date().toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          }),
-        },
-        data,
-      ) as Faculties,
-    )
+    await store.create(data)
   }
   dialogOpen.value = false
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (deletingItem.value) {
-    const idx = store.items.findIndex((i) => i.id === deletingItem.value!.id)
-    if (idx !== -1) store.items.splice(idx, 1)
+    await store.remove(deletingItem.value.id)
   }
   deleteDialogOpen.value = false
 }
@@ -147,7 +125,7 @@ function confirmDelete() {
   </div>
 
   <!-- Create / Edit dialog -->
-  <CreateFacultiesDialog
+  <CreateFacultyDialog
     :open="dialogOpen"
     :item="editingItem"
     @close="dialogOpen = false"

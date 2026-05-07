@@ -1,6 +1,6 @@
 // Types for the Faculties module
 
-export interface Faculties {
+export interface Faculty {
   id: number
   code: string
   nameAR: string

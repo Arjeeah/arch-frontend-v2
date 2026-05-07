@@ -39,7 +39,7 @@ const navItems: NavItem[] = [
     icon: GraduationCap,
     children: [
       { label: 'Faculties', to: '/faculties' },
-      { label: 'Programs', to: '/programs' },
+      //{ label: 'Programs', to: '/programs' },
     ],
   },
   { key: 'audit', label: 'Audit Logs', icon: ScrollText, to: '/audit' },
