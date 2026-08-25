@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
+import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { usersApi } from '../api/usersApi'
-import type { User } from '../types'
+import type { User, UserInput } from '../types'
 
 export const useUsersStore = defineStore('users', () => {
   const users = ref<User[]>([])
@@ -13,60 +13,62 @@ export const useUsersStore = defineStore('users', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await usersApi.getUsers()
-      users.value = response.data
+      users.value = await usersApi.list()
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        error.value = err.response?.data?.message ?? 'Something went wrong'
-      } else if (err instanceof Error) {
-        error.value = err.message
-      } else {
-        error.value = 'An unexpected error occurred'
-      }
+      error.value = getApiErrorMessage(err, 'Failed to load users')
     } finally {
       loading.value = false
     }
   }
 
-  async function createUser(data: Partial<User> & { password?: string }) {
+  /**
+   * Loads a single user by id and upserts it into `users`. The list endpoint
+   * is paginated, so a deep link cannot rely on the user being in page one.
+   */
+  async function fetchUser(id: number) {
     loading.value = true
     error.value = null
     try {
-      const response = await usersApi.createUser(data)
-      users.value.unshift(response.data)
-      return response.data
+      const user = await usersApi.show(id)
+      const idx = users.value.findIndex((u) => u.id === id)
+      if (idx === -1) users.value.push(user)
+      else users.value[idx] = user
+      return user
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        error.value = err.response?.data?.message ?? 'Something went wrong'
-      } else if (err instanceof Error) {
-        error.value = err.message
-      } else {
-        error.value = 'An unexpected error occurred'
-      }
+      error.value = getApiErrorMessage(err, 'Failed to load user')
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  async function updateUser(id: number, data: Partial<User> & { password?: string }) {
+  async function createUser(input: UserInput) {
     loading.value = true
     error.value = null
     try {
-      const response = await usersApi.updateUser(id, data)
+      const created = await usersApi.create(input)
+      users.value.unshift(created)
+      return created
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Failed to create user')
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateUser(id: number, input: Partial<UserInput>) {
+    loading.value = true
+    error.value = null
+    try {
+      const updated = await usersApi.update(id, input)
       const idx = users.value.findIndex((u) => u.id === id)
       if (idx !== -1) {
-        users.value[idx] = response.data
+        users.value[idx] = updated
       }
-      return response.data
+      return updated
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        error.value = err.response?.data?.message ?? 'Something went wrong'
-      } else if (err instanceof Error) {
-        error.value = err.message
-      } else {
-        error.value = 'An unexpected error occurred'
-      }
+      error.value = getApiErrorMessage(err, 'Failed to update user')
       throw err
     } finally {
       loading.value = false
@@ -77,29 +79,15 @@ export const useUsersStore = defineStore('users', () => {
     loading.value = true
     error.value = null
     try {
-      await usersApi.deleteUser(id)
+      await usersApi.delete(id)
       users.value = users.value.filter((u) => u.id !== id)
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        error.value = err.response?.data?.message ?? 'Something went wrong'
-      } else if (err instanceof Error) {
-        error.value = err.message
-      } else {
-        error.value = 'An unexpected error occurred'
-      }
+      error.value = getApiErrorMessage(err, 'Failed to delete user')
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  return {
-    users,
-    loading,
-    error,
-    fetchUsers,
-    createUser,
-    updateUser,
-    deleteUser,
-  }
+  return { users, loading, error, fetchUsers, fetchUser, createUser, updateUser, deleteUser }
 })

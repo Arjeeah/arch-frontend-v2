@@ -9,7 +9,7 @@ import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import { usePagination } from '@/composables/usePagination'
 import { ROLES } from '../types'
-import type { User } from '../types'
+import type { User, UserInput } from '../types'
 import { useUsersStore } from '../stores/useUsersStore'
 
 const store = useUsersStore()
@@ -22,6 +22,7 @@ onMounted(() => {
 const search = ref('')
 const roleFilter = ref('')
 const statusFilter = ref('')
+const facultyFilter = ref('')
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
@@ -29,12 +30,14 @@ const filtered = computed(() => {
     const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     const matchRole = !roleFilter.value || u.role === roleFilter.value
     const matchStatus = !statusFilter.value || u.status === statusFilter.value
-    return matchSearch && matchRole && matchStatus
+    const matchFaculty =
+      !facultyFilter.value || u.faculties.some((f) => String(f.id) === facultyFilter.value)
+    return matchSearch && matchRole && matchStatus && matchFaculty
   })
 })
 
 const { currentPage, totalPages, paginated, resetPage } = usePagination(filtered, 10)
-watch([search, roleFilter, statusFilter], resetPage)
+watch([search, roleFilter, statusFilter, facultyFilter], resetPage)
 
 // Create/Edit dialog
 const dialogOpen = ref(false)
@@ -49,7 +52,7 @@ function openEdit(user: User) {
   dialogOpen.value = true
 }
 
-async function handleSave(data: Partial<User> & { password?: string }) {
+async function handleSave(data: UserInput) {
   try {
     if (editingUser.value) {
       await store.updateUser(editingUser.value.id, data)
@@ -58,7 +61,7 @@ async function handleSave(data: Partial<User> & { password?: string }) {
     }
     dialogOpen.value = false
   } catch {
-    // store handles error
+    // store exposes the message via store.error
   }
 }
 
@@ -71,22 +74,30 @@ function openDelete(user: User) {
   deleteDialogOpen.value = true
 }
 async function confirmDelete() {
-  if (deletingUser.value) {
-    try {
-      await store.deleteUser(deletingUser.value.id)
-      deleteDialogOpen.value = false
-    } catch {
-      // store handles error
-    }
+  if (!deletingUser.value) return
+  try {
+    await store.deleteUser(deletingUser.value.id)
+    deleteDialogOpen.value = false
+  } catch {
+    // store exposes the message via store.error
   }
 }
 
 // Select options
-const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
+const roleOptions = ROLES.map((r) => ({ value: r.value, label: r.label }))
 const statusOptions = [
   { value: 'Active', label: 'Active' },
   { value: 'Inactive', label: 'Inactive' },
 ]
+// Derived from the loaded users — the users module cannot import the
+// faculties module to fetch the full list.
+const facultyOptions = computed(() => {
+  const byId = new Map<number, string>()
+  for (const user of store.users) {
+    for (const faculty of user.faculties) byId.set(faculty.id, faculty.nameEN)
+  }
+  return [...byId].map(([id, label]) => ({ value: String(id), label }))
+})
 </script>
 
 <template>
@@ -124,6 +135,20 @@ const statusOptions = [
 
       <AppSelect v-model="roleFilter" :options="roleOptions" placeholder="All Roles" />
       <AppSelect v-model="statusFilter" :options="statusOptions" placeholder="All Status" />
+      <AppSelect
+        v-if="facultyOptions.length"
+        v-model="facultyFilter"
+        :options="facultyOptions"
+        placeholder="All Faculties"
+      />
+    </div>
+
+    <!-- Load error -->
+    <div
+      v-if="store.error && !dialogOpen"
+      class="p-3 bg-danger/10 border border-danger/20 rounded-lg"
+    >
+      <p class="text-sm font-sans text-danger">{{ store.error }}</p>
     </div>
 
     <!-- Table -->

@@ -1,31 +1,37 @@
 <!-- src/modules/users/pages/UserDetailPage.vue -->
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Pencil } from 'lucide-vue-next'
+import { formatDate } from '@/shared/utils/date'
 import UserStatusBadge from '../components/UserStatusBadge.vue'
+import CreateUserDialog from '../components/CreateUserDialog.vue'
 import { useUsersStore } from '../stores/useUsersStore'
-import type { User } from '../types'
+import { roleLabel } from '../types'
+import type { UserInput } from '../types'
 
 const store = useUsersStore()
-
-if (store.users.length === 0) {
-  store.fetchUsers()
-}
-
 const route = useRoute()
 const router = useRouter()
 
-const users = computed(() => store.users)
 const userId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
   if (!raw) return null
   const n = parseInt(raw, 10)
   return isNaN(n) ? null : n
 })
+
 const user = computed(() =>
-  userId.value !== null ? (users.value.find((u) => u.id === userId.value) ?? null) : null,
+  userId.value !== null ? (store.users.find((u) => u.id === userId.value) ?? null) : null,
 )
+
+onMounted(() => {
+  if (userId.value !== null) {
+    store.fetchUser(userId.value).catch(() => {
+      // store exposes the message via store.error
+    })
+  }
+})
 
 function initials(name: string) {
   return name
@@ -40,22 +46,26 @@ function initials(name: string) {
 // Edit dialog
 const editOpen = ref(false)
 
-async function handleSave(data: Partial<User>) {
-  if (user.value) {
-    try {
-      await store.updateUser(user.value.id, data)
-      editOpen.value = false
-    } catch {
-      // store handles error
-    }
+async function handleSave(data: UserInput) {
+  if (!user.value) return
+  try {
+    await store.updateUser(user.value.id, data)
+    editOpen.value = false
+  } catch {
+    // store exposes the message via store.error
   }
 }
 </script>
 
 <template>
+  <!-- Loading -->
+  <div v-if="!user && store.loading" class="flex items-center justify-center py-24">
+    <p class="text-text-secondary font-sans">Loading…</p>
+  </div>
+
   <!-- Not found -->
-  <div v-if="!user" class="flex flex-col items-center justify-center py-24 gap-4">
-    <p class="text-text-secondary font-sans">User not found.</p>
+  <div v-else-if="!user" class="flex flex-col items-center justify-center py-24 gap-4">
+    <p class="text-text-secondary font-sans">{{ store.error ?? 'User not found.' }}</p>
     <button
       class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-display"
       @click="router.push('/users')"
@@ -79,19 +89,30 @@ async function handleSave(data: Partial<User>) {
       </div>
     </div>
 
-    <!-- 4 info blocks -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <!-- Info blocks -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
         <p class="text-xs text-text-muted font-display mb-1">Role</p>
-        <p class="text-base font-display font-semibold text-text-primary">{{ user.role }}</p>
+        <p class="text-base font-display font-semibold text-text-primary">
+          {{ roleLabel(user.role) }}
+        </p>
+      </div>
+      <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
+        <p class="text-xs text-text-muted font-display mb-1">Faculties</p>
+        <p class="text-base font-display font-semibold text-text-primary">
+          {{ user.faculties.length ? user.faculties.map((f) => f.nameEN).join(', ') : '-' }}
+        </p>
       </div>
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
         <p class="text-xs text-text-muted font-display mb-1">Created At</p>
-        <p class="text-sm font-display font-semibold text-text-primary">{{ user.created_at }}</p>
+        <p class="text-base font-display font-semibold text-text-primary">
+          {{ formatDate(user.createdAt) }}
+        </p>
       </div>
     </div>
 
-    <!-- Permissions + Activity removed as per new User model -->
+    <!-- Permissions and activity are not shown: the backend exposes no
+         endpoints for them yet. -->
 
     <!-- Bottom actions -->
     <div class="flex items-center justify-end gap-3 pt-2">
@@ -113,5 +134,12 @@ async function handleSave(data: Partial<User>) {
   </div>
 
   <!-- Edit dialog -->
-  <CreateUserDialog :open="editOpen" :user="user" @close="editOpen = false" @save="handleSave" />
+  <CreateUserDialog
+    :open="editOpen"
+    :user="user"
+    :loading="store.loading"
+    :error="store.error"
+    @close="editOpen = false"
+    @save="handleSave"
+  />
 </template>

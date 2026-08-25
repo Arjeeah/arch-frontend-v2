@@ -4,8 +4,8 @@ import { Eye, EyeOff } from 'lucide-vue-next'
 import AppDialog from '@/shared/components/AppDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import FormInput from '@/shared/components/FormInput.vue'
-import type { User } from '../types'
 import { ROLES } from '../types'
+import type { User, UserInput, UserRole, UserStatus } from '../types'
 
 const props = defineProps<{
   open: boolean
@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
-  save: [data: Partial<User> & { password?: string }]
+  save: [data: UserInput]
 }>()
 
 const isEdit = computed(() => !!props.user)
@@ -24,34 +24,27 @@ const isEdit = computed(() => !!props.user)
 const form = reactive({
   name: '',
   email: '',
-  role: '',
+  role: '' as UserRole | '',
   password: '',
-  status: 'Active' as 'Active' | 'Inactive',
+  status: 'Active' as UserStatus,
 })
 
 const showPassword = ref(false)
-const errors = reactive({ name: '', email: '', role: '' })
+const errors = reactive({ name: '', email: '', role: '', password: '' })
 
 watch(
   () => props.open,
   (open) => {
     if (!open) return
-    if (props.user) {
-      form.name = props.user.name
-      form.email = props.user.email
-      form.role = props.user.role
-      form.password = ''
-      form.status = props.user.status
-    } else {
-      form.name = ''
-      form.email = ''
-      form.role = ''
-      form.password = ''
-      form.status = 'Active'
-    }
+    form.name = props.user?.name ?? ''
+    form.email = props.user?.email ?? ''
+    form.role = props.user?.role ?? ''
+    form.password = ''
+    form.status = props.user?.status ?? 'Active'
     errors.name = ''
     errors.email = ''
     errors.role = ''
+    errors.password = ''
   },
 )
 
@@ -59,26 +52,30 @@ function validate() {
   errors.name = form.name.trim() ? '' : 'Full name is required'
   errors.email = form.email.trim() ? '' : 'Email is required'
   errors.role = form.role ? '' : 'Role is required'
-  return !errors.name && !errors.email && !errors.role
+  // The backend requires a password when creating; on edit an empty field
+  // means "leave the current password alone".
+  errors.password = isEdit.value || form.password ? '' : 'Password is required'
+  return !errors.name && !errors.email && !errors.role && !errors.password
 }
 
 function submit() {
   if (!validate()) return
-  const payload: Partial<User> & { password?: string } = {
+  const role = form.role
+  if (!role) return
+
+  const payload: UserInput = {
     name: form.name.trim(),
     email: form.email.trim(),
-    role: form.role as User['role'],
+    role,
     status: form.status,
   }
-
-  if (form.password) {
-    payload.password = form.password
-  }
+  // The API layer also sends this as password_confirmation.
+  if (form.password) payload.password = form.password
 
   emit('save', payload)
 }
 
-const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
+const roleOptions = ROLES.map((r) => ({ value: r.value, label: r.label }))
 </script>
 
 <template>
@@ -117,7 +114,7 @@ const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
         <AppSelect
           v-model="form.role"
           :options="roleOptions"
-          placeholder="select role"
+          placeholder="Select role"
           :placeholder-disabled="true"
         />
         <p v-if="errors.role" class="mt-1 text-xs text-danger">{{ errors.role }}</p>
@@ -137,13 +134,14 @@ const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
           />
           <button
             type="button"
-            class="shrink-0 w-[34px] h-[29px] bg-[#ACC6E8] border border-border-input rounded-[5px] flex items-center justify-center"
+            class="shrink-0 w-[34px] h-[29px] bg-primary-light border border-border-input rounded-[5px] flex items-center justify-center"
             @click="showPassword = !showPassword"
           >
-            <EyeOff v-if="showPassword" class="w-3.5 h-3.5 text-[#71839B]" />
-            <Eye v-else class="w-3.5 h-3.5 text-[#71839B]" />
+            <EyeOff v-if="showPassword" class="w-3.5 h-3.5 text-text-secondary" />
+            <Eye v-else class="w-3.5 h-3.5 text-text-secondary" />
           </button>
         </div>
+        <p v-if="errors.password" class="mt-1 text-xs text-danger">{{ errors.password }}</p>
       </div>
 
       <!-- Status -->
@@ -152,11 +150,11 @@ const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
         <div class="flex items-center justify-between">
           <p class="text-sm font-sans text-[#6F6F6F]">set user account as active or inactive</p>
           <div class="flex items-center gap-3 shrink-0">
-            <span class="text-sm font-sans text-[#595959]">{{ form.status }}</span>
+            <span class="text-sm font-sans text-text-secondary">{{ form.status }}</span>
             <button
               type="button"
               class="relative inline-flex h-[25px] w-[46px] items-center rounded-[16px] transition-colors focus:outline-none"
-              :class="form.status === 'Active' ? 'bg-[#ACC6E8]' : 'bg-border'"
+              :class="form.status === 'Active' ? 'bg-primary-light' : 'bg-border'"
               @click="form.status = form.status === 'Active' ? 'Inactive' : 'Active'"
             >
               <span

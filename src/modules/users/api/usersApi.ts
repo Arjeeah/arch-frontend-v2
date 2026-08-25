@@ -1,163 +1,110 @@
-import type { User } from '../types'
-// import { http } from '@/app/plugins/axios' // Uncomment this when connecting to real backend
+import { http } from '@/app/plugins/axios'
+import { API_ENDPOINTS } from '@/app/config/api'
+import { ROLES } from '../types'
+import type { User, UserInput, UserRole, UserStatus } from '../types'
 
-let mockUsers: User[] = [
-  {
-    id: 1,
-    name: 'Ahmed Ali',
-    email: 'a@limu.edu.ly',
-    role: 'Archivist',
-    status: 'Active',
-    created_at: 'Dec 1, 2025',
-  },
-  {
-    id: 2,
-    name: 'Nour Mohammed',
-    email: 'nour@limu.edu.ly',
-    role: 'Super Admin',
-    status: 'Active',
-    created_at: 'Nov 15, 2025',
-  },
-  {
-    id: 3,
-    name: 'Sara Ahmed Ali',
-    email: 'sara@limu.edu.ly',
-    role: 'Faculty Staff',
-    status: 'Inactive',
-    created_at: 'Dec 19, 2025',
-  },
-  {
-    id: 4,
-    name: 'Mohammed Hassan',
-    email: 'mo@limu.edu.ly',
-    role: 'Super Admin',
-    status: 'Active',
-    created_at: 'Oct 5, 2025',
-  },
-  {
-    id: 5,
-    name: 'Aya Alaa',
-    email: 'aya@limu.edu.ly',
-    role: 'Super Admin',
-    status: 'Active',
-    created_at: 'Sep 1, 2025',
-  },
-  {
-    id: 6,
-    name: 'Ehab Khalid',
-    email: '21@limu.edu.ly',
-    role: 'Archivist',
-    status: 'Active',
-    created_at: 'Dec 10, 2025',
-  },
-  {
-    id: 7,
-    name: 'Fatima Omar',
-    email: 'fatima@limu.edu.ly',
-    role: 'Faculty Staff',
-    status: 'Active',
-    created_at: 'Nov 20, 2025',
-  },
-  {
-    id: 8,
-    name: 'Khalid Mansour',
-    email: 'khalid@limu.edu.ly',
-    role: 'Archivist',
-    status: 'Inactive',
-    created_at: 'Aug 15, 2025',
-  },
-  {
-    id: 9,
-    name: 'Layla Ibrahim',
-    email: 'layla@limu.edu.ly',
-    role: 'Super Admin',
-    status: 'Active',
-    created_at: 'Oct 20, 2025',
-  },
-  {
-    id: 10,
-    name: 'Omar Faris',
-    email: 'omar@limu.edu.ly',
-    role: 'Faculty Staff',
-    status: 'Active',
-    created_at: 'Dec 5, 2025',
-  },
-  {
-    id: 11,
-    name: 'Rania Saleh',
-    email: 'rania@limu.edu.ly',
-    role: 'Archivist',
-    status: 'Active',
-    created_at: 'Nov 1, 2025',
-  },
-  {
-    id: 12,
-    name: 'Tarek Yousef',
-    email: 'tarek@limu.edu.ly',
-    role: 'Super Admin',
-    status: 'Inactive',
-    created_at: 'Sep 10, 2025',
-  },
-  {
-    id: 13,
-    name: 'Salma Nasser',
-    email: 'salma@limu.edu.ly',
-    role: 'Faculty Staff',
-    status: 'Active',
-    created_at: 'Dec 15, 2025',
-  },
-  {
-    id: 14,
-    name: 'Youssef Kamal',
-    email: 'youssef@limu.edu.ly',
-    role: 'Archivist',
-    status: 'Active',
-    created_at: 'Oct 30, 2025',
-  },
-  {
-    id: 15,
-    name: 'Hana Malik',
-    email: 'hana@limu.edu.ly',
-    role: 'Super Admin',
-    status: 'Active',
-    created_at: 'Aug 1, 2025',
-  },
-]
+/** A faculty as nested on the user resource (snake_case). */
+interface UserFacultyResource {
+  id: number
+  name_en: string
+}
 
-function delay<T>(data: T, ms = 500): Promise<{ data: T }> {
-  return new Promise((resolve) => setTimeout(() => resolve({ data }), ms))
+/** A user exactly as the backend sends it (Laravel resource, snake_case). */
+interface UserResource {
+  id: number
+  name: string
+  email: string
+  role: string
+  status: string
+  created_at: string
+  faculties?: UserFacultyResource[]
+}
+
+/** `show` / `store` / `update` responses are wrapped in a single `data` key. */
+interface UserItemResponse {
+  data: UserResource
+}
+
+/** `index` is paginated: `{ data: [...], meta, links }`. */
+interface UserListResponse {
+  data: UserResource[]
+}
+
+function toRole(raw: string): UserRole {
+  // Unknown slugs fall back to the least privileged role rather than widening
+  // the type — the UI must never render an unrecognised role as privileged.
+  return ROLES.find((r) => r.value === raw)?.value ?? 'faculty_staff'
+}
+
+// verify against live API: assumes status is a lowercase string on the wire.
+// Comparison is case-insensitive so a capitalised value still maps correctly.
+function toStatus(raw: string): UserStatus {
+  return raw.toLowerCase() === 'active' ? 'Active' : 'Inactive'
+}
+
+/** snake_case wire format -> camelCase UI model. */
+function fromResource(resource: UserResource): User {
+  return {
+    id: resource.id,
+    name: resource.name,
+    email: resource.email,
+    role: toRole(resource.role),
+    status: toStatus(resource.status),
+    createdAt: resource.created_at,
+    faculties: (resource.faculties ?? []).map((f) => ({ id: f.id, nameEN: f.name_en })),
+  }
+}
+
+/**
+ * camelCase UI model -> snake_case request payload.
+ *
+ * Faculty assignment is not sent: the dialog has no faculty picker, and the
+ * users module cannot import the faculties module to build one. The backend
+ * key for it is `faculty_ids` (array of faculty ids) — verify against live API
+ * before wiring a picker.
+ */
+function toPayload(input: Partial<UserInput>): Record<string, string> {
+  const payload: Record<string, string> = {}
+  if (input.name !== undefined) payload.name = input.name
+  if (input.email !== undefined) payload.email = input.email
+  if (input.role !== undefined) payload.role = input.role
+  if (input.status !== undefined) payload.status = input.status.toLowerCase()
+  if (input.password) {
+    payload.password = input.password
+    payload.password_confirmation = input.password
+  }
+  return payload
 }
 
 export const usersApi = {
-  getUsers() {
-    // return http.get<User[]>('/v1/users')
-    return delay([...mockUsers])
+  /**
+   * Returns one page of users. The backend paginates the index endpoint;
+   * with no params it responds with the first page.
+   */
+  list: async (params?: { page?: number; per_page?: number }): Promise<User[]> => {
+    const { data } = await http.get<UserListResponse>(API_ENDPOINTS.users.list, { params })
+    return data.data.map(fromResource)
   },
-  createUser(data: Partial<User> & { password?: string }) {
-    // return http.post<User>('/v1/users', data)
-    const newUser: User = {
-      id: Math.max(0, ...mockUsers.map((u) => u.id)) + 1,
-      name: data.name || '',
-      email: data.email || '',
-      role: (data.role as User['role']) || 'Faculty Staff',
-      status: data.status || 'Active',
-      created_at: new Date().toISOString().substring(0, 10),
-    }
-    mockUsers.unshift(newUser)
-    return delay(newUser)
+
+  show: async (id: number): Promise<User> => {
+    const { data } = await http.get<UserItemResponse>(API_ENDPOINTS.users.show(id))
+    return fromResource(data.data)
   },
-  updateUser(id: number, data: Partial<User> & { password?: string }) {
-    // return http.put<User>(`/v1/users/${id}`, data)
-    const idx = mockUsers.findIndex((u) => u.id === id)
-    if (idx !== -1) {
-      mockUsers[idx] = { ...mockUsers[idx], ...data } as User
-      return delay(mockUsers[idx])
-    }
-    return Promise.reject(new Error('User not found'))
+
+  create: async (input: UserInput): Promise<User> => {
+    const { data } = await http.post<UserItemResponse>(API_ENDPOINTS.users.create, toPayload(input))
+    return fromResource(data.data)
   },
-  deleteUser(id: number) {
-    // return http.delete(`/v1/users/${id}`)
-    mockUsers = mockUsers.filter((u) => u.id !== id)
-    return delay(null)
+
+  update: async (id: number, input: Partial<UserInput>): Promise<User> => {
+    const { data } = await http.put<UserItemResponse>(
+      API_ENDPOINTS.users.update(id),
+      toPayload(input),
+    )
+    return fromResource(data.data)
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await http.delete(API_ENDPOINTS.users.delete(id))
   },
 }
