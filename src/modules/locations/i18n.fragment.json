@@ -1,0 +1,264 @@
+{
+  "en": {
+    "locations": {
+      "common": {
+        "cancel": "Cancel",
+        "create": "Create",
+        "saveChanges": "Save Changes",
+        "edit": "Edit",
+        "delete": "Delete",
+        "actions": "Actions",
+        "name": "Name",
+        "description": "Description",
+        "status": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "loading": "Loading…",
+        "backToRooms": "Back to Rooms",
+        "backToCabinets": "Back to Cabinets"
+      },
+      "capacity": {
+        "slotsSuffix": "slots",
+        "status": {
+          "normal": "Normal",
+          "warning": "Warning",
+          "critical": "Critical"
+        }
+      },
+      "rooms": {
+        "title": "Archive Rooms",
+        "subtitle": "Browse archive rooms and drill into their cabinets and drawers",
+        "addRoom": "Add Room",
+        "searchPlaceholder": "Search rooms",
+        "filterAllStatuses": "All Statuses",
+        "emptyTitle": "No rooms yet",
+        "emptyDescription": "Add your first archive room to start organizing cabinets and drawers.",
+        "viewCabinets": "View cabinets",
+        "deleteTitle": "Delete Room",
+        "deleteMessage": "Are you sure you want to delete \"{name}\"? Its cabinets and drawers will be deleted too. This action cannot be undone.",
+        "columns": {
+          "name": "Name",
+          "description": "Description",
+          "cabinets": "Cabinets",
+          "status": "Status"
+        },
+        "dialog": {
+          "createTitle": "Add Room",
+          "editTitle": "Edit Room",
+          "namePlaceholder": "e.g. Ground Floor Archive",
+          "descriptionPlaceholder": "Optional notes about this room",
+          "nameRequired": "Name is required"
+        },
+        "toasts": {
+          "created": "Room created",
+          "updated": "Room updated",
+          "deleted": "Room deleted",
+          "saveFailed": "Could not save the room",
+          "deleteFailed": "Could not delete the room"
+        }
+      },
+      "cabinets": {
+        "subtitle": "Cabinets in this room. Each cabinet holds 4 drawers automatically.",
+        "addCabinet": "Add Cabinet",
+        "searchPlaceholder": "Search cabinets",
+        "filterAllStatuses": "All Statuses",
+        "emptyTitle": "No cabinets yet",
+        "emptyDescription": "Add a cabinet to this room — its 4 drawers are created automatically.",
+        "viewDrawers": "View drawers",
+        "roomLoadFailed": "Could not load this room",
+        "deleteTitle": "Delete Cabinet",
+        "deleteMessage": "Are you sure you want to delete \"{name}\"? Its drawers will be deleted too. This action cannot be undone.",
+        "columns": {
+          "name": "Name",
+          "position": "Position",
+          "drawers": "Drawers",
+          "status": "Status"
+        },
+        "dialog": {
+          "createTitle": "Add Cabinet",
+          "editTitle": "Edit Cabinet",
+          "namePlaceholder": "e.g. Cabinet A1",
+          "nameRequired": "Name is required",
+          "positionX": "Position X",
+          "positionY": "Position Y",
+          "positionInvalid": "Enter a valid number",
+          "roomContext": "Room: {room}",
+          "autoDrawersHint": "4 drawers will be created automatically for this cabinet."
+        },
+        "toasts": {
+          "created": "Cabinet created",
+          "updated": "Cabinet updated",
+          "deleted": "Cabinet deleted",
+          "saveFailed": "Could not save the cabinet",
+          "deleteFailed": "Could not delete the cabinet"
+        }
+      },
+      "drawers": {
+        "subtitle": "Drawers in this cabinet",
+        "subtitleWithRoom": "Drawers in this cabinet — {room}",
+        "addDrawer": "Add Drawer",
+        "filterAllStatuses": "All Statuses",
+        "emptyTitle": "No drawers yet",
+        "emptyDescription": "This cabinet has no drawers. Add one, or edit the cabinet to restore its default 4.",
+        "cabinetLoadFailed": "Could not load this cabinet",
+        "deleteTitle": "Delete Drawer",
+        "deleteMessage": "Are you sure you want to delete drawer #{number}? This action cannot be undone.",
+        "columns": {
+          "number": "No.",
+          "label": "Label",
+          "capacity": "Capacity",
+          "status": "Status"
+        },
+        "dialog": {
+          "createTitle": "Add Drawer",
+          "editTitle": "Edit Drawer",
+          "number": "Drawer Number",
+          "numberInvalid": "Enter a whole number of 1 or more",
+          "capacity": "Capacity",
+          "capacityInvalid": "Enter a valid capacity",
+          "label": "Label",
+          "labelPlaceholder": "Optional label, e.g. \"A–M\"",
+          "cabinetContext": "Cabinet: {cabinet}"
+        },
+        "toasts": {
+          "created": "Drawer created",
+          "updated": "Drawer updated",
+          "deleted": "Drawer deleted",
+          "saveFailed": "Could not save the drawer",
+          "deleteFailed": "Could not delete the drawer"
+        }
+      }
+    }
+  },
+  "ar": {
+    "locations": {
+      "common": {
+        "cancel": "إلغاء",
+        "create": "إنشاء",
+        "saveChanges": "حفظ التغييرات",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "actions": "الإجراءات",
+        "name": "الاسم",
+        "description": "الوصف",
+        "status": "الحالة",
+        "statusActive": "نشط",
+        "statusInactive": "غير نشط",
+        "loading": "جارٍ التحميل…",
+        "backToRooms": "العودة إلى الغرف",
+        "backToCabinets": "العودة إلى الخزائن"
+      },
+      "capacity": {
+        "slotsSuffix": "خانة",
+        "status": {
+          "normal": "طبيعية",
+          "warning": "تحذير",
+          "critical": "حرجة"
+        }
+      },
+      "rooms": {
+        "title": "غرف الأرشيف",
+        "subtitle": "تصفح غرف الأرشيف وتنقّل بين خزائنها وأدراجها",
+        "addRoom": "إضافة غرفة",
+        "searchPlaceholder": "بحث في الغرف",
+        "filterAllStatuses": "جميع الحالات",
+        "emptyTitle": "لا توجد غرف بعد",
+        "emptyDescription": "أضف أول غرفة أرشيف لبدء تنظيم الخزائن والأدراج.",
+        "viewCabinets": "عرض الخزائن",
+        "deleteTitle": "حذف الغرفة",
+        "deleteMessage": "هل أنت متأكد من حذف \"{name}\"؟ سيتم حذف خزائنها وأدراجها أيضًا. لا يمكن التراجع عن هذا الإجراء.",
+        "columns": {
+          "name": "الاسم",
+          "description": "الوصف",
+          "cabinets": "الخزائن",
+          "status": "الحالة"
+        },
+        "dialog": {
+          "createTitle": "إضافة غرفة",
+          "editTitle": "تعديل الغرفة",
+          "namePlaceholder": "مثال: أرشيف الطابق الأرضي",
+          "descriptionPlaceholder": "ملاحظات اختيارية عن هذه الغرفة",
+          "nameRequired": "الاسم مطلوب"
+        },
+        "toasts": {
+          "created": "تم إنشاء الغرفة",
+          "updated": "تم تحديث الغرفة",
+          "deleted": "تم حذف الغرفة",
+          "saveFailed": "تعذّر حفظ الغرفة",
+          "deleteFailed": "تعذّر حذف الغرفة"
+        }
+      },
+      "cabinets": {
+        "subtitle": "الخزائن الموجودة في هذه الغرفة. يتم إنشاء 4 أدراج تلقائيًا لكل خزانة.",
+        "addCabinet": "إضافة خزانة",
+        "searchPlaceholder": "بحث في الخزائن",
+        "filterAllStatuses": "جميع الحالات",
+        "emptyTitle": "لا توجد خزائن بعد",
+        "emptyDescription": "أضف خزانة إلى هذه الغرفة — سيتم إنشاء أدراجها الأربعة تلقائيًا.",
+        "viewDrawers": "عرض الأدراج",
+        "roomLoadFailed": "تعذّر تحميل هذه الغرفة",
+        "deleteTitle": "حذف الخزانة",
+        "deleteMessage": "هل أنت متأكد من حذف \"{name}\"؟ سيتم حذف أدراجها أيضًا. لا يمكن التراجع عن هذا الإجراء.",
+        "columns": {
+          "name": "الاسم",
+          "position": "الموضع",
+          "drawers": "الأدراج",
+          "status": "الحالة"
+        },
+        "dialog": {
+          "createTitle": "إضافة خزانة",
+          "editTitle": "تعديل الخزانة",
+          "namePlaceholder": "مثال: خزانة A1",
+          "nameRequired": "الاسم مطلوب",
+          "positionX": "الإحداثي X",
+          "positionY": "الإحداثي Y",
+          "positionInvalid": "أدخل رقمًا صحيحًا",
+          "roomContext": "الغرفة: {room}",
+          "autoDrawersHint": "سيتم إنشاء 4 أدراج تلقائيًا لهذه الخزانة."
+        },
+        "toasts": {
+          "created": "تم إنشاء الخزانة",
+          "updated": "تم تحديث الخزانة",
+          "deleted": "تم حذف الخزانة",
+          "saveFailed": "تعذّر حفظ الخزانة",
+          "deleteFailed": "تعذّر حذف الخزانة"
+        }
+      },
+      "drawers": {
+        "subtitle": "الأدراج الموجودة في هذه الخزانة",
+        "subtitleWithRoom": "الأدراج الموجودة في هذه الخزانة — {room}",
+        "addDrawer": "إضافة درج",
+        "filterAllStatuses": "جميع الحالات",
+        "emptyTitle": "لا توجد أدراج بعد",
+        "emptyDescription": "لا تحتوي هذه الخزانة على أدراج. أضف درجًا، أو عدّل الخزانة لاستعادة أدراجها الأربعة الافتراضية.",
+        "cabinetLoadFailed": "تعذّر تحميل هذه الخزانة",
+        "deleteTitle": "حذف الدرج",
+        "deleteMessage": "هل أنت متأكد من حذف الدرج رقم {number}؟ لا يمكن التراجع عن هذا الإجراء.",
+        "columns": {
+          "number": "الرقم",
+          "label": "التسمية",
+          "capacity": "السعة",
+          "status": "الحالة"
+        },
+        "dialog": {
+          "createTitle": "إضافة درج",
+          "editTitle": "تعديل الدرج",
+          "number": "رقم الدرج",
+          "numberInvalid": "أدخل رقمًا صحيحًا 1 أو أكبر",
+          "capacity": "السعة",
+          "capacityInvalid": "أدخل سعة صالحة",
+          "label": "التسمية",
+          "labelPlaceholder": "تسمية اختيارية، مثل \"A–M\"",
+          "cabinetContext": "الخزانة: {cabinet}"
+        },
+        "toasts": {
+          "created": "تم إنشاء الدرج",
+          "updated": "تم تحديث الدرج",
+          "deleted": "تم حذف الدرج",
+          "saveFailed": "تعذّر حفظ الدرج",
+          "deleteFailed": "تعذّر حذف الدرج"
+        }
+      }
+    }
+  }
+}
