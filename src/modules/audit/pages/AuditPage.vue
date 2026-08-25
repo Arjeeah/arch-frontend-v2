@@ -3,7 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { Clock, LogIn, User } from 'lucide-vue-next'
 import ExportButton from '@/shared/components/ExportButton.vue'
 import LiveBadge from '@/shared/components/LiveBadge.vue'
-import StatCard from '@/shared/components/StatCard.vue'
+import AppStatCard from '@/shared/components/AppStatCard.vue'
 import SearchBar from '@/shared/components/SearchBar.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import DataTable from '@/shared/components/DataTable.vue'
@@ -93,18 +93,18 @@ const handleExport = async () => {
 
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
-      <StatCard
+      <AppStatCard
         label="Total Operations Today"
         :value="auditStore.stats?.totalOperationsToday ?? '-'"
         :sub-label="auditStore.stats?.operationsChange ?? '-'"
         :icon="Clock"
       />
-      <StatCard
+      <AppStatCard
         label="Users logged in"
         :value="auditStore.stats?.usersLoggedIn ?? '-'"
         :icon="LogIn"
       />
-      <StatCard label="Total Users" :value="auditStore.stats?.totalUsers ?? '-'" :icon="User" />
+      <AppStatCard label="Total Users" :value="auditStore.stats?.totalUsers ?? '-'" :icon="User" />
     </div>
 
     <!-- Main Content Grid -->

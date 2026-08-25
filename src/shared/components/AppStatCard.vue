@@ -1,4 +1,3 @@
-<!-- src/modules/dashboard/components/StatCard.vue -->
 <script setup lang="ts">
 import type { Component } from 'vue'
 

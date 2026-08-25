@@ -1,63 +1,69 @@
-<!-- src/modules/users/pages/UserListPage.vue -->
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { Search, UserPlus } from 'lucide-vue-next'
-import UserTable from '../components/UserTable.vue'
-import CreateUserDialog from '../components/CreateUserDialog.vue'
-import AppSelect from '@/shared/components/AppSelect.vue'
+import { Search } from 'lucide-vue-next'
+import { useFacultiesStore } from '../stores/useFacultiesStore'
+import FacultiesTable from '../components/FacultiesTable.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
+import CreateFacultyDialog from '../components/CreateFacultyDialog.vue'
+import AppSelect from '@/shared/components/AppSelect.vue'
 import { usePagination } from '@/composables/usePagination'
-import { ROLES } from '../types'
-import type { User, UserInput } from '../types'
-import { useUsersStore } from '../stores/useUsersStore'
+import type { Faculty, FacultyInput } from '../types'
 
-const store = useUsersStore()
+const store = useFacultiesStore()
 
 onMounted(() => {
-  store.fetchUsers()
+  store.fetchAll()
 })
 
-// Filters
 const search = ref('')
-const roleFilter = ref('')
 const statusFilter = ref('')
-const facultyFilter = ref('')
+
+const dialogOpen = ref(false)
+const editingItem = ref<Faculty | null>(null)
+const deleteDialogOpen = ref(false)
+const deletingItem = ref<Faculty | null>(null)
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
-  return store.users.filter((u) => {
-    const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
-    const matchRole = !roleFilter.value || u.role === roleFilter.value
-    const matchStatus = !statusFilter.value || u.status === statusFilter.value
-    const matchFaculty =
-      !facultyFilter.value || u.faculties.some((f) => String(f.id) === facultyFilter.value)
-    return matchSearch && matchRole && matchStatus && matchFaculty
+  return store.items.filter((item) => {
+    const matchSearch =
+      !q ||
+      item.code.toLowerCase().includes(q) ||
+      item.nameAR.toLowerCase().includes(q) ||
+      item.nameEN.toLowerCase().includes(q)
+    const matchStatus = !statusFilter.value || item.status === statusFilter.value
+    return matchSearch && matchStatus
   })
 })
 
 const { currentPage, totalPages, paginated, resetPage } = usePagination(filtered, 10)
-watch([search, roleFilter, statusFilter, facultyFilter], resetPage)
+watch([search, statusFilter], resetPage)
 
-// Create/Edit dialog
-const dialogOpen = ref(false)
-const editingUser = ref<User | null>(null)
+const statusOptions = [
+  { value: 'Active', label: 'Active' },
+  { value: 'Inactive', label: 'Inactive' },
+]
 
 function openCreate() {
-  editingUser.value = null
+  editingItem.value = null
   dialogOpen.value = true
 }
-function openEdit(user: User) {
-  editingUser.value = user
+function openEdit(item: Faculty) {
+  editingItem.value = item
   dialogOpen.value = true
+}
+function openDelete(item: Faculty) {
+  deletingItem.value = item
+  deleteDialogOpen.value = true
 }
 
-async function handleSave(data: UserInput) {
+async function handleSave(data: FacultyInput) {
   try {
-    if (editingUser.value) {
-      await store.updateUser(editingUser.value.id, data)
+    if (editingItem.value) {
+      await store.update(editingItem.value.id, data)
     } else {
-      await store.createUser(data)
+      await store.create(data)
     }
     dialogOpen.value = false
   } catch {
@@ -65,39 +71,15 @@ async function handleSave(data: UserInput) {
   }
 }
 
-// Delete dialog
-const deleteDialogOpen = ref(false)
-const deletingUser = ref<User | null>(null)
-
-function openDelete(user: User) {
-  deletingUser.value = user
-  deleteDialogOpen.value = true
-}
 async function confirmDelete() {
-  if (!deletingUser.value) return
+  if (!deletingItem.value) return
   try {
-    await store.deleteUser(deletingUser.value.id)
+    await store.remove(deletingItem.value.id)
     deleteDialogOpen.value = false
   } catch {
     // store exposes the message via store.error
   }
 }
-
-// Select options
-const roleOptions = ROLES.map((r) => ({ value: r.value, label: r.label }))
-const statusOptions = [
-  { value: 'Active', label: 'Active' },
-  { value: 'Inactive', label: 'Inactive' },
-]
-// Derived from the loaded users — the users module cannot import the
-// faculties module to fetch the full list.
-const facultyOptions = computed(() => {
-  const byId = new Map<number, string>()
-  for (const user of store.users) {
-    for (const faculty of user.faculties) byId.set(faculty.id, faculty.nameEN)
-  }
-  return [...byId].map(([id, label]) => ({ value: String(id), label }))
-})
 </script>
 
 <template>
@@ -105,23 +87,21 @@ const facultyOptions = computed(() => {
     <!-- Header -->
     <div class="flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-display font-semibold text-text-primary">User Management</h1>
+        <h1 class="text-2xl font-display font-semibold text-text-primary">Faculties</h1>
         <p class="text-sm text-text-secondary font-sans mt-0.5">
-          Manage system users and their roles
+          Manage faculties and their programs
         </p>
       </div>
       <button
         class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-display font-medium hover:bg-primary-mid transition-colors"
         @click="openCreate"
       >
-        <UserPlus class="w-4 h-4" />
-        Add User
+        Add Faculty
       </button>
     </div>
 
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
-      <!-- Search -->
       <div class="relative flex-1 min-w-[200px]">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
         <input
@@ -132,15 +112,7 @@ const facultyOptions = computed(() => {
           style="border-width: 1.3px"
         />
       </div>
-
-      <AppSelect v-model="roleFilter" :options="roleOptions" placeholder="All Roles" />
       <AppSelect v-model="statusFilter" :options="statusOptions" placeholder="All Status" />
-      <AppSelect
-        v-if="facultyOptions.length"
-        v-model="facultyFilter"
-        :options="facultyOptions"
-        placeholder="All Faculties"
-      />
     </div>
 
     <!-- Load error -->
@@ -152,7 +124,12 @@ const facultyOptions = computed(() => {
     </div>
 
     <!-- Table -->
-    <UserTable :users="paginated" :loading="store.loading" @edit="openEdit" @delete="openDelete" />
+    <FacultiesTable
+      :items="paginated"
+      :loading="store.loading"
+      @edit="openEdit"
+      @delete="openDelete"
+    />
 
     <!-- Pagination -->
     <AppPagination
@@ -162,10 +139,10 @@ const facultyOptions = computed(() => {
     />
   </div>
 
-  <!-- Create/Edit dialog -->
-  <CreateUserDialog
+  <!-- Create / Edit dialog -->
+  <CreateFacultyDialog
     :open="dialogOpen"
-    :user="editingUser"
+    :item="editingItem"
     :loading="store.loading"
     :error="store.error"
     @close="dialogOpen = false"
@@ -175,7 +152,7 @@ const facultyOptions = computed(() => {
   <!-- Delete confirm dialog -->
   <AppConfirmDialog
     :open="deleteDialogOpen"
-    title="Delete User"
+    title="Delete Faculties"
     confirm-label="Delete"
     confirm-class="bg-danger text-white hover:opacity-80"
     @close="deleteDialogOpen = false"
@@ -183,7 +160,7 @@ const facultyOptions = computed(() => {
   >
     <p class="text-sm text-text-secondary font-sans">
       Are you sure you want to delete
-      <strong class="text-text-primary">{{ deletingUser?.name }}</strong
+      <strong class="text-text-primary">{{ deletingItem?.nameEN }}</strong
       >? This action cannot be undone.
     </p>
   </AppConfirmDialog>

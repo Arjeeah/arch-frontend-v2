@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { SquarePen, Ban } from 'lucide-vue-next'
+import { formatDate } from '@/shared/utils/date'
 import UserStatusBadge from './UserStatusBadge.vue'
+import { roleLabel } from '../types'
 import type { User } from '../types'
 
 defineProps<{
@@ -15,6 +17,10 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+
+function facultyNames(user: User) {
+  return user.faculties.length ? user.faculties.map((f) => f.nameEN).join(', ') : '-'
+}
 </script>
 
 <template>
@@ -39,9 +45,6 @@ const router = useRouter()
         <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Last Login</span>
-      </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Created At</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
@@ -60,7 +63,7 @@ const router = useRouter()
           <div class="h-4 bg-surface rounded animate-pulse w-[120px]" />
         </div>
         <div
-          v-for="j in 5"
+          v-for="j in 3"
           :key="j"
           class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full"
         >
@@ -68,6 +71,9 @@ const router = useRouter()
         </div>
         <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
           <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
+        </div>
+        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
         </div>
         <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
           <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
@@ -99,14 +105,16 @@ const router = useRouter()
 
         <!-- Role -->
         <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{ user.role }}</span>
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{
+            roleLabel(user.role)
+          }}</span>
         </div>
 
         <!-- Faculty -->
         <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">
-            {{ user.faculties.length ? user.faculties.join(', ') : '-' }}
-          </span>
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{
+            facultyNames(user)
+          }}</span>
         </div>
 
         <!-- Status -->
@@ -114,17 +122,10 @@ const router = useRouter()
           <UserStatusBadge :status="user.status" />
         </div>
 
-        <!-- Last Login -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            user.lastLogin
-          }}</span>
-        </div>
-
         <!-- Created At -->
         <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            user.createdAt
+            formatDate(user.createdAt)
           }}</span>
         </div>
 

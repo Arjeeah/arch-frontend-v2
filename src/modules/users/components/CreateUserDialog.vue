@@ -4,17 +4,19 @@ import { Eye, EyeOff } from 'lucide-vue-next'
 import AppDialog from '@/shared/components/AppDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import FormInput from '@/shared/components/FormInput.vue'
-import type { User } from '../types'
-import { ROLES, FACULTIES } from '../types'
+import { ROLES } from '../types'
+import type { User, UserInput, UserRole, UserStatus } from '../types'
 
 const props = defineProps<{
   open: boolean
   user?: User | null
+  loading?: boolean
+  error?: string | null
 }>()
 
 const emit = defineEmits<{
   close: []
-  save: [data: Partial<User>]
+  save: [data: UserInput]
 }>()
 
 const isEdit = computed(() => !!props.user)
@@ -22,37 +24,27 @@ const isEdit = computed(() => !!props.user)
 const form = reactive({
   name: '',
   email: '',
-  role: '',
-  faculty: '',
+  role: '' as UserRole | '',
   password: '',
-  status: 'Active' as 'Active' | 'Inactive',
+  status: 'Active' as UserStatus,
 })
 
 const showPassword = ref(false)
-const errors = reactive({ name: '', email: '', role: '' })
+const errors = reactive({ name: '', email: '', role: '', password: '' })
 
 watch(
   () => props.open,
   (open) => {
     if (!open) return
-    if (props.user) {
-      form.name = props.user.name
-      form.email = props.user.email
-      form.role = props.user.role
-      form.faculty = props.user.faculties[0] ?? ''
-      form.password = ''
-      form.status = props.user.status
-    } else {
-      form.name = ''
-      form.email = ''
-      form.role = ''
-      form.faculty = ''
-      form.password = ''
-      form.status = 'Active'
-    }
+    form.name = props.user?.name ?? ''
+    form.email = props.user?.email ?? ''
+    form.role = props.user?.role ?? ''
+    form.password = ''
+    form.status = props.user?.status ?? 'Active'
     errors.name = ''
     errors.email = ''
     errors.role = ''
+    errors.password = ''
   },
 )
 
@@ -60,22 +52,30 @@ function validate() {
   errors.name = form.name.trim() ? '' : 'Full name is required'
   errors.email = form.email.trim() ? '' : 'Email is required'
   errors.role = form.role ? '' : 'Role is required'
-  return !errors.name && !errors.email && !errors.role
+  // The backend requires a password when creating; on edit an empty field
+  // means "leave the current password alone".
+  errors.password = isEdit.value || form.password ? '' : 'Password is required'
+  return !errors.name && !errors.email && !errors.role && !errors.password
 }
 
 function submit() {
   if (!validate()) return
-  emit('save', {
+  const role = form.role
+  if (!role) return
+
+  const payload: UserInput = {
     name: form.name.trim(),
     email: form.email.trim(),
-    role: form.role,
-    faculties: form.faculty ? [form.faculty] : [],
+    role,
     status: form.status,
-  })
+  }
+  // The API layer also sends this as password_confirmation.
+  if (form.password) payload.password = form.password
+
+  emit('save', payload)
 }
 
-const roleOptions = ROLES.map((r) => ({ value: r, label: r }))
-const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
+const roleOptions = ROLES.map((r) => ({ value: r.value, label: r.label }))
 </script>
 
 <template>
@@ -108,26 +108,16 @@ const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
         <p v-if="errors.email" class="mt-1 text-xs text-danger">{{ errors.email }}</p>
       </div>
 
-      <!-- Role + Faculty -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-base font-sans text-text-primary mb-[7px]">Role</label>
-          <AppSelect
-            v-model="form.role"
-            :options="roleOptions"
-            placeholder="select role"
-            :placeholder-disabled="true"
-          />
-          <p v-if="errors.role" class="mt-1 text-xs text-danger">{{ errors.role }}</p>
-        </div>
-        <div>
-          <label class="block text-base font-sans text-text-primary mb-[7px]">Faculty</label>
-          <AppSelect
-            v-model="form.faculty"
-            :options="facultyOptions"
-            placeholder="select faculty"
-          />
-        </div>
+      <!-- Role -->
+      <div>
+        <label class="block text-base font-sans text-text-primary mb-[7px]">Role</label>
+        <AppSelect
+          v-model="form.role"
+          :options="roleOptions"
+          placeholder="Select role"
+          :placeholder-disabled="true"
+        />
+        <p v-if="errors.role" class="mt-1 text-xs text-danger">{{ errors.role }}</p>
       </div>
 
       <!-- Default Password (create only) -->
@@ -144,13 +134,14 @@ const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
           />
           <button
             type="button"
-            class="shrink-0 w-[34px] h-[29px] bg-[#ACC6E8] border border-border-input rounded-[5px] flex items-center justify-center"
+            class="shrink-0 w-[34px] h-[29px] bg-primary-light border border-border-input rounded-[5px] flex items-center justify-center"
             @click="showPassword = !showPassword"
           >
-            <EyeOff v-if="showPassword" class="w-3.5 h-3.5 text-[#71839B]" />
-            <Eye v-else class="w-3.5 h-3.5 text-[#71839B]" />
+            <EyeOff v-if="showPassword" class="w-3.5 h-3.5 text-text-secondary" />
+            <Eye v-else class="w-3.5 h-3.5 text-text-secondary" />
           </button>
         </div>
+        <p v-if="errors.password" class="mt-1 text-xs text-danger">{{ errors.password }}</p>
       </div>
 
       <!-- Status -->
@@ -159,11 +150,11 @@ const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
         <div class="flex items-center justify-between">
           <p class="text-sm font-sans text-[#6F6F6F]">set user account as active or inactive</p>
           <div class="flex items-center gap-3 shrink-0">
-            <span class="text-sm font-sans text-[#595959]">{{ form.status }}</span>
+            <span class="text-sm font-sans text-text-secondary">{{ form.status }}</span>
             <button
               type="button"
               class="relative inline-flex h-[25px] w-[46px] items-center rounded-[16px] transition-colors focus:outline-none"
-              :class="form.status === 'Active' ? 'bg-[#ACC6E8]' : 'bg-border'"
+              :class="form.status === 'Active' ? 'bg-primary-light' : 'bg-border'"
               @click="form.status = form.status === 'Active' ? 'Inactive' : 'Active'"
             >
               <span
@@ -176,17 +167,24 @@ const facultyOptions = FACULTIES.map((f) => ({ value: f, label: f }))
       </div>
     </div>
 
+    <!-- Error Message -->
+    <div v-if="error" class="mt-4 p-3 bg-danger/10 border border-danger/20 rounded-lg">
+      <p class="text-sm font-sans text-danger">{{ error }}</p>
+    </div>
+
     <template #footer>
       <button
         type="button"
-        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+        :disabled="loading"
         @click="emit('close')"
       >
         Cancel
       </button>
       <button
         type="button"
-        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50 flex items-center gap-2"
+        :disabled="loading"
         @click="submit"
       >
         {{ isEdit ? 'Update User' : 'Save User' }}

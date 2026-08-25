@@ -17,6 +17,18 @@ export const API_ENDPOINTS = {
     show: (id: number | string) => `/v1/academic/faculties/${id}`,
     update: (id: number | string) => `/v1/academic/faculties/${id}`,
     delete: (id: number | string) => `/v1/academic/faculties/${id}`,
+    restore: (id: number | string) => `/v1/academic/faculties/${id}/restore`,
+  },
+  borrowings: {
+    list: '/v1/borrowings',
+    create: '/v1/borrowings',
+    show: (id: number | string) => `/v1/borrowings/${id}`,
+    update: (id: number | string) => `/v1/borrowings/${id}`,
+    delete: (id: number | string) => `/v1/borrowings/${id}`,
+    /** Takes `{ action: 'approve' | 'reject' }`. */
+    approve: (id: number | string) => `/v1/borrowings/${id}/approve`,
+    markBorrowed: (id: number | string) => `/v1/borrowings/${id}/mark-borrowed`,
+    return: (id: number | string) => `/v1/borrowings/${id}/return`,
   },
   programs: {
     list: '/v1/academic/programs',
