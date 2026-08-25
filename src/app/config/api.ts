@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
     show: (id: number | string) => `/v1/academic/faculties/${id}`,
     update: (id: number | string) => `/v1/academic/faculties/${id}`,
     delete: (id: number | string) => `/v1/academic/faculties/${id}`,
+    restore: (id: number | string) => `/v1/academic/faculties/${id}/restore`,
   },
   programs: {
     list: '/v1/academic/programs',

@@ -31,9 +31,6 @@ const emit = defineEmits<{
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Programs</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Files</span>
-      </div>
       <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
       </div>
@@ -47,21 +44,13 @@ const emit = defineEmits<{
       <div
         v-for="i in 6"
         :key="i"
-        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px]"
+        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px] min-w-[800px]"
       >
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+        <div
+          v-for="j in 4"
+          :key="j"
+          class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full"
+        >
           <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
         </div>
         <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
@@ -103,14 +92,8 @@ const emit = defineEmits<{
           class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
         >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            item.programs
+            item.programsCount
           }}</span>
-        </div>
-        <!-- Files -->
-        <div
-          class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
-        >
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.files }}</span>
         </div>
         <!-- Status -->
         <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0">

@@ -8,7 +8,7 @@ import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import CreateFacultyDialog from '../components/CreateFacultyDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import { usePagination } from '@/composables/usePagination'
-import type { Faculty } from '../types'
+import type { Faculty, FacultyInput } from '../types'
 
 const store = useFacultiesStore()
 
@@ -58,20 +58,27 @@ function openDelete(item: Faculty) {
   deleteDialogOpen.value = true
 }
 
-async function handleSave(data: Partial<Faculty>) {
-  if (editingItem.value) {
-    await store.update(editingItem.value.id, data)
-  } else {
-    await store.create(data)
+async function handleSave(data: FacultyInput) {
+  try {
+    if (editingItem.value) {
+      await store.update(editingItem.value.id, data)
+    } else {
+      await store.create(data)
+    }
+    dialogOpen.value = false
+  } catch {
+    // store exposes the message via store.error
   }
-  dialogOpen.value = false
 }
 
 async function confirmDelete() {
-  if (deletingItem.value) {
+  if (!deletingItem.value) return
+  try {
     await store.remove(deletingItem.value.id)
+    deleteDialogOpen.value = false
+  } catch {
+    // store exposes the message via store.error
   }
-  deleteDialogOpen.value = false
 }
 </script>
 
@@ -108,6 +115,14 @@ async function confirmDelete() {
       <AppSelect v-model="statusFilter" :options="statusOptions" placeholder="All Status" />
     </div>
 
+    <!-- Load error -->
+    <div
+      v-if="store.error && !dialogOpen"
+      class="p-3 bg-danger/10 border border-danger/20 rounded-lg"
+    >
+      <p class="text-sm font-sans text-danger">{{ store.error }}</p>
+    </div>
+
     <!-- Table -->
     <FacultiesTable
       :items="paginated"
@@ -128,6 +143,8 @@ async function confirmDelete() {
   <CreateFacultyDialog
     :open="dialogOpen"
     :item="editingItem"
+    :loading="store.loading"
+    :error="store.error"
     @close="dialogOpen = false"
     @save="handleSave"
   />

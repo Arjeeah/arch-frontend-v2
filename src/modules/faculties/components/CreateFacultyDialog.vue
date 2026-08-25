@@ -2,16 +2,18 @@
 import { reactive, watch, computed } from 'vue'
 import AppDialog from '@/shared/components/AppDialog.vue'
 import FormInput from '@/shared/components/FormInput.vue'
-import type { Faculty } from '../types'
+import type { Faculty, FacultyInput, FacultyStatus } from '../types'
 
 const props = defineProps<{
   open: boolean
   item?: Faculty | null
+  loading?: boolean
+  error?: string | null
 }>()
 
 const emit = defineEmits<{
   close: []
-  save: [data: Partial<Faculty>]
+  save: [data: FacultyInput]
 }>()
 
 const isEdit = computed(() => !!props.item)
@@ -20,64 +22,42 @@ const form = reactive({
   code: '',
   nameAR: '',
   nameEN: '',
-  programs: '',
-  files: '',
-  status: 'Active' as 'Active' | 'Inactive',
+  status: 'Active' as FacultyStatus,
 })
 
 const errors = reactive({
   code: '',
   nameAR: '',
   nameEN: '',
-  programs: '',
-  files: '',
-  status: '',
 })
 
 watch(
   () => props.open,
   (open) => {
     if (!open) return
-    form.code = props.item ? String(props.item.code ?? '') : ''
-    form.nameAR = props.item ? String(props.item.nameAR ?? '') : ''
-    form.nameEN = props.item ? String(props.item.nameEN ?? '') : ''
-    form.programs = props.item ? String(props.item.programs ?? '') : ''
-    form.files = props.item ? String(props.item.files ?? '') : ''
-    form.status = props.item?.status as 'Active' | 'Inactive'
+    form.code = props.item?.code ?? ''
+    form.nameAR = props.item?.nameAR ?? ''
+    form.nameEN = props.item?.nameEN ?? ''
+    form.status = props.item?.status ?? 'Active'
     errors.code = ''
     errors.nameAR = ''
     errors.nameEN = ''
-    errors.programs = ''
-    errors.files = ''
-    errors.status = ''
   },
 )
 
 function validate() {
-  errors.code = (form.code || '').trim() ? '' : 'Code is required'
-  errors.nameAR = (form.nameAR || '').trim() ? '' : 'Name AR is required'
-  errors.nameEN = (form.nameEN || '').trim() ? '' : 'Name EN is required'
-  errors.programs = (form.programs || '').trim() ? '' : 'Programs is required'
-  errors.files = (form.files || '').trim() ? '' : 'Files is required'
-  errors.status = (form.status || '').trim() ? '' : 'Status is required'
-  return (
-    !errors.code &&
-    !errors.nameAR &&
-    !errors.nameEN &&
-    !errors.programs &&
-    !errors.files &&
-    !errors.status
-  )
+  errors.code = form.code.trim() ? '' : 'Code is required'
+  errors.nameAR = form.nameAR.trim() ? '' : 'Name AR is required'
+  errors.nameEN = form.nameEN.trim() ? '' : 'Name EN is required'
+  return !errors.code && !errors.nameAR && !errors.nameEN
 }
 
 function submit() {
   if (!validate()) return
   emit('save', {
-    code: form.code,
-    nameAR: form.nameAR,
-    nameEN: form.nameEN,
-    programs: Number(form.programs),
-    files: Number(form.files),
+    code: form.code.trim(),
+    nameAR: form.nameAR.trim(),
+    nameEN: form.nameEN.trim(),
     status: form.status,
   })
 }
@@ -113,28 +93,16 @@ function submit() {
         <p v-if="errors.nameEN" class="mt-1 text-xs text-danger">{{ errors.nameEN }}</p>
       </div>
 
-      <div>
-        <label class="block text-base font-sans text-text-primary mb-[7px]">Programs</label>
-        <FormInput v-model="form.programs" type="number" placeholder="Enter number of programs" />
-        <p v-if="errors.programs" class="mt-1 text-xs text-danger">{{ errors.programs }}</p>
-      </div>
-
-      <div>
-        <label class="block text-base font-sans text-text-primary mb-[7px]">Files</label>
-        <FormInput v-model="form.files" type="number" placeholder="Enter number of files" />
-        <p v-if="errors.files" class="mt-1 text-xs text-danger">{{ errors.files }}</p>
-      </div>
-
       <div class="mt-4">
         <label class="block text-base font-sans text-text-primary mb-1">Status</label>
         <div class="flex items-center justify-between">
           <p class="text-sm font-sans text-[#6F6F6F]">Set faculty status as active or inactive</p>
           <div class="flex items-center gap-3 shrink-0">
-            <span class="text-sm font-sans text-[#595959]">{{ form.status }}</span>
+            <span class="text-sm font-sans text-text-secondary">{{ form.status }}</span>
             <button
               type="button"
               class="relative inline-flex h-[25px] w-[46px] items-center rounded-[16px] transition-colors focus:outline-none"
-              :class="form.status === 'Active' ? 'bg-[#ACC6E8]' : 'bg-border'"
+              :class="form.status === 'Active' ? 'bg-primary-light' : 'bg-border'"
               @click="form.status = form.status === 'Active' ? 'Inactive' : 'Active'"
             >
               <span
@@ -147,17 +115,23 @@ function submit() {
       </div>
     </div>
 
+    <div v-if="error" class="mt-4 p-3 bg-danger/10 border border-danger/20 rounded-lg">
+      <p class="text-sm font-sans text-danger">{{ error }}</p>
+    </div>
+
     <template #footer>
       <button
         type="button"
-        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-[#C0D4E9] text-sm font-sans font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+        :disabled="loading"
         @click="emit('close')"
       >
         Cancel
       </button>
       <button
         type="button"
-        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80"
+        class="px-[10.6px] py-[7px] rounded-[4px] bg-primary-mid text-sm font-sans font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+        :disabled="loading"
         @click="submit"
       >
         {{ isEdit ? 'Update Faculty' : 'Save Faculty' }}
