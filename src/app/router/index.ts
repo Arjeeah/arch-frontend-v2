@@ -22,6 +22,10 @@ const router = createRouter({
         { path: 'users', component: () => import('@/modules/users/pages/UserListPage.vue') },
         { path: 'users/:id', component: () => import('@/modules/users/pages/UserDetailPage.vue') },
         {
+          path: 'faculties',
+          component: () => import('@/modules/faculties/pages/FacultyListPage.vue'),
+        },
+        {
           path: 'audit',
           component: () => import('@/modules/audit/pages/AuditPage.vue'),
         },
