@@ -10,8 +10,11 @@ import DataTable from '@/shared/components/DataTable.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import { useAuditStore } from '../stores/useAuditStore'
 import { auditApi } from '../api/auditApi'
+import { useToasts } from '@/shared/composables/useToasts'
+import { getApiErrorMessage } from '@/shared/utils/apiError'
 
 const auditStore = useAuditStore()
+const toasts = useToasts()
 
 const search = ref('')
 const role = ref('')
@@ -70,15 +73,16 @@ const handleExport = async () => {
       }
     }
 
-    const url = window.URL.createObjectURL(new Blob([response.data as Blob]))
+    const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', filename)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   } catch (err) {
-    console.error('Failed to export report:', err)
+    toasts.error(getApiErrorMessage(err, 'Failed to export the audit report'))
   }
 }
 </script>

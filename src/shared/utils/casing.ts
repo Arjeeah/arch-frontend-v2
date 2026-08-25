@@ -1,12 +1,21 @@
 /**
  * Key-casing conversion for the API boundary.
  *
- * Convention (MASTER_PLAN): snake_case on the wire, camelCase inside the app.
- * Conversion happens in ONE place — the axios interceptors — never per module.
+ * Convention: snake_case on the wire, camelCase inside the app.
  *
- * Both helpers walk plain objects and arrays recursively. Values that are not
- * plain objects (Date, File, Blob, FormData, Map, class instances, …) are passed
- * through untouched so that upload payloads survive the round trip.
+ * Conversion is NOT done globally in the axios interceptors. Each module's
+ * `api/*.ts` owns the boundary instead, with typed `*Resource` interfaces and
+ * explicit `fromResource` / `toPayload` mappers — the pattern `gen:module`
+ * emits and every module follows. That is deliberate: the mappers are the only
+ * place that can also narrow a wire string onto a union (`toRole`, `toStatus`),
+ * drop fields the UI must not send, and document per-endpoint quirks. A blind
+ * global transform would erase all of that and silently rename keys the
+ * backend expects verbatim.
+ *
+ * These helpers are therefore a tool for one-off conversions, not the app's
+ * casing policy. Both walk plain objects and arrays recursively; values that
+ * are not plain objects (Date, File, Blob, FormData, Map, class instances, …)
+ * pass through untouched so upload payloads survive the round trip.
  */
 
 /** `created_at` → `createdAt` at the type level. */

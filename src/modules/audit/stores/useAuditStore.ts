@@ -1,9 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { auditApi } from '../api/auditApi'
+import { auditApi, type AuditLogQuery } from '../api/auditApi'
+import { useToasts } from '@/shared/composables/useToasts'
+import { getApiErrorMessage } from '@/shared/utils/apiError'
 import type { AuditLog, TimelineEntry, AuditStat } from '../types'
 
 export const useAuditStore = defineStore('audit', () => {
+  const toasts = useToasts()
+
   const stats = ref<AuditStat | null>(null)
   const timeline = ref<TimelineEntry[]>([])
   const logs = ref<AuditLog[]>([])
@@ -14,32 +18,27 @@ export const useAuditStore = defineStore('audit', () => {
   const fetchDashboardData = async () => {
     loading.value = true
     try {
-      const [statsRes, timelineRes] = await Promise.all([
+      const [statsResult, timelineResult] = await Promise.all([
         auditApi.getStats(),
         auditApi.getTimeline(),
       ])
-      stats.value = statsRes.data
-      timeline.value = timelineRes.data.data || timelineRes.data
+      stats.value = statsResult
+      timeline.value = timelineResult
     } catch (err) {
-      console.error('Failed to fetch audit dashboard data', err)
+      toasts.error(getApiErrorMessage(err, 'Failed to load the audit dashboard'))
     } finally {
       loading.value = false
     }
   }
 
-  const fetchLogs = async (params: {
-    search?: string
-    role?: string
-    page?: number
-    order?: string
-  }) => {
+  const fetchLogs = async (params: AuditLogQuery) => {
     logsLoading.value = true
     try {
-      const res = await auditApi.getLogs(params)
-      logs.value = res.data.data
-      totalPages.value = res.data.meta?.last_page || 1
+      const page = await auditApi.getLogs(params)
+      logs.value = page.logs
+      totalPages.value = page.totalPages
     } catch (err) {
-      console.error('Failed to fetch logs', err)
+      toasts.error(getApiErrorMessage(err, 'Failed to load audit logs'))
     } finally {
       logsLoading.value = false
     }

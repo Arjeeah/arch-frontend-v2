@@ -112,6 +112,27 @@ The rule is enforced by `eslint-plugin-boundaries` in `eslint.config.ts`. The ro
 
 If you need to share code between two modules, move it to `src/shared/`. Never add `eslint-disable` comments — fix the architecture instead.
 
+## The API boundary — where snake_case becomes camelCase
+
+The wire is snake_case (Laravel); the app is camelCase. **Every module's
+`api/*.ts` owns that translation for its own endpoints** — never the axios
+interceptors, and never a component or store.
+
+Each api file declares typed `*Resource` interfaces matching the wire exactly,
+plus `fromResource` (wire → UI model) and `toPayload` (UI model → request
+body). `gen:module` emits this shape for you; `usersApi.ts` is the reference
+for the hand-written case.
+
+Two rules follow from it:
+
+- **Never type an api call as bare `http.get(...)`.** Without a generic, `res.data` is `any`, so a field name that does not exist on the wire type-checks fine and renders `undefined` in the UI. Always pass the response generic.
+- **Never assign a raw response onto a camelCase model** (`stats.value = res.data`). Go through the mapper, or the mismatch is invisible until a user sees blank cells.
+
+`shared/utils/casing.ts` exists for one-off conversions. It is not a global
+interceptor and must not become one: the per-module mappers are also where a
+wire string is narrowed onto a union, where fields the UI must not send are
+dropped, and where per-endpoint quirks are documented.
+
 ## Auth, roles and routing
 
 - Never read or write `auth_token` / `auth_user` directly. `src/app/config/authStorage.ts` is the only module that touches them; the store, the axios interceptors and the router guard all import it.
@@ -210,7 +231,7 @@ If you need a color not in either table above, add it to `tailwind.config.ts` �
 `src/shared/utils/`:
 
 - `apiError.ts` — `getApiErrorMessage(err)`, the message every `catch` block should pass to `toasts.error()`
-- `casing.ts` — `keysToCamel` / `keysToSnake`, deep and array-aware (`Date`/`File`/`Blob`/`FormData` pass through untouched)
+- `casing.ts` — `keysToCamel` / `keysToSnake`, deep and array-aware (`Date`/`File`/`Blob`/`FormData` pass through untouched). Helpers for one-off conversion only — **not** the casing policy; see below
 - `date.ts` — `formatDate` and `relativeTime(value, locale?)`
 
 `src/composables/` (legacy location, client-side paging only):
@@ -270,6 +291,8 @@ If either fails, fix the issues before reporting the task as done.
 ## Never do
 
 - `any` type — use proper types or `unknown`
+- Untyped api calls (`http.get('/v1/…')` with no response generic) — they smuggle `any` past the type-checker
+- Assigning a raw snake_case response onto a camelCase model — go through the module's `fromResource` mapper
 - Cross-module imports (`modules/auth` → `modules/users`) — move shared code to `src/shared/`
 - New arbitrary hex values in templates — use tokens from the tables above
 - `<style>` blocks — Tailwind only
