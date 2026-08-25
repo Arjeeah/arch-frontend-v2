@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import SidebarNavItem from './SidebarNavItem.vue'
 import logo from '@/assets/logo.svg'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { Component } from 'vue'
 import {
   LayoutDashboard,
@@ -16,36 +17,99 @@ import {
   ChevronDown,
 } from 'lucide-vue-next'
 
+const props = defineProps<{
+  /**
+   * Role slug of the signed-in user (`super_admin` / `archivist` /
+   * `faculty_staff`). Typed as a plain string because shared components may not
+   * import the `UserRole` union from `src/modules/auth/`. The layout passes it
+   * down from the auth store; `null` hides every role-restricted item.
+   */
+  role?: string | null
+}>()
+
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 // for type safety
+interface NavChild {
+  labelKey: string
+  to: string
+  roles?: readonly string[]
+}
+
 interface NavItem {
   key: string
-  label: string
+  labelKey: string
   icon: Component
   to?: string
-  children?: { label: string; to: string }[]
+  /** Roles allowed to see the item. Omit to show it to every role. */
+  roles?: readonly string[]
+  children?: NavChild[]
 }
 
 const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' },
-  { key: 'users', label: 'User Management', icon: Users, to: '/users' },
-  { key: 'archive', label: 'Archive Room', icon: FolderOpen, to: '/archive-room' },
-  { key: 'borrowing', label: 'Borrowing', icon: BookCopy, to: '/borrowing' },
+  { key: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, to: '/dashboard' },
+  {
+    key: 'users',
+    labelKey: 'nav.users',
+    icon: Users,
+    to: '/users',
+    roles: ['super_admin'],
+  },
+  { key: 'archive', labelKey: 'nav.archive', icon: FolderOpen, to: '/archive-room' },
+  { key: 'borrowing', labelKey: 'nav.borrowing', icon: BookCopy, to: '/borrowing' },
   {
     key: 'faculty-management',
-    label: 'Faculty Management',
+    labelKey: 'nav.facultyManagement',
     icon: GraduationCap,
+    roles: ['super_admin', 'archivist'],
     children: [
-      { label: 'Faculties', to: '/faculties' },
-      //{ label: 'Programs', to: '/programs' },
+      { labelKey: 'nav.faculties', to: '/faculties', roles: ['super_admin', 'archivist'] },
+      //{ labelKey: 'nav.programs', to: '/programs' },
     ],
   },
-  { key: 'audit', label: 'Audit Logs', icon: ScrollText, to: '/audit' },
-  { key: 'reports', label: 'Reports', icon: BarChart2, to: '/reports' },
-  { key: 'settings', label: 'Settings', icon: Settings, to: '/settings' },
+  {
+    key: 'audit',
+    labelKey: 'nav.audit',
+    icon: ScrollText,
+    to: '/audit',
+    roles: ['super_admin', 'archivist'],
+  },
+  {
+    key: 'reports',
+    labelKey: 'nav.reports',
+    icon: BarChart2,
+    to: '/reports',
+    roles: ['super_admin', 'archivist'],
+  },
+  {
+    key: 'settings',
+    labelKey: 'nav.settings',
+    icon: Settings,
+    to: '/settings',
+    roles: ['super_admin'],
+  },
 ]
+
+function isAllowed(roles?: readonly string[]): boolean {
+  if (!roles || roles.length === 0) return true
+  return props.role != null && roles.includes(props.role)
+}
+
+/**
+ * Role filtering runs over the whole tree: a parent is dropped when its own
+ * roles exclude the user, and also when every one of its children was dropped.
+ */
+const visibleNavItems = computed<NavItem[]>(() =>
+  navItems
+    .filter((item) => isAllowed(item.roles))
+    .map((item) => ({
+      ...item,
+      children: item.children?.filter((child) => isAllowed(child.roles)),
+    }))
+    .filter((item) => Boolean(item.to) || (item.children?.length ?? 0) > 0),
+)
 
 // sub-menu drop down
 const openDropdown = ref<string | null>(null)
@@ -72,9 +136,9 @@ function isActive(item: NavItem): boolean {
 
     <!-- Nav -->
     <nav class="flex flex-col gap-3 flex-1">
-      <template v-for="item in navItems" :key="item.key">
+      <template v-for="item in visibleNavItems" :key="item.key">
         <SidebarNavItem
-          :label="item.label"
+          :label="t(item.labelKey)"
           :active="isActive(item)"
           :has-chevron="Boolean(item.children?.length)"
           @click="
@@ -101,8 +165,8 @@ function isActive(item: NavItem): boolean {
             v-slot="{ navigate }"
           >
             <SidebarNavItem
-              :label="child.label"
-              class="pl-7 before:content-['•'] before:ml-2"
+              :label="t(child.labelKey)"
+              class="ps-7 before:content-['•'] before:ms-2"
               :sub-active="route.path === child.to"
               :indent="true"
               @click="navigate()"

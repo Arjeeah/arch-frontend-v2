@@ -1,6 +1,7 @@
 <!-- src/modules/dashboard/pages/DashboardPage.vue -->
 <script setup lang="ts">
 import type { Component } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { File, Users, BookOpen, AlertCircle } from 'lucide-vue-next'
 import AppStatCard from '@/shared/components/AppStatCard.vue'
 import FilesMonthChart from '../components/FilesMonthChart.vue'
@@ -11,6 +12,7 @@ import WeeklyDigestCard from '../components/WeeklyDigestCard.vue'
 import RecentActivityTable from '../components/RecentActivityTable.vue'
 import { statCards } from '../data/mockDashboard'
 
+const { t } = useI18n()
 const iconMap: Record<string, Component> = { File, Users, BookOpen, AlertCircle }
 const getIcon = (name: string): Component => iconMap[name]!
 </script>
@@ -19,8 +21,9 @@ const getIcon = (name: string): Component => iconMap[name]!
   <div class="flex flex-col gap-6">
     <!-- Page header -->
     <div>
-      <h1 class="text-2xl font-display font-semibold text-text-primary">System Dashboard</h1>
-      <p class="text-sm text-text-secondary font-sans mt-0.5">Super Admin</p>
+      <h1 class="text-2xl font-display font-semibold text-text-primary">
+        {{ t('dashboard.title') }}
+      </h1>
     </div>
 
     <!-- Stat cards -->
