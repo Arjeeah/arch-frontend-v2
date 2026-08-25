@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { SquarePen, Ban } from 'lucide-vue-next'
+import AppButton from '@/shared/components/AppButton.vue'
+import { formatDate } from '@/shared/utils/date'
+import BorrowingStatusBadge from './BorrowingStatusBadge.vue'
+import { canApprove, canMarkBorrowed, canReturn } from '../types'
 import type { Borrowing } from '../types'
 
 defineProps<{
@@ -10,40 +14,41 @@ defineProps<{
 const emit = defineEmits<{
   edit: [item: Borrowing]
   delete: [item: Borrowing]
+  approve: [item: Borrowing]
+  reject: [item: Borrowing]
+  markBorrowed: [item: Borrowing]
+  markReturned: [item: Borrowing]
 }>()
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-3 overflow-x-auto">
     <!-- Header row -->
     <div
-      class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px]"
+      class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px] min-w-[1200px]"
     >
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">File Number</span>
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Document</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Borrower Name</span>
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Borrower</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Faculty</span>
-      </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Purpose</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Borrow Date</span>
-      </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Due Date</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Return Date</span>
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Borrowed At</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
+      <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
+        <span class="text-[15px] font-sans font-bold text-text-secondary">Returned At</span>
+      </div>
+      <div class="flex justify-center items-center px-[13px] w-[120px] shrink-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
+      <div class="flex justify-center items-center px-[13px] w-[300px] shrink-0 h-full">
         <span class="text-[15px] font-sans font-bold text-text-secondary">Actions</span>
       </div>
     </div>
@@ -53,34 +58,20 @@ const emit = defineEmits<{
       <div
         v-for="i in 6"
         :key="i"
-        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px]"
+        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[56px] min-w-[1200px]"
       >
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
+        <div
+          v-for="j in 6"
+          :key="j"
+          class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full"
+        >
           <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
         </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[80px]" />
-        </div>
-        <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
+        <div class="flex justify-center items-center px-[13px] w-[120px] shrink-0 h-full">
           <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
         </div>
-        <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
-          <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
+        <div class="flex justify-center items-center px-[13px] w-[300px] shrink-0 h-full">
+          <div class="h-4 bg-surface rounded animate-pulse w-[140px]" />
         </div>
       </div>
     </template>
@@ -90,73 +81,109 @@ const emit = defineEmits<{
       <div
         v-for="item in items"
         :key="item.id"
-        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[48px]"
+        class="flex flex-row items-center bg-white border border-border rounded-[4px] h-[56px] min-w-[1200px]"
       >
-        <!-- File Number -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <!-- Document -->
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            item.fileNumber
+            item.document?.title ?? '-'
           }}</span>
         </div>
-        <!-- Borrower Name -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <!-- Borrower -->
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            item.borrowerName
+            item.borrower?.name ?? '-'
           }}</span>
-        </div>
-        <!-- Faculty -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.faculty }}</span>
         </div>
         <!-- Purpose -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.purpose }}</span>
-        </div>
-        <!-- Borrow Date -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            item.borrowDate
+            item.purpose || '-'
           }}</span>
         </div>
         <!-- Due Date -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{ item.dueDate }}</span>
-        </div>
-        <!-- Return Date -->
-        <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden"
+        >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            item.returnDate
+            formatDate(item.dueDate)
+          }}</span>
+        </div>
+        <!-- Borrowed At -->
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden"
+        >
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{
+            formatDate(item.borrowedAt)
+          }}</span>
+        </div>
+        <!-- Returned At -->
+        <div
+          class="flex items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden"
+        >
+          <span class="text-[15px] font-sans text-text-secondary truncate">{{
+            formatDate(item.returnedAt)
           }}</span>
         </div>
         <!-- Status -->
-        <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0">
-          <span
-            class="px-3 py-1 rounded-full text-xs font-medium capitalize"
-            :class="{
-              'bg-success-bg text-success-text': item.status === 'borrowed',
-              'bg-surface border border-border text-text-secondary': item.status === 'returned',
-              'bg-danger/10 text-danger': item.status === 'overdue',
-            }"
-          >
-            {{ item.status }}
-          </span>
+        <div class="flex justify-center items-center px-[13px] w-[120px] shrink-0">
+          <BorrowingStatusBadge :status="item.status" />
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-center items-center px-[13px] gap-[15px] w-[90px] shrink-0">
+        <div class="flex justify-end items-center px-[13px] gap-2 w-[300px] shrink-0">
+          <AppButton
+            v-if="canApprove(item.status)"
+            size="sm"
+            variant="primary"
+            @click="emit('approve', item)"
+          >
+            Approve
+          </AppButton>
+          <AppButton
+            v-if="canApprove(item.status)"
+            size="sm"
+            variant="danger"
+            @click="emit('reject', item)"
+          >
+            Reject
+          </AppButton>
+          <AppButton
+            v-if="canMarkBorrowed(item.status)"
+            size="sm"
+            variant="accent"
+            @click="emit('markBorrowed', item)"
+          >
+            Mark Borrowed
+          </AppButton>
+          <AppButton
+            v-if="canReturn(item.status)"
+            size="sm"
+            variant="primary"
+            @click="emit('markReturned', item)"
+          >
+            Return
+          </AppButton>
+
           <button
-            class="text-[#4285F4] hover:opacity-70 transition-opacity"
+            class="text-[#4285F4] hover:opacity-70 transition-opacity shrink-0"
             title="Edit"
             @click="emit('edit', item)"
           >
-            <SquarePen class="w-6 h-6" />
+            <SquarePen class="w-5 h-5" />
           </button>
           <button
-            class="text-danger hover:opacity-70 transition-opacity"
+            class="text-danger hover:opacity-70 transition-opacity shrink-0"
             title="Delete"
             @click="emit('delete', item)"
           >
-            <Ban class="w-6 h-6" />
+            <Ban class="w-5 h-5" />
           </button>
         </div>
       </div>
