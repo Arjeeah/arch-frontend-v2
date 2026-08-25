@@ -4,7 +4,8 @@
   },
   "common": {
     "language": "اللغة",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "dismissNotification": "إغلاق الإشعار"
   },
   "nav": {
     "dashboard": "لوحة التحكم",
