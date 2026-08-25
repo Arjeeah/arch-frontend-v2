@@ -5,7 +5,12 @@ import { authStorage } from '@/app/config/authStorage'
 
 const { t } = useI18n()
 
-// Signed-out visitors have nothing to go back to but the login screen.
+/*
+ * Rendered inside `DashboardLayout`, so the sidebar and header stay put and
+ * the user is never stranded — the link below is a convenience, not the only
+ * way out. The signed-out branch is kept for safety: the route requires auth,
+ * so in practice a visitor without a token is redirected to login first.
+ */
 const isAuthenticated = !!authStorage.getToken()
 const backTo = isAuthenticated ? '/dashboard' : '/login'
 const backLabel = computed(() =>
@@ -14,7 +19,7 @@ const backLabel = computed(() =>
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface flex items-center justify-center p-6 font-sans">
+  <div class="min-h-full flex items-center justify-center py-16 font-sans">
     <div class="text-center max-w-md">
       <p class="font-display font-semibold text-primary text-7xl leading-none">
         {{ t('notFound.code') }}

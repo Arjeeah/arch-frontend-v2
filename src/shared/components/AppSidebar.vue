@@ -8,12 +8,9 @@ import type { Component } from 'vue'
 import {
   LayoutDashboard,
   Users,
-  FolderOpen,
   BookCopy,
   GraduationCap,
   ScrollText,
-  BarChart2,
-  Settings,
   ChevronDown,
 } from 'lucide-vue-next'
 
@@ -43,11 +40,24 @@ interface NavItem {
   labelKey: string
   icon: Component
   to?: string
-  /** Roles allowed to see the item. Omit to show it to every role. */
+  /**
+   * Roles allowed to see the item. Omit to show it to every role; an empty
+   * array is an empty allowlist and hides it from everyone, matching how the
+   * router reads `meta.roles`.
+   */
   roles?: readonly string[]
   children?: NavChild[]
 }
 
+/**
+ * Every entry must point at a route that exists in `src/app/router/index.ts`
+ * with the same `roles`. A routeless entry falls through to the 404 route, so
+ * clicking it takes the user nowhere useful — add the module and its route
+ * first, then the nav item.
+ *
+ * Waiting on their modules (icons already imported below when they land):
+ * archive room (`/archive-room`), reports (`/reports`), settings (`/settings`).
+ */
 const navItems: NavItem[] = [
   { key: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, to: '/dashboard' },
   {
@@ -57,7 +67,6 @@ const navItems: NavItem[] = [
     to: '/users',
     roles: ['super_admin'],
   },
-  { key: 'archive', labelKey: 'nav.archive', icon: FolderOpen, to: '/archive-room' },
   { key: 'borrowing', labelKey: 'nav.borrowing', icon: BookCopy, to: '/borrowing' },
   {
     key: 'faculty-management',
@@ -76,24 +85,10 @@ const navItems: NavItem[] = [
     to: '/audit',
     roles: ['super_admin', 'archivist'],
   },
-  {
-    key: 'reports',
-    labelKey: 'nav.reports',
-    icon: BarChart2,
-    to: '/reports',
-    roles: ['super_admin', 'archivist'],
-  },
-  {
-    key: 'settings',
-    labelKey: 'nav.settings',
-    icon: Settings,
-    to: '/settings',
-    roles: ['super_admin'],
-  },
 ]
 
 function isAllowed(roles?: readonly string[]): boolean {
-  if (!roles || roles.length === 0) return true
+  if (!roles) return true
   return props.role != null && roles.includes(props.role)
 }
 

@@ -137,9 +137,11 @@ dropped, and where per-endpoint quirks are documented.
 
 - Never read or write `auth_token` / `auth_user` directly. `src/app/config/authStorage.ts` is the only module that touches them; the store, the axios interceptors and the router guard all import it.
 - `src/app/plugins/axios.ts` handles 401 globally (clear the session + redirect to `/login`). Modules must not add their own 401 branches — catch a failed request and show a toast, nothing more.
-- Route access is declared as `meta: { roles: ['super_admin'] }` in `src/app/router/index.ts`. Omit the `roles` key to allow every authenticated role; never write `roles: []` — it locks everyone out. An unauthorised role is redirected to `/dashboard`, which must stay open to all roles.
+- Route access is declared as `meta: { roles: ['super_admin'] }` in `src/app/router/index.ts`. Omit the `roles` key to allow every authenticated role; never write `roles: []` — an empty allowlist locks everyone out, in the guard and in `AppSidebar` alike. An unauthorised role is redirected to `/dashboard`, which must stay open to all roles.
 - Backend role slugs, exactly three: `super_admin`, `archivist`, `faculty_staff` (`AUTH_ROLES` / `UserRole` in `src/modules/auth/types`).
-- A new route needs a matching `AppSidebar` entry with the same `roles`; the sidebar filters its tree recursively.
+- Landing is role-based: `ROLE_LANDING` in the router maps each role to where `/` and post-login send it. Add a role's entry there when its home screen lands, rather than pointing everyone at `/dashboard`.
+- A new route needs a matching `AppSidebar` entry with the same `roles` — **and the reverse**: never add a nav item for a route that does not exist yet. It falls through to the 404 route, so the item looks live but goes nowhere.
+- The 404 catch-all is a **child** of the `/` layout route, so an unknown path keeps the sidebar and header instead of dropping the user onto a bare page.
 
 ## i18n and RTL
 
