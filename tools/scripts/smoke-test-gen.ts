@@ -105,7 +105,7 @@ async function testFullModule() {
     // Spot-check: store — fetchAll calls the live api, no commented-out placeholder
     const store = fs.readFileSync(path.join(basePath, 'stores/useGenSmokeTestStore.ts'), 'utf8')
     assert.ok(
-      store.includes('items.value = await genSmokeTestApi.list()'),
+      store.includes('items.value = await genSmokeTestApi.listAll()'),
       'store fetchAll does not call the generated api live',
     )
     assert.ok(!store.includes('// import'), 'store still has a commented-out api import')

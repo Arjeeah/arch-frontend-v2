@@ -1,5 +1,6 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import * as prettier from 'prettier'
 import type { CustomActionFunction } from 'plop'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -149,7 +150,15 @@ interface ${pascal}ItemResponse {
 /** \`index\` is paginated: \`{ data: [...], meta, links }\`. */
 interface ${pascal}ListResponse {
   data: ${pascal}Resource[]
+  meta?: { last_page?: number }
 }
+
+/**
+ * Hard ceiling on the pages \`listAll()\` walks, so a very large table cannot
+ * fire unbounded requests. If a real deployment hits this, move the list page
+ * onto \`useServerTable\` (see CLAUDE.md) rather than raising the number.
+ */
+const MAX_PAGES = 20
 
 /** snake_case wire format -> camelCase UI model. */
 function fromResource(resource: ${pascal}Resource): ${pascal} {
@@ -175,6 +184,27 @@ export const ${camel}Api = {
   list: async (params?: { page?: number; per_page?: number }): Promise<${pascal}[]> => {
     const { data } = await http.get<${pascal}ListResponse>('${basePath}', { params })
     return data.data.map(fromResource)
+  },
+
+  /**
+   * Returns every ${camel}, walking the paginated index endpoint up to
+   * \`MAX_PAGES\`. The generated list page searches, filters and paginates
+   * client-side, so it needs the whole set — a bare \`list()\` would render a
+   * complete-looking table built from page one alone.
+   */
+  listAll: async (): Promise<${pascal}[]> => {
+    const all: ${pascal}[] = []
+    let page = 1
+    let lastPage = 1
+
+    do {
+      const { data } = await http.get<${pascal}ListResponse>('${basePath}', { params: { page } })
+      all.push(...data.data.map(fromResource))
+      lastPage = data.meta?.last_page ?? 1
+      page += 1
+    } while (page <= lastPage && page <= MAX_PAGES)
+
+    return all
   },
 
   show: async (id: number): Promise<${pascal}> => {
@@ -215,7 +245,7 @@ export const use${pascal}Store = defineStore('${camel}', () => {
   async function fetchAll() {
     loading.value = true
     try {
-      items.value = await ${camel}Api.list()
+      items.value = await ${camel}Api.listAll()
     } finally {
       loading.value = false
     }
@@ -407,6 +437,11 @@ function buildDialog(pascal: string, fields: Field[]): string {
   const submitLines = fields
     .map((f) => {
       if (f.type === 'number') return `    ${f.name}: Number(form.${f.name}),`
+      // `form` holds every field as a plain string, but a select field is typed
+      // as a string-literal union on the model. `validate()` has already
+      // rejected the empty string, and `AppSelect` can only ever emit one of
+      // the option values, so the narrowing cast is safe.
+      if (f.type === 'select') return `    ${f.name}: form.${f.name} as ${pascal}['${f.name}'],`
       return `    ${f.name}: form.${f.name},`
     })
     .join('\n')
@@ -663,12 +698,12 @@ async function confirmDelete() {
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
       <div class="relative flex-1 min-w-[200px]">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
         <input
           v-model="search"
           type="text"
           placeholder="Search"
-          class="w-full h-[42px] pl-9 pr-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
+          class="w-full h-[42px] ps-9 pe-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
           style="border-width: 1.3px"
         />
       </div>
@@ -716,6 +751,19 @@ ${filterDropdowns}
   </AppConfirmDialog>
 </template>
 `
+}
+
+// ── File emission ──────────────────────────────────────────────────────────
+
+/**
+ * Writes one generated file, run through Prettier with the repo's own config
+ * first. The builders above emit readable-but-unformatted source; without this
+ * a freshly generated module fails CI's `prettier --check src/`.
+ */
+async function writeFormatted(filePath: string, source: string): Promise<void> {
+  const options = await prettier.resolveConfig(filePath)
+  const formatted = await prettier.format(source, { ...options, filepath: filePath })
+  fs.writeFileSync(filePath, formatted, 'utf8')
 }
 
 // ── Main action ────────────────────────────────────────────────────────────
@@ -790,37 +838,42 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
   const kebab = name
 
   const basePath = path.join(process.cwd(), 'src', 'modules', kebab)
+
+  // Generating over an existing module would overwrite hand-written code with
+  // no warning and no way back, so refuse rather than merge.
+  if (fs.existsSync(basePath)) {
+    throw new Error(
+      `Module "${kebab}" already exists at src/modules/${kebab}. ` +
+        `Delete it first, or pick another name — the generator never overwrites.`,
+    )
+  }
+
   fs.mkdirSync(path.join(basePath, 'pages'), { recursive: true })
   fs.mkdirSync(path.join(basePath, 'components'), { recursive: true })
   fs.mkdirSync(path.join(basePath, 'stores'), { recursive: true })
   fs.mkdirSync(path.join(basePath, 'api'), { recursive: true })
 
-  fs.writeFileSync(path.join(basePath, 'index.ts'), buildIndex(pascal), 'utf8')
-  fs.writeFileSync(path.join(basePath, 'types.ts'), buildTypes(pascal, fields), 'utf8')
-  fs.writeFileSync(
+  await writeFormatted(path.join(basePath, 'index.ts'), buildIndex(pascal))
+  await writeFormatted(path.join(basePath, 'types.ts'), buildTypes(pascal, fields))
+  await writeFormatted(
     path.join(basePath, 'api', `${camel}Api.ts`),
     buildApi(pascal, camel, kebab, fields, prefix),
-    'utf8',
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'stores', `use${pascal}Store.ts`),
     buildStore(pascal, camel),
-    'utf8',
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'components', `${pascal}Table.vue`),
     buildTable(pascal, fields),
-    'utf8',
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'components', `Create${pascal}Dialog.vue`),
     buildDialog(pascal, fields),
-    'utf8',
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'pages', `${pascal}ListPage.vue`),
     buildPage(pascal, camel, kebab, fields),
-    'utf8',
   )
 
   return `✔ 7 files created for module "${kebab}"`
