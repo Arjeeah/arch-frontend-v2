@@ -15,6 +15,22 @@ interface Field {
 /** Where the generated endpoints live on the API: `/v1/<prefix>/<plural>`. */
 type EndpointPrefix = 'none' | 'academic' | 'location'
 
+/**
+ * The slice of plop's API this generator actually uses.
+ *
+ * `node-plop` really does hand an object carrying `.inquirer` to a custom
+ * action — it is how every interactive action prompts — but the published
+ * `NodePlopAPI` type never declares the property. So declare the shape we
+ * depend on here and adapt exactly once, in the `generateModule` wrapper.
+ * That keeps the generator core honestly typed and lets tests drive it with a
+ * plain object instead of an `any`.
+ */
+export interface PlopPrompter {
+  inquirer: {
+    prompt: <T>(questions: unknown) => Promise<T>
+  }
+}
+
 // ── String helpers ─────────────────────────────────────────────────────────
 
 function toPascal(kebab: string): string {
@@ -768,10 +784,12 @@ async function writeFormatted(filePath: string, source: string): Promise<void> {
 
 // ── Main action ────────────────────────────────────────────────────────────
 
-export const generateModule: CustomActionFunction = async (answers, _config, plop) => {
-  const name = (answers as { name: string }).name
-
-  const { prefix } = await plop!.inquirer.prompt<{ prefix: EndpointPrefix }>([
+/**
+ * Generates a module. Typed precisely (name + the prompter it needs) so the
+ * smoke test can drive it directly with a mock instead of casting.
+ */
+export async function runModuleGenerator(name: string, plop: PlopPrompter): Promise<string> {
+  const { prefix } = await plop.inquirer.prompt<{ prefix: EndpointPrefix }>([
     {
       type: 'list',
       name: 'prefix',
@@ -785,7 +803,7 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
 
   // Collect fields interactively until user leaves name blank
   while (true) {
-    const { fieldName } = await plop!.inquirer.prompt<{ fieldName: string }>([
+    const { fieldName } = await plop.inquirer.prompt<{ fieldName: string }>([
       {
         type: 'input',
         name: 'fieldName',
@@ -794,7 +812,7 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
     ])
     if (!fieldName.trim()) break
 
-    const { fieldType } = await plop!.inquirer.prompt<{ fieldType: Field['type'] }>([
+    const { fieldType } = await plop.inquirer.prompt<{ fieldType: Field['type'] }>([
       {
         type: 'list',
         name: 'fieldType',
@@ -807,7 +825,7 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
     let filterable: boolean | undefined
 
     if (fieldType === 'select') {
-      const { optionsStr } = await plop!.inquirer.prompt<{ optionsStr: string }>([
+      const { optionsStr } = await plop.inquirer.prompt<{ optionsStr: string }>([
         {
           type: 'input',
           name: 'optionsStr',
@@ -819,7 +837,7 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
         .map((s) => s.trim())
         .filter(Boolean)
 
-      const { isFilterable } = await plop!.inquirer.prompt<{ isFilterable: boolean }>([
+      const { isFilterable } = await plop.inquirer.prompt<{ isFilterable: boolean }>([
         {
           type: 'confirm',
           name: 'isFilterable',
@@ -877,4 +895,13 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
   )
 
   return `✔ 7 files created for module "${kebab}"`
+}
+
+/**
+ * Plop action-type wrapper. The only place that bridges plop's under-declared
+ * `NodePlopAPI` to the `PlopPrompter` shape the generator relies on.
+ */
+export const generateModule: CustomActionFunction = (answers, _config, plop) => {
+  if (!plop) throw new Error('generateModule was invoked without plop’s API')
+  return runModuleGenerator((answers as { name: string }).name, plop as unknown as PlopPrompter)
 }

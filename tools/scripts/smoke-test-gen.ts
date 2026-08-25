@@ -1,22 +1,21 @@
 // Programmatic smoke test for the smart module generator
 // Run with: npx tsx tools/scripts/smoke-test-gen.ts
 
-import { generateModule } from '../plop/generators/module'
+import { runModuleGenerator, type PlopPrompter } from '../plop/generators/module'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as assert from 'node:assert'
+import { spawnSync } from 'node:child_process'
+
+/** Prefix every scratch module this script writes must carry. */
+const SCRATCH_PREFIX = 'gen-smoke-'
 
 /**
- * A mock `plop.inquirer` that pops the next queued answer off the front on
- * every `prompt()` call, regardless of which question was asked. Build one
- * per `generateModule()` run so tests can't leak answers into each other.
- *
- * `node-plop`'s `NodePlopAPI` type doesn't declare `.inquirer` (the same gap
- * `generateModule` itself works around with a non-null assertion), so this
- * has to be `any` to stand in for it.
+ * A mock prompter that pops the next queued answer off the front on every
+ * `prompt()` call, regardless of which question was asked. Build one per
+ * `runModuleGenerator()` run so tests can't leak answers into each other.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mockPlop(answersQueue: Record<string, unknown>[]): any {
+function mockPlop(answersQueue: Record<string, unknown>[]): PlopPrompter {
   let queueIdx = 0
   return {
     inquirer: {
@@ -29,13 +28,71 @@ function mockPlop(answersQueue: Record<string, unknown>[]): any {
   }
 }
 
+const modulesDir = path.join(process.cwd(), 'src', 'modules')
+
 /** Deletes a generated module dir if present. Scoped to `gen-smoke-*` names only, as a guard against ever touching a real module. */
 function cleanup(moduleName: string) {
-  if (!moduleName.startsWith('gen-smoke-')) {
+  if (!moduleName.startsWith(SCRATCH_PREFIX)) {
     throw new Error(`refusing to clean up non-scratch module dir: ${moduleName}`)
   }
-  const dir = path.join(process.cwd(), 'src', 'modules', moduleName)
+  const dir = path.join(modulesDir, moduleName)
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true })
+}
+
+/**
+ * Removes every `gen-smoke-*` directory before the run starts.
+ *
+ * Each test cleans up in its own `finally`, but a hard kill (Ctrl-C, a CI
+ * timeout) skips that and strands a real-looking module inside `src/modules/`
+ * — where it would then be type-checked and built alongside real code. Sweeping
+ * up front makes a leftover self-healing instead of sticky.
+ *
+ * Note these dirs are deliberately NOT gitignored: Prettier honours
+ * `.gitignore`, so an ignore entry would silently turn the format check below
+ * into a no-op that passes on badly formatted output.
+ */
+function sweepScratchModules() {
+  if (!fs.existsSync(modulesDir)) return
+  for (const entry of fs.readdirSync(modulesDir)) {
+    if (entry.startsWith(SCRATCH_PREFIX)) {
+      console.log(`  … removing leftover scratch module "${entry}"`)
+      fs.rmSync(path.join(modulesDir, entry), { recursive: true })
+    }
+  }
+}
+
+/** Runs a command in the repo root, throwing with its output when it fails. */
+function runGate(label: string, command: string, args: string[]) {
+  const result = spawnSync(command, args, { cwd: process.cwd(), encoding: 'utf8' })
+  if (result.error) throw result.error
+  if (result.status !== 0) {
+    const output = `${result.stdout ?? ''}${result.stderr ?? ''}`.trim()
+    throw new Error(`${label} failed on the generated module:\n${output}`)
+  }
+}
+
+/**
+ * The check that actually proves the generator still works: the emitted module
+ * has to survive the same gates CI runs over hand-written code.
+ *
+ * Every other assertion in this file is a `String.includes` grep, and a grep
+ * cannot tell working code from code that merely contains the right words —
+ * that is exactly how a generator emitting a TS2322 shipped green through CI.
+ */
+function verifyGeneratedModule(moduleName: string) {
+  const dir = path.posix.join('src', 'modules', moduleName)
+  console.log('\nVerifying generated module against the CI gates…')
+
+  // Project-wide: the generated module is inside `src/`, so this compiles it
+  // together with the rest of the app exactly as `npm run type-check` would.
+  runGate('type-check', 'npx', ['vue-tsc', '--noEmit', '-p', 'tsconfig.app.json'])
+  console.log('  ✓ vue-tsc — generated module compiles')
+
+  runGate('eslint', 'npx', ['eslint', dir, '--no-warn-ignored'])
+  console.log('  ✓ eslint — no lint errors')
+
+  runGate('prettier --check', 'npx', ['prettier', '--check', dir])
+  console.log('  ✓ prettier — output is already formatted')
 }
 
 async function testFullModule() {
@@ -58,7 +115,7 @@ async function testFullModule() {
   ]
 
   try {
-    const result = await generateModule({ name: MODULE }, undefined, mockPlop(answersQueue))
+    const result = await runModuleGenerator(MODULE, mockPlop(answersQueue))
     console.log('Result:', result)
 
     const expectedFiles = [
@@ -158,6 +215,9 @@ async function testFullModule() {
     assert.ok(dialog.includes('<AppSelect'), 'Dialog.vue missing <AppSelect')
     assert.ok(dialog.includes('type="date"'), 'Dialog.vue missing type="date"')
     console.log('  ✓ Dialog.vue — AppSelect and date input present')
+
+    // This module covers every field type, so it is the one worth compiling.
+    verifyGeneratedModule(MODULE)
   } finally {
     cleanup(MODULE)
   }
@@ -176,7 +236,7 @@ async function testEndpointPrefixes() {
     const MODULE = 'gen-smoke-widget'
     cleanup(MODULE)
     try {
-      await generateModule({ name: MODULE }, undefined, mockPlop([{ prefix }, { fieldName: '' }]))
+      await runModuleGenerator(MODULE, mockPlop([{ prefix }, { fieldName: '' }]))
       const api = fs.readFileSync(
         path.join(process.cwd(), 'src', 'modules', MODULE, 'api/genSmokeWidgetApi.ts'),
         'utf8',
@@ -206,11 +266,7 @@ async function testPluralization() {
   for (const { module, expected } of cases) {
     cleanup(module)
     try {
-      await generateModule(
-        { name: module },
-        undefined,
-        mockPlop([{ prefix: 'none' }, { fieldName: '' }]),
-      )
+      await runModuleGenerator(module, mockPlop([{ prefix: 'none' }, { fieldName: '' }]))
       const camel = module
         .split('-')
         .map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)))
@@ -231,6 +287,7 @@ async function testPluralization() {
 }
 
 async function main() {
+  sweepScratchModules()
   await testFullModule()
   await testEndpointPrefixes()
   await testPluralization()

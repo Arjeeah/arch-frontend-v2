@@ -94,7 +94,9 @@ src/modules/{name}/
 
 Nothing needs manual rewiring after generation — the store's `fetchAll` calls the generated api live, and the page's create/update/delete call the store rather than mutating a local array.
 
-The generator logic lives in `tools/plop/generators/module.ts`, covered by `tools/scripts/smoke-test-gen.ts` (`npx tsx tools/scripts/smoke-test-gen.ts`, run in CI). To add a new field type, add a branch in each `buildX()` function there.
+The generator logic lives in `tools/plop/generators/module.ts`, covered by `tools/scripts/smoke-test-gen.ts` (`npx tsx tools/scripts/smoke-test-gen.ts`, run in CI). To add a new field type, add a branch in each `buildX()` function there — the smoke test compiles a generated module with `vue-tsc` and runs ESLint + Prettier over it, so a branch that emits non-compiling code fails CI.
+
+`gen:module` refuses to overwrite an existing `src/modules/<name>/`. Emitted files are Prettier-formatted by the generator itself; never hand-format them.
 
 ## Module boundary rule — the most important rule
 

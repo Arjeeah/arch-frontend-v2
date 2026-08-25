@@ -115,7 +115,13 @@ After generation, register the new page in `src/app/router/index.ts` and add a n
 
 The generator logic lives in `tools/plop/generators/module.ts` and is
 covered by `tools/scripts/smoke-test-gen.ts` (`npx tsx
-tools/scripts/smoke-test-gen.ts`), which CI runs on every push/PR.
+tools/scripts/smoke-test-gen.ts`), which CI runs on every push/PR. Besides
+inspecting the emitted text, it compiles a generated module with `vue-tsc`
+and runs ESLint and Prettier over it, so a generator that emits code which
+does not type-check fails the build.
+
+`gen:module` refuses to run when `src/modules/<name>/` already exists —
+delete the directory first if you really mean to regenerate it.
 
 ## CI / quality gates
 
@@ -124,7 +130,7 @@ Every push and pull request runs:
 1. **Lint** (`npm run lint:check`) — oxlint + ESLint with boundary checks, no auto-fix (CI never mutates code; use `npm run lint` locally to auto-fix)
 2. **Format check** (`prettier --check`) — Prettier formatting
 3. **Type check** (`npm run type-check`) — vue-tsc full check
-4. **Generator smoke test** (`npx tsx tools/scripts/smoke-test-gen.ts`) — proves `gen:module` still produces working output
+4. **Generator smoke test** (`npx tsx tools/scripts/smoke-test-gen.ts`) — generates a module covering every field type, then type-checks, lints and format-checks it
 5. **Build** (`npm run build`) — production Vite build
 
 Pre-commit hooks (Husky + lint-staged) run lint + format automatically on staged files. Pre-push runs `vue-tsc --build`. Fix any issues before pushing.
