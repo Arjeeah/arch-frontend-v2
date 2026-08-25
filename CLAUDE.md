@@ -30,18 +30,21 @@ ARCH is a university archive management system. This repo is the frontend admin 
 
 ```bash
 npm run gen:module     # new feature module (interactive — asks for fields)
-npm run gen:page       # new page inside an existing module
 npm run gen:component  # new shared component in src/shared/components/
-npm run gen:store      # new Pinia store inside a module
-npm run gen:api        # new API file inside a module
 ```
+
+`gen:page`, `gen:store`, and `gen:api` do not exist — they were removed
+because they pointed at Handlebars templates deleted long ago. `gen:module`
+is the only way to scaffold module code; there is no generator today for
+adding a single page/store/api file to an already-existing module.
 
 ### Smart module generator (`gen:module`)
 
-The module generator is interactive. After entering the module name it loops, asking for each field until you leave the name blank:
+The module generator is interactive. After entering the module name it asks for the endpoint prefix (`none` / `academic` / `location`), then loops, asking for each field until you leave the name blank:
 
 ```
 ? Module name (kebab-case): borrowing
+? Endpoint prefix: academic
 
 ? Field name (camelCase, blank to finish): bookTitle
 ? Field type: text
@@ -80,14 +83,18 @@ The module generator is interactive. After entering the module name it loops, as
 src/modules/{name}/
   index.ts                              — module entrypoint (re-exports)
   types.ts                              — TypeScript interface
-  api/{camel}Api.ts                     — full CRUD with axios http
-  stores/use{Pascal}Store.ts            — Pinia store (items, loading, fetchAll)
+  api/{camel}Api.ts                     — full CRUD, snake_case <-> camelCase field mapping
+                                           (endpoint: /v1/{prefix}/{pluralized name})
+  stores/use{Pascal}Store.ts            — Pinia store; fetchAll/create/update/remove call the api
   components/{Pascal}Table.vue          — flex-row table with skeleton + badges
   components/Create{Pascal}Dialog.vue   — AppDialog form with validation
-  pages/{Pascal}ListPage.vue            — full list page (search, filters, pagination, dialogs)
+  pages/{Pascal}ListPage.vue            — fetches on mount; create/update/delete go through
+                                           the store (→ api); mutations report via useToasts
 ```
 
-The generator logic lives in `tools/plop/generators/module.ts`. To add a new field type, add a branch in each `buildX()` function there.
+Nothing needs manual rewiring after generation — the store's `fetchAll` calls the generated api live, and the page's create/update/delete call the store rather than mutating a local array.
+
+The generator logic lives in `tools/plop/generators/module.ts`, covered by `tools/scripts/smoke-test-gen.ts` (`npx tsx tools/scripts/smoke-test-gen.ts`, run in CI). To add a new field type, add a branch in each `buildX()` function there.
 
 ## Module boundary rule — the most important rule
 
@@ -230,7 +237,7 @@ If either fails, fix the issues before reporting the task as done.
 - Cross-module imports (`modules/auth` → `modules/users`) — move shared code to `src/shared/`
 - New arbitrary hex values in templates — use tokens from the tables above
 - `<style>` blocks — Tailwind only
-- Hand-create files that a generator covers (`gen:module`, `gen:page`, `gen:component`, `gen:store`, `gen:api`)
+- Hand-create files that a generator covers (`gen:module`, `gen:component`)
 - `eslint-disable` comments — fix the root cause
 - `git commit --no-verify` to skip hooks
 - Inline raw `<table>` / `<thead>` / `<tbody>` in new components — use `DataTable` instead

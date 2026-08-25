@@ -25,13 +25,16 @@ jobs:
         run: npm install
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:check
 
       - name: Format check
         run: npx prettier --check src/
 
       - name: Type-check
         run: npm run type-check
+
+      - name: Generator smoke test
+        run: npx tsx tools/scripts/smoke-test-gen.ts
 
       - name: Build
         run: npm run build
