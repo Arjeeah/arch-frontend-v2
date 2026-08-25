@@ -17,7 +17,7 @@ defineEmits<{ click: [] }>()
     :class="{
       'bg-primary-light': active,
       'bg-primary-subtle': subActive,
-      'pl-8': indent,
+      'ps-8': indent,
     }"
     @click="$emit('click')"
   >
@@ -26,7 +26,7 @@ defineEmits<{ click: [] }>()
       <slot name="icon" />
     </span>
 
-    <span class="flex-1 text-left text-base leading-5">{{ label }}</span>
+    <span class="flex-1 text-start text-base leading-5">{{ label }}</span>
 
     <!-- Optional chevron for expandable items -->
     <span v-if="hasChevron" class="w-5 h-5 shrink-0 flex items-center justify-center opacity-50">

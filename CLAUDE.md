@@ -6,8 +6,8 @@ This file is loaded automatically by Claude Code. Follow everything here exactly
 
 ARCH is a university archive management system. This repo is the frontend admin panel.
 
-**API base URL:** `http://64.23.135.78:8088/api` (configured in `src/app/config/env.ts`)
-**Override:** set `VITE_API_BASE_URL` in a local `.env.local` file to point at a different backend (file is gitignored)
+**API base URL:** `https://arch-os-server.tailf7bd4c.ts.net/api` (default in `src/app/config/env.ts`)
+**Override:** set `VITE_API_BASE_URL` in a local `.env.local` file to point at a different backend (file is gitignored — see `.env.example`)
 **Dev server:** `npm run dev` → `http://localhost:5173`
 
 ## Stack
@@ -110,6 +110,21 @@ The rule is enforced by `eslint-plugin-boundaries` in `eslint.config.ts`. The ro
 
 If you need to share code between two modules, move it to `src/shared/`. Never add `eslint-disable` comments — fix the architecture instead.
 
+## Auth, roles and routing
+
+- Never read or write `auth_token` / `auth_user` directly. `src/app/config/authStorage.ts` is the only module that touches them; the store, the axios interceptors and the router guard all import it.
+- `src/app/plugins/axios.ts` handles 401 globally (clear the session + redirect to `/login`). Modules must not add their own 401 branches — catch a failed request and show a toast, nothing more.
+- Route access is declared as `meta: { roles: ['super_admin'] }` in `src/app/router/index.ts`. Omit the `roles` key to allow every authenticated role; never write `roles: []` — it locks everyone out. An unauthorised role is redirected to `/dashboard`, which must stay open to all roles.
+- Backend role slugs, exactly three: `super_admin`, `archivist`, `faculty_staff` (`AUTH_ROLES` / `UserRole` in `src/modules/auth/types`).
+- A new route needs a matching `AppSidebar` entry with the same `roles`; the sidebar filters its tree recursively.
+
+## i18n and RTL
+
+- Every user-facing string in shell chrome goes through `t()`; add the key to **both** `src/locales/en.json` and `src/locales/ar.json` in the same commit — a missing Arabic key silently falls back to English.
+- `setLocale()` in `src/app/plugins/i18n.ts` is the only way to switch language. It persists to `localStorage['app_locale']` and sets `<html lang>` + `<html dir>`.
+- RTL is driven entirely by `<html dir>`. **New markup uses logical Tailwind utilities** — `ps-`/`pe-`/`ms-`/`me-`/`start-`/`end-`/`text-start`/`text-end` — never `pl-`/`pr-`/`ml-`/`mr-`/`left-`/`right-`/`text-left`. Tailwind 3.4 supports them natively. Retrofit existing physical classes as you touch a file, not big-bang.
+- `shared/` components cannot import `src/app/` (boundaries rule), so they take locale-affecting actions by emitting an event the layout handles — see `AppHeader`'s `locale-change`.
+
 ## Naming conventions
 
 | Thing               | Convention               | Example                          |
@@ -178,10 +193,27 @@ If you need a color not in either table above, add it to `tailwind.config.ts` �
 - `AppHeader` — top header bar (do not duplicate)
 - `AppSidebar` — left navigation sidebar (do not duplicate)
 - `SidebarNavItem` — single nav item used inside AppSidebar
+- `AppToastHost` — renders the toast queue. Already mounted once in `src/App.vue`; never mount another one in a page or layout
+- `AppFileUpload` — drag/drop + picker, `v-model:files` (`File[]`), `accept` / `maxSizeMb` / `maxFiles` / `multiple`, optional `progress: Record<fileName, number>`, emits `error: [messages: string[]]`
+- `AppAsyncSelect` — typeahead select; v-models an **option object** (`{ value, label } | null`, not a bare id) and takes `searchFn: (query) => Promise<{value,label}[]>`, `minChars` (2), `debounceMs` (300)
+- `AppEmptyState` — "nothing here yet" placeholder for empty lists
+- `AppErrorState` — failed-request placeholder with a retry action
 
-`src/composables/`:
+`src/shared/composables/`:
 
-- `usePagination(items, perPage?)` — returns `{ currentPage, totalPages, paginated, resetPage }`. Accepts `Ref<T[]>` or `ComputedRef<T[]>`. Always call `watch([search, ...filters], resetPage)` when filters change.
+- `useToasts()` — app-wide queue: `{ toasts, success, error, info, dismiss, clear }`; each helper is `(message, duration?)` and returns the toast id. `duration: 0` keeps a toast until dismissed. This is the only way to report a mutation's outcome — do not build per-page banners
+- `useDebouncedRef(source, delay = 300)` — **derives** a read-only ref from an existing one (`const q = ref(''); const dq = useDebouncedRef(q)`); it is not a self-debouncing writable ref
+- `useServerTable(fetcher, { perPage, filters, immediate })` — server-paginated list state: `{ rows, loading, error, page, perPage, total, totalPages, filters, isEmpty, setFilters, resetFilters, refresh }`. Sends `{ ...filters, page, per_page }`; `setFilters` resets to page 1 and issues exactly one request
+
+`src/shared/utils/`:
+
+- `apiError.ts` — `getApiErrorMessage(err)`, the message every `catch` block should pass to `toasts.error()`
+- `casing.ts` — `keysToCamel` / `keysToSnake`, deep and array-aware (`Date`/`File`/`Blob`/`FormData` pass through untouched)
+- `date.ts` — `formatDate` and `relativeTime(value, locale?)`
+
+`src/composables/` (legacy location, client-side paging only):
+
+- `usePagination(items, perPage?)` — returns `{ currentPage, totalPages, paginated, resetPage }`. Accepts `Ref<T[]>` or `ComputedRef<T[]>`. Always call `watch([search, ...filters], resetPage)` when filters change. For a backend-paginated list use `useServerTable` instead.
 
 ### Using DataTable
 
@@ -212,8 +244,10 @@ src/
       pages/            — routed page components
   shared/
     components/   — reusable UI components (App* prefix)
-  composables/    — shared composables (use* prefix)
-  locales/        — i18n translation files
+    composables/  — shared composables (useToasts, useDebouncedRef, useServerTable)
+    utils/        — framework-free helpers (apiError, casing, date)
+  composables/    — legacy composable location (usePagination only)
+  locales/        — i18n translation files (en.json + ar.json, keys kept in sync)
 tools/
   plop/
     generators/   — generator TypeScript logic (module.ts)
@@ -241,3 +275,7 @@ If either fails, fix the issues before reporting the task as done.
 - `eslint-disable` comments — fix the root cause
 - `git commit --no-verify` to skip hooks
 - Inline raw `<table>` / `<thead>` / `<tbody>` in new components — use `DataTable` instead
+- `localStorage.getItem('auth_token')` and friends — go through `src/app/config/authStorage.ts`
+- Per-module 401 handling — the axios response interceptor already does it
+- Physical direction utilities (`pl-`, `mr-`, `left-`, `text-left`) in new markup — use the logical ones so RTL works
+- A second `AppToastHost` — one is already mounted in `src/App.vue`
