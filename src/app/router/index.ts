@@ -20,6 +20,10 @@ const router = createRouter({
           component: () => import('@/modules/dashboard/pages/DashboardPage.vue'),
         },
         { path: 'users', component: () => import('@/modules/users/pages/UserListPage.vue') },
+        {
+          path: 'borrowing',
+          component: () => import('@/modules/borrowing/pages/BorrowingListPage.vue'),
+        },
         { path: 'users/:id', component: () => import('@/modules/users/pages/UserDetailPage.vue') },
         {
           path: 'faculties',
