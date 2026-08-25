@@ -13,21 +13,9 @@ export interface User {
   id: number
   name: string
   email: string
-  role: string
-  faculties: string[]
+  role: 'Super Admin' | 'Archivist' | 'Faculty Staff'
   status: 'Active' | 'Inactive'
-  lastLogin: string
-  createdAt: string
-  permissions: Permission[]
-  recentActivity: Activity[]
+  created_at: string
 }
 
-export const ROLES = ['Super admin', 'Admin', 'Archivist', 'Faculty staff'] as const
-export const FACULTIES = [
-  'IT',
-  'Business',
-  'Architecture',
-  'Medicine',
-  'Law',
-  'Engineering',
-] as const
+export const ROLES = ['Super Admin', 'Archivist', 'Faculty Staff'] as const
