@@ -105,10 +105,13 @@ async function handleSave(data: BorrowingInput) {
 type PendingKind = 'reject' | 'return' | 'delete'
 const pendingAction = ref<{ kind: PendingKind; item: Borrowing } | null>(null)
 
+// Kept resolvable even with no action pending so the dialog can stay mounted
+// and play its open/close transition.
 const confirmDialog = computed(() => {
   const action = pendingAction.value
-  if (!action) return null
-  const label = action.item.document?.title ?? `request #${action.item.id}`
+  const label = action
+    ? (action.item.document?.title ?? `request #${action.item.id}`)
+    : 'this record'
   const presets: Record<
     PendingKind,
     { title: string; confirmLabel: string; confirmClass: string; message: string }
@@ -132,7 +135,7 @@ const confirmDialog = computed(() => {
       message: `Delete the borrowing record for ${label}? This action cannot be undone.`,
     },
   }
-  return presets[action.kind]
+  return presets[action?.kind ?? 'delete']
 })
 
 async function confirmPending() {
@@ -264,7 +267,6 @@ async function handleMarkBorrowed(item: Borrowing) {
 
   <!-- Confirm dialog for irreversible actions -->
   <AppConfirmDialog
-    v-if="confirmDialog"
     :open="!!pendingAction"
     :title="confirmDialog.title"
     :confirm-label="confirmDialog.confirmLabel"
