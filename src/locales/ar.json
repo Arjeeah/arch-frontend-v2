@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "ARCH"
+  },
+  "common": {
+    "language": "اللغة",
+    "logout": "تسجيل الخروج"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "users": "إدارة المستخدمين",
+    "archive": "غرفة الأرشيف",
+    "borrowing": "الإعارة",
+    "facultyManagement": "إدارة الكليات",
+    "faculties": "الكليات",
+    "audit": "سجلات التدقيق",
+    "reports": "التقارير",
+    "settings": "الإعدادات"
+  },
+  "header": {
+    "searchPlaceholder": "بحث…",
+    "notifications": "الإشعارات",
+    "accountMenu": "قائمة الحساب",
+    "fallbackUser": "مستخدم"
+  },
+  "login": {
+    "title": "تسجيل الدخول",
+    "emailLabel": "أدخل بريدك الإلكتروني",
+    "emailPlaceholder": "البريد الإلكتروني",
+    "passwordLabel": "أدخل كلمة المرور",
+    "passwordPlaceholder": "كلمة المرور",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "submit": "تسجيل الدخول",
+    "dismissError": "إغلاق",
+    "errors": {
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "failed": "فشل تسجيل الدخول"
+    }
+  },
+  "dashboard": {
+    "title": "لوحة تحكم النظام"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "الصفحة غير موجودة",
+    "description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "backToDashboard": "العودة إلى لوحة التحكم",
+    "backToLogin": "العودة إلى تسجيل الدخول"
+  }
+}

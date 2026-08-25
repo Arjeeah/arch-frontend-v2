@@ -1,3 +1,55 @@
 {
-  "app.title": "Arch Frontend v2"
+  "app": {
+    "title": "ARCH"
+  },
+  "common": {
+    "language": "Language",
+    "logout": "Log out"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "User Management",
+    "archive": "Archive Room",
+    "borrowing": "Borrowing",
+    "facultyManagement": "Faculty Management",
+    "faculties": "Faculties",
+    "audit": "Audit Logs",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "header": {
+    "searchPlaceholder": "Search…",
+    "notifications": "Notifications",
+    "accountMenu": "Account menu",
+    "fallbackUser": "User"
+  },
+  "login": {
+    "title": "Sign in",
+    "emailLabel": "Enter your email address",
+    "emailPlaceholder": "email address",
+    "passwordLabel": "Enter your Password",
+    "passwordPlaceholder": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot Password",
+    "submit": "Log in",
+    "dismissError": "Dismiss",
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "passwordRequired": "Password is required",
+      "failed": "Login failed"
+    }
+  },
+  "dashboard": {
+    "title": "System Dashboard"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "backToDashboard": "Back to dashboard",
+    "backToLogin": "Back to sign in"
+  }
 }
