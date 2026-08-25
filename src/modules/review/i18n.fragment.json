@@ -1,0 +1,204 @@
+{
+  "en": {
+    "review": {
+      "navLabel": "Review Queue",
+      "title": "Review Queue",
+      "subtitle": "Confirm or correct what the AI read off each scan — worst confidence first.",
+      "header": {
+        "pending": "{count} awaiting review",
+        "position": "{index} of {count}"
+      },
+      "list": {
+        "title": "Queue",
+        "untitled": "Untitled document"
+      },
+      "confidence": {
+        "label": "Extraction confidence",
+        "unknown": "No score",
+        "title": "Extraction confidence: {value}%"
+      },
+      "preview": {
+        "title": "Scanned document",
+        "openInNewTab": "Open",
+        "emptyTitle": "Nothing to preview",
+        "noFile": "This document has no stored file.",
+        "selectRow": "Pick a document from the queue to start reviewing."
+      },
+      "fields": {
+        "studentNumber": "Student number",
+        "studentName": "Student name",
+        "college": "College",
+        "program": "Program",
+        "documentType": "Document type",
+        "enrollmentDate": "Enrollment date",
+        "additionalFields": "Additional fields"
+      },
+      "form": {
+        "title": "Extracted identity",
+        "additionalFields": "Additional fields",
+        "addField": "Add field",
+        "noAdditionalFields": "The extractor found nothing beyond the fields above.",
+        "fieldKey": "Field",
+        "fieldValue": "Value",
+        "removeField": "Remove field",
+        "notExtracted": "Not extracted",
+        "datePlaceholder": "YYYY-MM-DD",
+        "loadingOptions": "Loading…",
+        "noCollege": "No college selected",
+        "noDocumentType": "No document type selected",
+        "unlistedOption": "{value} — not on record",
+        "aiSaid": "AI read: {value}",
+        "blank": "(blank)",
+        "revert": "Restore the AI value",
+        "unsaved": "Unsaved changes",
+        "noSelectionTitle": "No document selected",
+        "noSelectionDescription": "Pick a row from the queue to start reviewing."
+      },
+      "filter": {
+        "all": "All confidence levels",
+        "below": "Below {value}%"
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "retry": "Try again",
+        "previous": "Previous document",
+        "next": "Next document",
+        "saveAndNext": "Save & next",
+        "verifyAndNext": "Verify & next",
+        "saveCorrections": "Save corrections | Save 1 correction | Save {count} corrections",
+        "verifyAsIs": "Verify as-is",
+        "reset": "Undo edits"
+      },
+      "diff": {
+        "title": "AI vs. reviewer",
+        "acceptedAsIs": "Accepted as extracted",
+        "correctedCount": "No corrections | 1 field corrected | {count} fields corrected",
+        "by": "by {name} · {when}",
+        "unknownUser": "Unknown user"
+      },
+      "discard": {
+        "title": "Discard your edits?",
+        "message": "Verifying as-is saves the AI's reading and throws away the changes you have not saved.",
+        "confirm": "Discard and verify"
+      },
+      "shortcuts": {
+        "hint": "Shortcuts: J / K to move between documents · Ctrl/⌘ + Enter to verify and advance · Ctrl/⌘ + S to save corrections"
+      },
+      "empty": {
+        "title": "Nothing left to review",
+        "description": "Every extraction has been checked by a human. Refresh when a new batch finishes processing."
+      },
+      "errors": {
+        "loadTitle": "Could not load the review queue",
+        "save": "Could not save the corrections",
+        "verify": "Could not verify this document",
+        "lookups": "Could not load the college and document-type lists"
+      },
+      "toasts": {
+        "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
+        "verified": "Document verified"
+      }
+    }
+  },
+  "ar": {
+    "review": {
+      "navLabel": "قائمة المراجعة",
+      "title": "قائمة المراجعة",
+      "subtitle": "أكّد أو صحّح ما قرأه الذكاء الاصطناعي من كل مستند — الأقل ثقةً أولاً.",
+      "header": {
+        "pending": "{count} بانتظار المراجعة",
+        "position": "{index} من {count}"
+      },
+      "list": {
+        "title": "قائمة الانتظار",
+        "untitled": "مستند بلا اسم"
+      },
+      "confidence": {
+        "label": "درجة ثقة الاستخراج",
+        "unknown": "بدون درجة",
+        "title": "درجة ثقة الاستخراج: {value}٪"
+      },
+      "preview": {
+        "title": "المستند الممسوح ضوئياً",
+        "openInNewTab": "فتح",
+        "emptyTitle": "لا يوجد ما يُعرض",
+        "noFile": "لا يوجد ملف محفوظ لهذا المستند.",
+        "selectRow": "اختر مستنداً من قائمة الانتظار لبدء المراجعة."
+      },
+      "fields": {
+        "studentNumber": "الرقم الدراسي",
+        "studentName": "اسم الطالب",
+        "college": "الكلية",
+        "program": "البرنامج",
+        "documentType": "نوع المستند",
+        "enrollmentDate": "تاريخ القيد",
+        "additionalFields": "حقول إضافية"
+      },
+      "form": {
+        "title": "البيانات المستخرجة",
+        "additionalFields": "حقول إضافية",
+        "addField": "إضافة حقل",
+        "noAdditionalFields": "لم يستخرج النظام أي حقول أخرى غير ما سبق.",
+        "fieldKey": "الحقل",
+        "fieldValue": "القيمة",
+        "removeField": "حذف الحقل",
+        "notExtracted": "لم يُستخرج",
+        "datePlaceholder": "YYYY-MM-DD",
+        "loadingOptions": "جارٍ التحميل…",
+        "noCollege": "لم تُحدَّد الكلية",
+        "noDocumentType": "لم يُحدَّد نوع المستند",
+        "unlistedOption": "{value} — غير مسجّل لدينا",
+        "aiSaid": "قراءة الذكاء الاصطناعي: {value}",
+        "blank": "(فارغ)",
+        "revert": "استعادة قيمة الذكاء الاصطناعي",
+        "unsaved": "تغييرات غير محفوظة",
+        "noSelectionTitle": "لم يُحدَّد أي مستند",
+        "noSelectionDescription": "اختر صفاً من قائمة الانتظار لبدء المراجعة."
+      },
+      "filter": {
+        "all": "كل درجات الثقة",
+        "below": "أقل من {value}٪"
+      },
+      "actions": {
+        "refresh": "تحديث",
+        "retry": "إعادة المحاولة",
+        "previous": "المستند السابق",
+        "next": "المستند التالي",
+        "saveAndNext": "حفظ والتالي",
+        "verifyAndNext": "تأكيد والتالي",
+        "saveCorrections": "حفظ التصحيحات | حفظ تصحيح واحد | حفظ {count} تصحيحات",
+        "verifyAsIs": "تأكيد كما هي",
+        "reset": "التراجع عن التعديلات"
+      },
+      "diff": {
+        "title": "الذكاء الاصطناعي مقابل المراجع",
+        "acceptedAsIs": "قُبلت البيانات كما استُخرجت",
+        "correctedCount": "بدون تصحيحات | صُحِّح حقل واحد | صُحِّحت {count} حقول",
+        "by": "بواسطة {name} · {when}",
+        "unknownUser": "مستخدم غير معروف"
+      },
+      "discard": {
+        "title": "تجاهل تعديلاتك؟",
+        "message": "التأكيد كما هي يحفظ قراءة الذكاء الاصطناعي ويتجاهل التعديلات التي لم تحفظها.",
+        "confirm": "تجاهل وتأكيد"
+      },
+      "shortcuts": {
+        "hint": "اختصارات: J / K للتنقل بين المستندات · Ctrl/⌘ + Enter للتأكيد والانتقال · Ctrl/⌘ + S لحفظ التصحيحات"
+      },
+      "empty": {
+        "title": "لا توجد مستندات بانتظار المراجعة",
+        "description": "تمت مراجعة كل ما استخرجه النظام. حدّث الصفحة عند انتهاء معالجة دفعة جديدة."
+      },
+      "errors": {
+        "loadTitle": "تعذّر تحميل قائمة المراجعة",
+        "save": "تعذّر حفظ التصحيحات",
+        "verify": "تعذّر تأكيد هذا المستند",
+        "lookups": "تعذّر تحميل قائمتي الكليات وأنواع المستندات"
+      },
+      "toasts": {
+        "saved": "لا شيء للحفظ | حُفظ تصحيح واحد | حُفظت {count} تصحيحات",
+        "verified": "تم تأكيد المستند"
+      }
+    }
+  }
+}
