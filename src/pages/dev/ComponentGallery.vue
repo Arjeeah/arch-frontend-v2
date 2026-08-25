@@ -12,7 +12,6 @@ import SearchBar from '@/shared/components/SearchBar.vue'
 import FilterDropdown from '@/shared/components/FilterDropdown.vue'
 import ExportButton from '@/shared/components/ExportButton.vue'
 import LiveBadge from '@/shared/components/LiveBadge.vue'
-import AppToastHost from '@/shared/components/AppToastHost.vue'
 import AppFileUpload from '@/shared/components/AppFileUpload.vue'
 import AppAsyncSelect from '@/shared/components/AppAsyncSelect.vue'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
@@ -310,9 +309,10 @@ const relativeSamples = computed(() => {
     <section class="space-y-3">
       <h2 class="text-lg font-semibold text-text-secondary font-sans">useToasts + AppToastHost</h2>
       <p class="text-sm text-text-secondary font-sans">
-        Auto-dismiss after 4s, or close manually. Mount
-        <code class="text-text-primary">AppToastHost</code> once in
-        <code class="text-text-primary">App.vue</code>.
+        Auto-dismiss after 4s, or close manually. These render through the one
+        <code class="text-text-primary">AppToastHost</code> mounted in
+        <code class="text-text-primary">App.vue</code> — this page deliberately does not mount its
+        own.
       </p>
       <div class="flex flex-wrap gap-3">
         <AppButton variant="primary" @click="toastSuccess('Faculty created successfully')">
@@ -484,7 +484,5 @@ const relativeSamples = computed(() => {
         </li>
       </ul>
     </section>
-
-    <AppToastHost />
   </div>
 </template>

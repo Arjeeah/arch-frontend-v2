@@ -106,6 +106,7 @@ src/modules/auth/       ✅ can import from src/app/
 src/modules/auth/       ❌ CANNOT import from src/modules/users/
 src/shared/             ❌ CANNOT import from any src/modules/
 src/app/router/         ✅ CAN import from any src/modules/ (router wires up pages)
+src/pages/dev/          ✅ src/shared/ only — dev pages exist to demo shared components
 ```
 
 The rule is enforced by `eslint-plugin-boundaries` in `eslint.config.ts`. The router (`src/app/router/index.ts`) is the one legitimate place where `app` imports module pages — this is intentional. All other cross-module imports are forbidden.
@@ -259,6 +260,13 @@ Where `columns` is `Array<{ key: string; label: string; align?: 'left'|'center'|
 ```
 src/
   app/           — router, plugins, layouts, global config
+    config/      — env, api endpoints, authStorage
+    layouts/     — DashboardLayout
+    pages/       — app-level pages outside any module (NotFoundPage)
+    plugins/     — axios, i18n
+    router/      — route table + guards
+  pages/
+    dev/         — dev-only pages, never in a build (ComponentGallery)
   modules/       — feature modules (auth, dashboard, users, …)
     {name}/
       index.ts          — public re-exports
@@ -305,4 +313,4 @@ If either fails, fix the issues before reporting the task as done.
 - `localStorage.getItem('auth_token')` and friends — go through `src/app/config/authStorage.ts`
 - Per-module 401 handling — the axios response interceptor already does it
 - Physical direction utilities (`pl-`, `mr-`, `left-`, `text-left`) in new markup — use the logical ones so RTL works
-- A second `AppToastHost` — one is already mounted in `src/App.vue`
+- A second `AppToastHost` — one is already mounted in `src/App.vue`, and whichever host mounts first wins, so a second one silently takes over the app's toasts

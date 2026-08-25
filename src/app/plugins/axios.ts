@@ -18,6 +18,20 @@ http.interceptors.request.use((config) => {
 })
 
 /**
+ * Clears the Pinia auth store as well as storage.
+ *
+ * Imported lazily: `useAuthStore` reaches `authService`, which imports this
+ * module, so a static import would close a cycle at module-eval time. The
+ * store is only ever needed once a request has already failed, long after the
+ * app is set up.
+ */
+function clearAuthState(): void {
+  void import('@/modules/auth/store/useAuthStore').then(({ useAuthStore }) => {
+    useAuthStore().clearSession()
+  })
+}
+
+/**
  * Global 401 handling: a rejected token means the session is gone, so wipe it
  * and send the browser to the login page. Two guards keep it from looping —
  * the login request itself reports bad credentials through the form instead,
@@ -30,8 +44,18 @@ http.interceptors.response.use(
 
     if (error.response?.status === 401 && !isLoginRequest) {
       authStorage.clear()
+
       if (window.location.pathname !== LOGIN_PATH) {
-        window.location.assign(LOGIN_PATH)
+        // Carry where the user was, so signing back in returns them there
+        // instead of dumping them on the dashboard. `LoginPage` reads this
+        // query exactly as it reads the one the router guard builds.
+        const from = window.location.pathname + window.location.search
+        window.location.assign(`${LOGIN_PATH}?redirect=${encodeURIComponent(from)}`)
+      } else {
+        // Already on /login, so there is no reload to reset in-memory state.
+        // Without this the store keeps reporting `isAuthenticated` against
+        // storage we just emptied.
+        clearAuthState()
       }
     }
 

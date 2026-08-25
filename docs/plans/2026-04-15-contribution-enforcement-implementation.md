@@ -1,5 +1,21 @@
 # Contribution Guide & Enforcement Implementation Plan
 
+> ## ⚠️ SUPERSEDED — historical record, do not follow
+>
+> This plan has been implemented and parts of it are now wrong. Two things in
+> the snippets below must **not** be copied anywhere:
+>
+> - **`http://64.23.135.78:8088/api`** is dead and must never be reintroduced.
+>   The API base URL lives in `src/app/config/env.ts`; the app is served over
+>   HTTPS, so a plain-HTTP base URL is blocked as mixed content.
+> - **`gen:page`, `gen:store` and `gen:api` do not exist.** They pointed at
+>   Handlebars templates deleted long ago and have been removed. `gen:module`
+>   and `gen:component` are the only generators.
+>
+> For current conventions read `CLAUDE.md`, `README.md` and `CONTRIBUTING.md`,
+> which are the maintained sources of truth. The text below is kept only to
+> record what was decided at the time.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Set up Husky git hooks, GitHub Actions CI, CLAUDE.md, and updated docs so every team member — human or AI — produces consistent, quality code from day one.
@@ -13,6 +29,7 @@
 ### Task 1: Install Husky + lint-staged and wire the pre-commit hook
 
 **Files:**
+
 - Modify: `package.json` (adds `prepare` script + `lint-staged` config)
 - Create: `.husky/pre-commit`
 
@@ -84,6 +101,7 @@ git commit -m "chore: add husky pre-commit hook with lint-staged"
 ### Task 2: Add pre-push hook for type-check
 
 **Files:**
+
 - Create: `.husky/pre-push`
 
 **Step 1: Create the pre-push hook**
@@ -120,6 +138,7 @@ git commit -m "chore: add husky pre-push hook for type-check"
 ### Task 3: Create GitHub Actions CI workflow
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 **Step 1: Create the directory**
@@ -177,6 +196,7 @@ git commit -m "ci: add GitHub Actions workflow for lint, type-check, and build"
 **Step 4: After pushing to GitHub — enable branch protection (manual)**
 
 Go to the GitHub repo → Settings → Branches → Add branch protection rule for `main`:
+
 - Check: "Require a pull request before merging"
 - Check: "Require status checks to pass before merging"
 - Search for and add: `Lint, Type-check & Build`
@@ -190,11 +210,12 @@ This is a manual step in the GitHub UI — it cannot be done from code.
 ### Task 4: Create CLAUDE.md
 
 **Files:**
+
 - Create: `CLAUDE.md`
 
 **Step 1: Create `CLAUDE.md` at the repo root**
 
-```markdown
+````markdown
 # CLAUDE.md — arch-frontend-v2
 
 This file is loaded automatically by Claude Code. Follow everything here exactly — do not invent conventions.
@@ -208,16 +229,16 @@ ARCH is a university archive management system. This repo is the frontend, built
 
 ## Stack
 
-| Tool | Version | Purpose |
-|---|---|---|
-| Vue 3 | 3.5 | UI framework (`<script setup lang="ts">` only) |
-| Vite | 8 | Build tool |
-| TypeScript | 6 | Types everywhere, no `any` |
-| Tailwind CSS | 3.4 | Styling — no `<style>` blocks |
-| Pinia | 3 | State management |
-| Axios | 1.x | HTTP — configured in `src/app/plugins/axios.ts` |
-| Vue Router | 5 | Routing — defined in `src/app/router/index.ts` |
-| Lucide Vue Next | latest | Icons only |
+| Tool            | Version | Purpose                                         |
+| --------------- | ------- | ----------------------------------------------- |
+| Vue 3           | 3.5     | UI framework (`<script setup lang="ts">` only)  |
+| Vite            | 8       | Build tool                                      |
+| TypeScript      | 6       | Types everywhere, no `any`                      |
+| Tailwind CSS    | 3.4     | Styling — no `<style>` blocks                   |
+| Pinia           | 3       | State management                                |
+| Axios           | 1.x     | HTTP — configured in `src/app/plugins/axios.ts` |
+| Vue Router      | 5       | Routing — defined in `src/app/router/index.ts`  |
+| Lucide Vue Next | latest  | Icons only                                      |
 
 ## Always use the generators — never create files by hand
 
@@ -228,6 +249,7 @@ npm run gen:component  # new shared component in src/shared/components/
 npm run gen:store      # new Pinia store inside a module
 npm run gen:api        # new API file inside a module
 ```
+````
 
 The generators create the correct file structure and naming automatically.
 
@@ -244,15 +266,15 @@ If you need to share code between two modules, move it to `src/shared/`. Never d
 
 ## Naming conventions
 
-| Thing | Convention | Example |
-|---|---|---|
-| Vue component files | PascalCase | `UserTable.vue` |
-| Page components | `<Name>Page.vue` | `UserListPage.vue` |
-| Shared components | `App` prefix | `AppDialog.vue`, `AppSelect.vue` |
-| Composables | `use` prefix | `usePagination.ts` |
-| Pinia stores | `use` + `Store` suffix | `useUsersStore.ts` |
-| API files | camelCase + `Api` | `usersApi.ts` |
-| All other files | kebab-case | `mock-users.ts` |
+| Thing               | Convention             | Example                          |
+| ------------------- | ---------------------- | -------------------------------- |
+| Vue component files | PascalCase             | `UserTable.vue`                  |
+| Page components     | `<Name>Page.vue`       | `UserListPage.vue`               |
+| Shared components   | `App` prefix           | `AppDialog.vue`, `AppSelect.vue` |
+| Composables         | `use` prefix           | `usePagination.ts`               |
+| Pinia stores        | `use` + `Store` suffix | `useUsersStore.ts`               |
+| API files           | camelCase + `Api`      | `usersApi.ts`                    |
+| All other files     | kebab-case             | `mock-users.ts`                  |
 
 ## Vue component rules
 
@@ -294,6 +316,7 @@ Check `src/shared/components/` first. Available:
 - `FormInput` — styled text input
 
 Composables in `src/composables/` and `src/shared/composables/`:
+
 - `usePagination(items, perPage)` — returns `{ currentPage, totalPages, paginated, resetPage }`
 
 ## Before finishing any task
@@ -316,25 +339,27 @@ If either fails, fix the issues before reporting the task as done.
 - Hand-create files that a generator covers
 - Disable ESLint rules with `// eslint-disable` — fix the root cause
 - Commit with `--no-verify` to skip hooks
-```
+
+````
 
 **Step 2: Commit**
 
 ```bash
 git add CLAUDE.md
 git commit -m "docs: add CLAUDE.md with full project conventions for Claude Code"
-```
+````
 
 ---
 
 ### Task 5: Rewrite README.md
 
 **Files:**
+
 - Modify: `README.md`
 
 **Step 1: Replace the entire content of `README.md`**
 
-```markdown
+````markdown
 # ARCH Frontend
 
 Admin panel for the ARCH university archive management system.
@@ -356,6 +381,7 @@ cd arch-frontend-v2
 npm install          # also installs git hooks automatically
 npm run dev          # http://localhost:5173
 ```
+````
 
 > **Note:** `npm install` sets up git hooks automatically via Husky. You don't need to do anything extra.
 
@@ -382,20 +408,22 @@ Read [CONTRIBUTING.md](./CONTRIBUTING.md) before writing any code.
 ## Design
 
 Figma designs are shared privately with team members. Ask Arjeeah for access.
-```
+
+````
 
 **Step 2: Commit**
 
 ```bash
 git add README.md
 git commit -m "docs: rewrite README with project-specific quick start"
-```
+````
 
 ---
 
 ### Task 6: Update CONTRIBUTING.md
 
 **Files:**
+
 - Modify: `CONTRIBUTING.md`
 
 **Step 1: Replace the entire content of `CONTRIBUTING.md`**
@@ -413,26 +441,27 @@ If it's used by **two or more features**, put it in `src/shared/`.
 If you're unsure, ask Arjeeah.
 
 ## Folder structure
-
 ```
+
 src/
-├── modules/           # one folder per feature
-│   └── <feature>/
-│       ├── pages/     # route-level views (<Name>Page.vue)
-│       ├── components/# components used only by this feature
-│       ├── stores/    # Pinia state (useNameStore.ts)
-│       ├── api/       # HTTP calls (nameApi.ts)
-│       └── types.ts   # TypeScript types
+├── modules/ # one folder per feature
+│ └── <feature>/
+│ ├── pages/ # route-level views (<Name>Page.vue)
+│ ├── components/# components used only by this feature
+│ ├── stores/ # Pinia state (useNameStore.ts)
+│ ├── api/ # HTTP calls (nameApi.ts)
+│ └── types.ts # TypeScript types
 ├── shared/
-│   ├── components/    # reusable UI — prefix with App (AppDialog, AppSelect…)
-│   ├── composables/   # reusable hooks (usePagination…)
-│   └── utils/         # pure helpers
-├── composables/       # app-level composables
+│ ├── components/ # reusable UI — prefix with App (AppDialog, AppSelect…)
+│ ├── composables/ # reusable hooks (usePagination…)
+│ └── utils/ # pure helpers
+├── composables/ # app-level composables
 └── app/
-    ├── router/        # route definitions
-    ├── layouts/       # page layout shells
-    ├── plugins/       # axios, i18n setup
-    └── config/        # env variables
+├── router/ # route definitions
+├── layouts/ # page layout shells
+├── plugins/ # axios, i18n setup
+└── config/ # env variables
+
 ```
 
 ## Always use the generators
@@ -483,10 +512,12 @@ If lint blocks you and you're stuck, ask — those conversations are the point o
 
 **Commit message format:**
 ```
+
 feat: add user table with pagination
 fix: truncate long names in table row
 chore: update husky to v9
-```
+
+````
 
 One line, lowercase, present tense, no period at the end.
 
@@ -517,15 +548,16 @@ npm run dev       # dev server at http://localhost:5173
 npm run build     # production build
 npm run lint      # lint and auto-fix
 npm run type-check # TypeScript check
-```
-```
+````
+
+````
 
 **Step 2: Commit**
 
 ```bash
 git add CONTRIBUTING.md
 git commit -m "docs: update CONTRIBUTING with Vue rules, git workflow, and hook explanation"
-```
+````
 
 ---
 

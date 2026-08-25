@@ -89,7 +89,17 @@ async function runSearch(raw: string): Promise<void> {
   }
 }
 
-watch(debouncedQuery, (value) => void runSearch(value))
+watch(debouncedQuery, (value) => {
+  /*
+   * Picking an option, closing the list and an external `modelValue` change
+   * all write the selected label into `query`. With the list closed there is
+   * nothing to show, so searching for it would be a round-trip whose results
+   * are discarded. Typing keeps the list open, so a real search still runs
+   * even when the typed text happens to equal the current selection.
+   */
+  if (!open.value && value === props.modelValue?.label) return
+  void runSearch(value)
+})
 
 watch(
   () => props.modelValue,

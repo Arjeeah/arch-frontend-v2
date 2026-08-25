@@ -122,6 +122,12 @@ function addFiles(incoming: File[]): void {
 
   errors.value = rejected
   if (rejected.length > 0) emit('error', rejected)
+
+  // Single-file mode starts `accepted` empty, so a rejected drop would emit
+  // `[]` and silently discard a perfectly good earlier selection. Nothing was
+  // accepted, so there is nothing to update — leave the current file alone.
+  if (accepted.length === 0 && rejected.length > 0) return
+
   if (accepted.length !== props.files.length || accepted.some((f, i) => f !== props.files[i])) {
     emit('update:files', accepted)
   }
