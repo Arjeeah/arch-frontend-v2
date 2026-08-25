@@ -37,20 +37,26 @@ npm run type-check   # TypeScript check only
 
 ```bash
 npm run gen:module    # new feature module (interactive — asks for fields)
-npm run gen:page      # new page inside an existing module
 npm run gen:component # new shared component
-npm run gen:store     # new Pinia store
-npm run gen:api       # new API file
 ```
+
+> `gen:page`, `gen:store`, and `gen:api` were removed — they pointed at
+> Handlebars templates that no longer exist. `gen:module` scaffolds a
+> complete module (page, store, api, table, dialog) in one pass; there is no
+> supported way to add a lone page/store/api file to an existing module
+> through the generator today.
 
 ### `gen:module` — smart module generator
 
-The module generator is fully interactive. It asks for each field one at a time. Leave the field name blank to finish and generate all files.
+The module generator is fully interactive. First it asks which endpoint
+prefix the module's API lives under, then it asks for each field one at a
+time. Leave the field name blank to finish and generate all files.
 
 **Example session:**
 
 ```
 ? Module name (kebab-case): borrowing
+? Endpoint prefix: academic
 
 ? Field name (camelCase, blank to finish): bookTitle
 ? Field type: text
@@ -68,18 +74,33 @@ The module generator is fully interactive. It asks for each field one at a time.
 ✔ 7 files created for module "borrowing"
 ```
 
+**Endpoint prefix** picks the base path the generated api file calls:
+`none` → `/v1/<plural>`, `academic` → `/v1/academic/<plural>`, `location` →
+`/v1/location/<plural>`. The module name is pluralized for you (a tiny
+built-in pluralizer — handles trailing `s`/`y` correctly, so naming the
+module `faculty` produces `/v1/academic/faculties`, and naming it already
+plural, e.g. `faculties`, doesn't double-pluralize into `facultiess`).
+
 **Generated files:**
 
 ```
 src/modules/borrowing/
   index.ts                             — module entrypoint
   types.ts                             — TypeScript interface with all fields
-  api/borrowingApi.ts                  — full CRUD (list, show, create, update, delete)
-  stores/useBorrowingStore.ts          — Pinia store
+  api/borrowingApi.ts                  — full CRUD, snake_case <-> camelCase field mapping
+  stores/useBorrowingStore.ts          — Pinia store (fetchAll/create/update/remove call the api)
   components/BorrowingTable.vue        — table with select badges + skeleton loading
   components/CreateBorrowingDialog.vue — create/edit form with validation
-  pages/BorrowingListPage.vue          — search, filters, pagination, dialogs
+  pages/BorrowingListPage.vue          — fetches on mount; create/update/delete go through
+                                          the store (→ api); mutations report via useToasts
 ```
+
+Everything the generator produces is live: the store's `fetchAll` really
+calls the generated api, and the list page's create/update/delete actions go
+through the store rather than mutating a local array. No manual rewiring is
+needed before the module talks to the backend — only `verify against live
+API` comments left in the api file for things the generator can't know
+(exact wire casing of select-field values, etc.).
 
 **Field types:**
 
@@ -92,14 +113,19 @@ src/modules/borrowing/
 
 After generation, register the new page in `src/app/router/index.ts` and add a nav item in `src/shared/components/AppSidebar.vue`.
 
+The generator logic lives in `tools/plop/generators/module.ts` and is
+covered by `tools/scripts/smoke-test-gen.ts` (`npx tsx
+tools/scripts/smoke-test-gen.ts`), which CI runs on every push/PR.
+
 ## CI / quality gates
 
 Every push and pull request runs:
 
-1. **Lint** (`npm run lint`) — oxlint + ESLint with boundary checks
+1. **Lint** (`npm run lint:check`) — oxlint + ESLint with boundary checks, no auto-fix (CI never mutates code; use `npm run lint` locally to auto-fix)
 2. **Format check** (`prettier --check`) — Prettier formatting
 3. **Type check** (`npm run type-check`) — vue-tsc full check
-4. **Build** (`npm run build`) — production Vite build
+4. **Generator smoke test** (`npx tsx tools/scripts/smoke-test-gen.ts`) — proves `gen:module` still produces working output
+5. **Build** (`npm run build`) — production Vite build
 
 Pre-commit hooks (Husky + lint-staged) run lint + format automatically on staged files. Pre-push runs `vue-tsc --build`. Fix any issues before pushing.
 
