@@ -1,0 +1,152 @@
+{
+  "en": {
+    "nav": {
+      "search": "Search"
+    },
+    "search": {
+      "title": "Archive Search",
+      "subtitle": "Search the text of every scanned page in the archive.",
+      "form": {
+        "label": "Search query",
+        "placeholder": "طالب صيدلة رقم 1625",
+        "submit": "Search",
+        "clear": "Clear",
+        "hint": "Press Enter to search. Documents are Arabic, so the box types right-to-left.",
+        "tooShort": "Enter at least {min} characters",
+        "tooLong": "Keep the query under {max} characters"
+      },
+      "filters": {
+        "title": "Filters",
+        "faculty": "Faculty",
+        "allFaculties": "All faculties",
+        "program": "Program",
+        "allPrograms": "All programs",
+        "status": "Student status",
+        "allStatuses": "All statuses",
+        "limit": "Results per search",
+        "limitOption": "{count} results",
+        "loading": "Loading…",
+        "reset": "Reset filters",
+        "loadFailed": "The faculty and program lists could not be loaded — you can still search without them.",
+        "retryLookups": "Retry"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "graduated": "Graduated",
+        "transferred": "Transferred",
+        "withdrawn": "Withdrawn"
+      },
+      "mode": {
+        "semantic": "Semantic search",
+        "semanticHint": "Meaning-based match across document embeddings.",
+        "keyword": "Keyword fallback",
+        "keywordHint": "Semantic search is unavailable, so these results come from an exact-word match — expect to miss documents that phrase things differently.",
+        "whyLabel": "Why?",
+        "hideReason": "Hide details",
+        "reasonLabel": "Reason reported by the server"
+      },
+      "results": {
+        "summary": "{results} matching pages across {documents} documents",
+        "matchingPages": "{count} pages",
+        "page": "Page {page}",
+        "pageUnknown": "Page unknown",
+        "fileNumber": "File {number}",
+        "unassigned": "Not linked to a student",
+        "openStudent": "Open student",
+        "openDocument": "Open document",
+        "match": "{percent}% match",
+        "rank": "Rank {score}",
+        "showMore": "Show {count} more pages",
+        "showLess": "Show fewer pages"
+      },
+      "empty": {
+        "title": "No matches",
+        "description": "Nothing in the archive matched “{query}”. Try fewer words, or clear the filters."
+      },
+      "idle": {
+        "title": "Search the archive",
+        "description": "Type a student name or number, or any phrase that appears inside a scanned document."
+      },
+      "error": {
+        "title": "Search failed",
+        "retry": "Try again"
+      }
+    }
+  },
+  "ar": {
+    "nav": {
+      "search": "البحث"
+    },
+    "search": {
+      "title": "البحث في الأرشيف",
+      "subtitle": "ابحث في نصوص جميع الصفحات الممسوحة ضوئيًا في الأرشيف.",
+      "form": {
+        "label": "عبارة البحث",
+        "placeholder": "طالب صيدلة رقم 1625",
+        "submit": "بحث",
+        "clear": "مسح",
+        "hint": "اضغط Enter للبحث. المستندات باللغة العربية، لذلك يكتب الحقل من اليمين إلى اليسار.",
+        "tooShort": "أدخل {min} حرفين على الأقل",
+        "tooLong": "يجب ألا تتجاوز عبارة البحث {max} حرف"
+      },
+      "filters": {
+        "title": "عوامل التصفية",
+        "faculty": "الكلية",
+        "allFaculties": "كل الكليات",
+        "program": "البرنامج",
+        "allPrograms": "كل البرامج",
+        "status": "حالة الطالب",
+        "allStatuses": "كل الحالات",
+        "limit": "عدد النتائج",
+        "limitOption": "{count} نتيجة",
+        "loading": "جارٍ التحميل…",
+        "reset": "إعادة ضبط التصفية",
+        "loadFailed": "تعذّر تحميل قائمتي الكليات والبرامج — ما زال بإمكانك البحث بدونهما.",
+        "retryLookups": "إعادة المحاولة"
+      },
+      "status": {
+        "draft": "مسودة",
+        "active": "مستمر",
+        "graduated": "متخرج",
+        "transferred": "منقول",
+        "withdrawn": "منسحب"
+      },
+      "mode": {
+        "semantic": "بحث دلالي",
+        "semanticHint": "مطابقة بالمعنى اعتمادًا على تمثيلات المستندات.",
+        "keyword": "بحث بالكلمات المفتاحية",
+        "keywordHint": "البحث الدلالي غير متاح، لذلك جاءت هذه النتائج من مطابقة حرفية للكلمات — قد تفوتك مستندات صيغت بألفاظ مختلفة.",
+        "whyLabel": "لماذا؟",
+        "hideReason": "إخفاء التفاصيل",
+        "reasonLabel": "السبب كما أبلغ عنه الخادم"
+      },
+      "results": {
+        "summary": "{results} صفحة مطابقة ضمن {documents} مستند",
+        "matchingPages": "{count} صفحة",
+        "page": "صفحة {page}",
+        "pageUnknown": "رقم الصفحة غير معروف",
+        "fileNumber": "ملف {number}",
+        "unassigned": "غير مرتبط بطالب",
+        "openStudent": "فتح ملف الطالب",
+        "openDocument": "فتح المستند",
+        "match": "تطابق {percent}%",
+        "rank": "الترتيب {score}",
+        "showMore": "عرض {count} صفحات أخرى",
+        "showLess": "عرض عدد أقل من الصفحات"
+      },
+      "empty": {
+        "title": "لا توجد نتائج",
+        "description": "لم يطابق أي مستند في الأرشيف «{query}». جرّب كلمات أقل، أو أزل عوامل التصفية."
+      },
+      "idle": {
+        "title": "ابحث في الأرشيف",
+        "description": "اكتب اسم الطالب أو رقمه، أو أي عبارة ترد داخل مستند ممسوح ضوئيًا."
+      },
+      "error": {
+        "title": "تعذّر تنفيذ البحث",
+        "retry": "إعادة المحاولة"
+      }
+    }
+  }
+}
