@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ChevronDown } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -10,10 +11,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
+const { t } = useI18n()
+
 const open = ref(false)
 const wrapper = ref<HTMLElement | null>(null)
 const selectedLabel = () =>
-  props.options.find((o) => o.value === props.modelValue)?.label ?? props.placeholder ?? 'Select'
+  props.options.find((o) => o.value === props.modelValue)?.label ??
+  props.placeholder ??
+  t('common.select')
 
 function select(value: string) {
   emit('update:modelValue', value)
@@ -49,7 +54,7 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
         v-for="option in options"
         :key="option.value"
         type="button"
-        class="w-full text-left px-4 py-2.5 font-display text-xs font-medium text-text-primary hover:bg-surface transition-colors"
+        class="w-full text-start px-4 py-2.5 font-display text-xs font-medium text-text-primary hover:bg-surface transition-colors"
         @click="select(option.value)"
       >
         {{ option.label }}

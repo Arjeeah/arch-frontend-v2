@@ -1,75 +1,68 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { i18n } from '@/app/plugins/i18n'
 import type { Faculty, FacultyInput } from '../types'
 import { facultiesApi } from '../api/facultiesApi'
 
+/**
+ * Single-record faculty mutations. The paginated list itself lives in
+ * `useServerTable` inside `FacultyListPage` — this store only owns
+ * create/update/delete.
+ */
+/**
+ * Store-level copy. These fallbacks land in `error`, which the pages render
+ * verbatim, so they have to be translated — an Arabic operator whose
+ * connection dropped mid-delete read an English sentence inside an otherwise
+ * Arabic dialog. A store is not a component, so it goes through the i18n
+ * instance directly, the way `useImportsStore` does.
+ */
+function tr(key: string): string {
+  return i18n.global.t(key)
+}
+
 export const useFacultiesStore = defineStore('faculties', () => {
-  const items = ref<Faculty[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchAll() {
+  async function create(input: FacultyInput): Promise<Faculty> {
     loading.value = true
     error.value = null
     try {
-      items.value = await facultiesApi.list()
+      return await facultiesApi.create(input)
     } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to load faculties')
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function create(input: FacultyInput) {
-    loading.value = true
-    error.value = null
-    try {
-      const created = await facultiesApi.create(input)
-      items.value.unshift(created)
-      return created
-    } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to create faculty')
+      error.value = getApiErrorMessage(err, tr('faculties.toast.saveFailed'))
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  async function update(id: number, input: Partial<FacultyInput>) {
+  async function update(id: number, input: Partial<FacultyInput>): Promise<Faculty> {
     loading.value = true
     error.value = null
     try {
-      const updated = await facultiesApi.update(id, input)
-      const index = items.value.findIndex((f) => f.id === id)
-      if (index !== -1) {
-        items.value[index] = updated
-      }
-      return updated
+      return await facultiesApi.update(id, input)
     } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to update faculty')
+      error.value = getApiErrorMessage(err, tr('faculties.toast.saveFailed'))
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  async function remove(id: number) {
+  async function remove(id: number): Promise<void> {
     loading.value = true
     error.value = null
     try {
       await facultiesApi.delete(id)
-      const index = items.value.findIndex((f) => f.id === id)
-      if (index !== -1) {
-        items.value.splice(index, 1)
-      }
     } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to delete faculty')
+      error.value = getApiErrorMessage(err, tr('faculties.toast.deleteFailed'))
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  return { items, loading, error, fetchAll, create, update, remove }
+  return { loading, error, create, update, remove }
 })

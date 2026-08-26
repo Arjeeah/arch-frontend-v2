@@ -1,11 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Search } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   modelValue?: string
   placeholder?: string
 }>()
-defineEmits<{ 'update:modelValue': [value: string] }>()
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  /** Enter pressed. Hosts that have somewhere to send the query listen for it. */
+  submit: [value: string]
+}>()
+
+const { t } = useI18n()
+
+const placeholderText = computed(() => props.placeholder ?? t('common.searchPlaceholder'))
 </script>
 
 <template>
@@ -13,9 +23,10 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
     <Search class="w-5 h-5 text-text-placeholder shrink-0" />
     <input
       :value="modelValue"
-      :placeholder="placeholder ?? 'Search…'"
+      :placeholder="placeholderText"
       class="flex-1 bg-transparent font-sans text-sm text-text-primary placeholder:text-text-placeholder focus:outline-none"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      @keyup.enter="emit('submit', ($event.target as HTMLInputElement).value)"
     />
   </div>
 </template>

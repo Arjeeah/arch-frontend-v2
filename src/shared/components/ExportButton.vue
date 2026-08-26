@@ -1,18 +1,29 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Download } from 'lucide-vue-next'
 
-withDefaults(
+/**
+ * `label` falls back to a translated default rather than an English literal —
+ * the audit page renders this button with no `label` at all, so the literal
+ * leaked "Export Report" into the Arabic UI.
+ */
+const props = withDefaults(
   defineProps<{
     label?: string
     loading?: boolean
     disabled?: boolean
   }>(),
   {
-    label: 'Export Report',
+    label: undefined,
     loading: false,
     disabled: false,
   },
 )
+
+const { t } = useI18n()
+
+const text = computed(() => props.label ?? t('common.export'))
 
 defineEmits<{ click: [e: MouseEvent] }>()
 </script>
@@ -29,6 +40,6 @@ defineEmits<{ click: [e: MouseEvent] }>()
       class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
     />
     <Download v-else class="w-4 h-4" />
-    {{ label }}
+    {{ text }}
   </button>
 </template>

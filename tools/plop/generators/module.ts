@@ -1,5 +1,6 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import * as prettier from 'prettier'
 import type { CustomActionFunction } from 'plop'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -9,6 +10,25 @@ interface Field {
   type: 'text' | 'number' | 'date' | 'select'
   options?: string[]
   filterable?: boolean
+}
+
+/** Where the generated endpoints live on the API: `/v1/<prefix>/<plural>`. */
+type EndpointPrefix = 'none' | 'academic' | 'location'
+
+/**
+ * The slice of plop's API this generator actually uses.
+ *
+ * `node-plop` really does hand an object carrying `.inquirer` to a custom
+ * action — it is how every interactive action prompts — but the published
+ * `NodePlopAPI` type never declares the property. So declare the shape we
+ * depend on here and adapt exactly once, in the `generateModule` wrapper.
+ * That keeps the generator core honestly typed and lets tests drive it with a
+ * plain object instead of an `any`.
+ */
+export interface PlopPrompter {
+  inquirer: {
+    prompt: <T>(questions: unknown) => Promise<T>
+  }
 }
 
 // ── String helpers ─────────────────────────────────────────────────────────
@@ -31,6 +51,40 @@ function toLabel(camel: string): string {
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, (s) => s.toUpperCase())
     .trim()
+}
+
+/** camelCase → snake_case, for mapping field names onto wire keys. */
+function toSnakeField(camel: string): string {
+  return camel.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+}
+
+/**
+ * Pluralizes a single word. Deliberately tiny — it only handles the cases
+ * this codebase's endpoint names actually hit:
+ *  - already ends in "s"        → left alone (avoids "faculties" -> "facultiess")
+ *  - consonant + "y"            → "y" -> "ies" ("faculty" -> "faculties")
+ *  - "x"/"z"/"ch"/"sh"          → "+es" ("box" -> "boxes")
+ *  - everything else            → "+s"
+ */
+function pluralizeWord(word: string): string {
+  const lower = word.toLowerCase()
+  if (lower.endsWith('s')) return word
+  if (/[^aeiou]y$/.test(lower)) return `${word.slice(0, -1)}ies`
+  if (/(x|z|ch|sh)$/.test(lower)) return `${word}es`
+  return `${word}s`
+}
+
+/** Pluralizes only the last `-`-separated segment of a kebab-case name. */
+function pluralizeKebab(kebab: string): string {
+  const segments = kebab.split('-')
+  const last = segments.pop() as string
+  return [...segments, pluralizeWord(last)].join('-')
+}
+
+/** Builds the `/v1/...` base path a generated api file calls. */
+function endpointBase(prefix: EndpointPrefix, kebab: string): string {
+  const prefixSegment = prefix === 'none' ? '' : `${prefix}/`
+  return `/v1/${prefixSegment}${pluralizeKebab(kebab)}`
 }
 
 // ── Builder functions ──────────────────────────────────────────────────────
@@ -61,21 +115,135 @@ ${fieldLines.join('\n')}
 `
 }
 
-function buildApi(pascal: string, camel: string, kebab: string): string {
+function buildApi(
+  pascal: string,
+  camel: string,
+  kebab: string,
+  fields: Field[],
+  prefix: EndpointPrefix,
+): string {
+  const basePath = endpointBase(prefix, kebab)
+
+  const resourceFieldLines = fields
+    .map((f) => `  ${toSnakeField(f.name)}: ${f.type === 'number' ? 'number' : 'string'}`)
+    .join('\n')
+
+  const fromResourceLines = fields
+    .map((f) => {
+      const snake = toSnakeField(f.name)
+      if (f.type === 'select') {
+        // verify against live API: assumes the wire value matches one of the
+        // option strings exactly. Add a mapping function (see FacultyResource
+        // for the pattern) if the backend uses a different casing/slug.
+        return `    ${f.name}: resource.${snake} as ${pascal}['${f.name}'],`
+      }
+      return `    ${f.name}: resource.${snake},`
+    })
+    .join('\n')
+
+  const toPayloadLines = fields
+    .map(
+      (f) =>
+        `  if (input.${f.name} !== undefined) payload.${toSnakeField(f.name)} = input.${f.name}`,
+    )
+    .join('\n')
+
   return `import { http } from '@/app/plugins/axios'
 import type { ${pascal} } from '../types'
 
+/** A ${camel} exactly as the backend sends it (Laravel resource, snake_case). */
+interface ${pascal}Resource {
+  id: number
+${resourceFieldLines}
+  created_at: string
+}
+
+/** \`show\` / \`store\` / \`update\` responses are wrapped in a single \`data\` key. */
+interface ${pascal}ItemResponse {
+  data: ${pascal}Resource
+}
+
+/** \`index\` is paginated: \`{ data: [...], meta, links }\`. */
+interface ${pascal}ListResponse {
+  data: ${pascal}Resource[]
+  meta?: { last_page?: number }
+}
+
+/**
+ * Hard ceiling on the pages \`listAll()\` walks, so a very large table cannot
+ * fire unbounded requests. If a real deployment hits this, move the list page
+ * onto \`useServerTable\` (see CLAUDE.md) rather than raising the number.
+ */
+const MAX_PAGES = 20
+
+/** snake_case wire format -> camelCase UI model. */
+function fromResource(resource: ${pascal}Resource): ${pascal} {
+  return {
+    id: resource.id,
+${fromResourceLines}
+    createdAt: resource.created_at,
+  }
+}
+
+/** camelCase UI model -> snake_case request payload. */
+function toPayload(input: Partial<${pascal}>): Record<string, string | number> {
+  const payload: Record<string, string | number> = {}
+${toPayloadLines}
+  return payload
+}
+
 export const ${camel}Api = {
-  list: () =>
-    http.get<${pascal}[]>('/v1/${kebab}s').then(r => r.data),
-  show: (id: number) =>
-    http.get<${pascal}>(\`/v1/${kebab}s/\${id}\`).then(r => r.data),
-  create: (data: Partial<${pascal}>) =>
-    http.post<${pascal}>('/v1/${kebab}s', data).then(r => r.data),
-  update: (id: number, data: Partial<${pascal}>) =>
-    http.put<${pascal}>(\`/v1/${kebab}s/\${id}\`, data).then(r => r.data),
-  delete: (id: number) =>
-    http.delete(\`/v1/${kebab}s/\${id}\`),
+  /**
+   * Returns one page of ${camel}. The backend paginates the index endpoint;
+   * with no params it responds with the first page.
+   */
+  list: async (params?: { page?: number; per_page?: number }): Promise<${pascal}[]> => {
+    const { data } = await http.get<${pascal}ListResponse>('${basePath}', { params })
+    return data.data.map(fromResource)
+  },
+
+  /**
+   * Returns every ${camel}, walking the paginated index endpoint up to
+   * \`MAX_PAGES\`. The generated list page searches, filters and paginates
+   * client-side, so it needs the whole set — a bare \`list()\` would render a
+   * complete-looking table built from page one alone.
+   */
+  listAll: async (): Promise<${pascal}[]> => {
+    const all: ${pascal}[] = []
+    let page = 1
+    let lastPage = 1
+
+    do {
+      const { data } = await http.get<${pascal}ListResponse>('${basePath}', { params: { page } })
+      all.push(...data.data.map(fromResource))
+      lastPage = data.meta?.last_page ?? 1
+      page += 1
+    } while (page <= lastPage && page <= MAX_PAGES)
+
+    return all
+  },
+
+  show: async (id: number): Promise<${pascal}> => {
+    const { data } = await http.get<${pascal}ItemResponse>(\`${basePath}/\${id}\`)
+    return fromResource(data.data)
+  },
+
+  create: async (input: Partial<${pascal}>): Promise<${pascal}> => {
+    const { data } = await http.post<${pascal}ItemResponse>('${basePath}', toPayload(input))
+    return fromResource(data.data)
+  },
+
+  update: async (id: number, input: Partial<${pascal}>): Promise<${pascal}> => {
+    const { data } = await http.put<${pascal}ItemResponse>(
+      \`${basePath}/\${id}\`,
+      toPayload(input),
+    )
+    return fromResource(data.data)
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await http.delete(\`${basePath}/\${id}\`)
+  },
 }
 `
 }
@@ -84,7 +252,7 @@ function buildStore(pascal: string, camel: string): string {
   return `import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { ${pascal} } from '../types'
-// import { ${camel}Api } from '../api/${camel}Api'
+import { ${camel}Api } from '../api/${camel}Api'
 
 export const use${pascal}Store = defineStore('${camel}', () => {
   const items = ref<${pascal}[]>([])
@@ -93,13 +261,32 @@ export const use${pascal}Store = defineStore('${camel}', () => {
   async function fetchAll() {
     loading.value = true
     try {
-      // items.value = await ${camel}Api.list()
+      items.value = await ${camel}Api.listAll()
     } finally {
       loading.value = false
     }
   }
 
-  return { items, loading, fetchAll }
+  async function create(input: Partial<${pascal}>) {
+    const created = await ${camel}Api.create(input)
+    items.value.unshift(created)
+    return created
+  }
+
+  async function update(id: number, input: Partial<${pascal}>) {
+    const updated = await ${camel}Api.update(id, input)
+    const index = items.value.findIndex((item) => item.id === id)
+    if (index !== -1) items.value[index] = updated
+    return updated
+  }
+
+  async function remove(id: number) {
+    await ${camel}Api.delete(id)
+    const index = items.value.findIndex((item) => item.id === id)
+    if (index !== -1) items.value.splice(index, 1)
+  }
+
+  return { items, loading, fetchAll, create, update, remove }
 })
 `
 }
@@ -266,6 +453,11 @@ function buildDialog(pascal: string, fields: Field[]): string {
   const submitLines = fields
     .map((f) => {
       if (f.type === 'number') return `    ${f.name}: Number(form.${f.name}),`
+      // `form` holds every field as a plain string, but a select field is typed
+      // as a string-literal union on the model. `validate()` has already
+      // rejected the empty string, and `AppSelect` can only ever emit one of
+      // the option values, so the narrowing cast is safe.
+      if (f.type === 'select') return `    ${f.name}: form.${f.name} as ${pascal}['${f.name}'],`
       return `    ${f.name}: form.${f.name},`
     })
     .join('\n')
@@ -420,18 +612,10 @@ function buildPage(pascal: string, camel: string, kebab: string, fields: Field[]
     })
     .join('\n')
 
-  const defaultFieldValues = fields
-    .map((f) => {
-      if (f.type === 'number') return `      ${f.name}: 0,`
-      if (f.type === 'select') return `      ${f.name}: '' as ${pascal}['${f.name}'],`
-      return `      ${f.name}: '',`
-    })
-    .join('\n')
-
   const firstIdentifier = textFields[0]?.name ?? fields[0]?.name ?? 'id'
 
   const imports = [
-    `import { ref, computed, watch } from 'vue'`,
+    `import { ref, computed, watch, onMounted } from 'vue'`,
     `import { Search } from 'lucide-vue-next'`,
     `import { use${pascal}Store } from '../stores/use${pascal}Store'`,
     `import ${pascal}Table from '../components/${pascal}Table.vue'`,
@@ -440,6 +624,8 @@ function buildPage(pascal: string, camel: string, kebab: string, fields: Field[]
     `import Create${pascal}Dialog from '../components/Create${pascal}Dialog.vue'`,
     hasFilters ? `import AppSelect from '@/shared/components/AppSelect.vue'` : null,
     `import { usePagination } from '@/composables/usePagination'`,
+    `import { useToasts } from '@/shared/composables/useToasts'`,
+    `import { getApiErrorMessage } from '@/shared/utils/apiError'`,
     `import type { ${pascal} } from '../types'`,
   ]
     .filter(Boolean)
@@ -449,6 +635,15 @@ function buildPage(pascal: string, camel: string, kebab: string, fields: Field[]
 ${imports}
 
 const store = use${pascal}Store()
+const toasts = useToasts()
+
+onMounted(async () => {
+  try {
+    await store.fetchAll()
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, 'Failed to load ${camel}'))
+  }
+})
 
 const search = ref('')
 ${filterRefs}${filterRefs ? '\n' : ''}
@@ -473,27 +668,30 @@ function openCreate() { editingItem.value = null; dialogOpen.value = true }
 function openEdit(item: ${pascal}) { editingItem.value = item; dialogOpen.value = true }
 function openDelete(item: ${pascal}) { deletingItem.value = item; deleteDialogOpen.value = true }
 
-function handleSave(data: Partial<${pascal}>) {
-  if (editingItem.value) {
-    const idx = store.items.findIndex(i => i.id === editingItem.value!.id)
-    if (idx !== -1) store.items.splice(idx, 1, Object.assign({}, store.items[idx], data) as ${pascal})
-  } else {
-    const newId = Math.max(0, ...store.items.map(i => i.id)) + 1
-    store.items.unshift(Object.assign({
-      id: newId,
-${defaultFieldValues}
-      createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    }, data) as ${pascal})
+async function handleSave(data: Partial<${pascal}>) {
+  try {
+    if (editingItem.value) {
+      await store.update(editingItem.value.id, data)
+      toasts.success('${pascal} updated.')
+    } else {
+      await store.create(data)
+      toasts.success('${pascal} created.')
+    }
+    dialogOpen.value = false
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, 'Failed to save ${camel}'))
   }
-  dialogOpen.value = false
 }
 
-function confirmDelete() {
-  if (deletingItem.value) {
-    const idx = store.items.findIndex(i => i.id === deletingItem.value!.id)
-    if (idx !== -1) store.items.splice(idx, 1)
+async function confirmDelete() {
+  if (!deletingItem.value) return
+  try {
+    await store.remove(deletingItem.value.id)
+    toasts.success('${pascal} deleted.')
+    deleteDialogOpen.value = false
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, 'Failed to delete ${camel}'))
   }
-  deleteDialogOpen.value = false
 }
 </script>
 
@@ -516,12 +714,12 @@ function confirmDelete() {
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
       <div class="relative flex-1 min-w-[200px]">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
         <input
           v-model="search"
           type="text"
           placeholder="Search"
-          class="w-full h-[42px] pl-9 pr-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
+          class="w-full h-[42px] ps-9 pe-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
           style="border-width: 1.3px"
         />
       </div>
@@ -571,15 +769,41 @@ ${filterDropdowns}
 `
 }
 
+// ── File emission ──────────────────────────────────────────────────────────
+
+/**
+ * Writes one generated file, run through Prettier with the repo's own config
+ * first. The builders above emit readable-but-unformatted source; without this
+ * a freshly generated module fails CI's `prettier --check src/`.
+ */
+async function writeFormatted(filePath: string, source: string): Promise<void> {
+  const options = await prettier.resolveConfig(filePath)
+  const formatted = await prettier.format(source, { ...options, filepath: filePath })
+  fs.writeFileSync(filePath, formatted, 'utf8')
+}
+
 // ── Main action ────────────────────────────────────────────────────────────
 
-export const generateModule: CustomActionFunction = async (answers, _config, plop) => {
-  const name = (answers as { name: string }).name
+/**
+ * Generates a module. Typed precisely (name + the prompter it needs) so the
+ * smoke test can drive it directly with a mock instead of casting.
+ */
+export async function runModuleGenerator(name: string, plop: PlopPrompter): Promise<string> {
+  const { prefix } = await plop.inquirer.prompt<{ prefix: EndpointPrefix }>([
+    {
+      type: 'list',
+      name: 'prefix',
+      message: 'Endpoint prefix:',
+      choices: ['none', 'academic', 'location'],
+      default: 'none',
+    },
+  ])
+
   const fields: Field[] = []
 
   // Collect fields interactively until user leaves name blank
   while (true) {
-    const { fieldName } = await plop!.inquirer.prompt<{ fieldName: string }>([
+    const { fieldName } = await plop.inquirer.prompt<{ fieldName: string }>([
       {
         type: 'input',
         name: 'fieldName',
@@ -588,7 +812,7 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
     ])
     if (!fieldName.trim()) break
 
-    const { fieldType } = await plop!.inquirer.prompt<{ fieldType: Field['type'] }>([
+    const { fieldType } = await plop.inquirer.prompt<{ fieldType: Field['type'] }>([
       {
         type: 'list',
         name: 'fieldType',
@@ -601,7 +825,7 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
     let filterable: boolean | undefined
 
     if (fieldType === 'select') {
-      const { optionsStr } = await plop!.inquirer.prompt<{ optionsStr: string }>([
+      const { optionsStr } = await plop.inquirer.prompt<{ optionsStr: string }>([
         {
           type: 'input',
           name: 'optionsStr',
@@ -613,7 +837,7 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
         .map((s) => s.trim())
         .filter(Boolean)
 
-      const { isFilterable } = await plop!.inquirer.prompt<{ isFilterable: boolean }>([
+      const { isFilterable } = await plop.inquirer.prompt<{ isFilterable: boolean }>([
         {
           type: 'confirm',
           name: 'isFilterable',
@@ -632,38 +856,52 @@ export const generateModule: CustomActionFunction = async (answers, _config, plo
   const kebab = name
 
   const basePath = path.join(process.cwd(), 'src', 'modules', kebab)
+
+  // Generating over an existing module would overwrite hand-written code with
+  // no warning and no way back, so refuse rather than merge.
+  if (fs.existsSync(basePath)) {
+    throw new Error(
+      `Module "${kebab}" already exists at src/modules/${kebab}. ` +
+        `Delete it first, or pick another name — the generator never overwrites.`,
+    )
+  }
+
   fs.mkdirSync(path.join(basePath, 'pages'), { recursive: true })
   fs.mkdirSync(path.join(basePath, 'components'), { recursive: true })
   fs.mkdirSync(path.join(basePath, 'stores'), { recursive: true })
   fs.mkdirSync(path.join(basePath, 'api'), { recursive: true })
 
-  fs.writeFileSync(path.join(basePath, 'index.ts'), buildIndex(pascal), 'utf8')
-  fs.writeFileSync(path.join(basePath, 'types.ts'), buildTypes(pascal, fields), 'utf8')
-  fs.writeFileSync(
+  await writeFormatted(path.join(basePath, 'index.ts'), buildIndex(pascal))
+  await writeFormatted(path.join(basePath, 'types.ts'), buildTypes(pascal, fields))
+  await writeFormatted(
     path.join(basePath, 'api', `${camel}Api.ts`),
-    buildApi(pascal, camel, kebab),
-    'utf8',
+    buildApi(pascal, camel, kebab, fields, prefix),
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'stores', `use${pascal}Store.ts`),
     buildStore(pascal, camel),
-    'utf8',
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'components', `${pascal}Table.vue`),
     buildTable(pascal, fields),
-    'utf8',
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'components', `Create${pascal}Dialog.vue`),
     buildDialog(pascal, fields),
-    'utf8',
   )
-  fs.writeFileSync(
+  await writeFormatted(
     path.join(basePath, 'pages', `${pascal}ListPage.vue`),
     buildPage(pascal, camel, kebab, fields),
-    'utf8',
   )
 
   return `✔ 7 files created for module "${kebab}"`
+}
+
+/**
+ * Plop action-type wrapper. The only place that bridges plop's under-declared
+ * `NodePlopAPI` to the `PlopPrompter` shape the generator relies on.
+ */
+export const generateModule: CustomActionFunction = (answers, _config, plop) => {
+  if (!plop) throw new Error('generateModule was invoked without plop’s API')
+  return runModuleGenerator((answers as { name: string }).name, plop as unknown as PlopPrompter)
 }

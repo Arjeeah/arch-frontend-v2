@@ -1,0 +1,144 @@
+{
+  "en": {
+    "programs": {
+      "title": "Programs",
+      "subtitle": "Manage the academic programs offered under each faculty",
+      "addNew": "Add Program",
+      "searchPlaceholder": "Search by name…",
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "nameAr": "Name (Arabic)",
+        "nameEn": "Name (English)",
+        "faculty": "Faculty",
+        "status": "Status"
+      },
+      "filters": {
+        "allFaculties": "All faculties",
+        "allStatuses": "All statuses"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "empty": {
+        "title": "No programs yet",
+        "description": "Add a program to a faculty to get started.",
+        "filteredTitle": "No matching programs",
+        "filteredDescription": "No program matches the current search and filters."
+      },
+      "errorState": {
+        "title": "Could not load programs",
+        "retry": "Try again"
+      },
+      "dialog": {
+        "createTitle": "Add Program",
+        "editTitle": "Edit Program",
+        "createSubtitle": "Fill in the details to create a new program.",
+        "editSubtitle": "Update the program's details.",
+        "facultyPlaceholder": "Select a faculty",
+        "facultiesLoading": "Loading faculties…",
+        "facultiesLoadFailed": "Could not load faculties. Try reopening this dialog.",
+        "facultyRequired": "Faculty is required",
+        "codePlaceholder": "e.g. PHARM-101",
+        "codeRequired": "Code is required",
+        "nameArPlaceholder": "Program name in Arabic",
+        "nameEnPlaceholder": "Program name in English",
+        "nameArRequired": "Arabic name is required",
+        "nameEnRequired": "English name is required",
+        "cancel": "Cancel",
+        "save": "Save",
+        "update": "Update"
+      },
+      "deleteDialog": {
+        "title": "Delete Program",
+        "confirm": "Delete",
+        "message": "Are you sure you want to delete \"{name}\"? This cannot be undone."
+      },
+      "toasts": {
+        "created": "Program created.",
+        "updated": "Program updated.",
+        "deleted": "Program deleted.",
+        "saveFailed": "Failed to save program",
+        "deleteFailed": "Failed to delete program",
+        "facultiesLoadFailed": "Failed to load faculties"
+      }
+    }
+  },
+  "ar": {
+    "programs": {
+      "title": "البرامج الدراسية",
+      "subtitle": "إدارة البرامج الدراسية المطروحة ضمن كل كلية",
+      "addNew": "إضافة برنامج",
+      "searchPlaceholder": "البحث بالاسم…",
+      "fields": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "nameAr": "الاسم (عربي)",
+        "nameEn": "الاسم (إنجليزي)",
+        "faculty": "الكلية",
+        "status": "الحالة"
+      },
+      "filters": {
+        "allFaculties": "كل الكليات",
+        "allStatuses": "كل الحالات"
+      },
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "table": {
+        "actions": "الإجراءات",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "empty": {
+        "title": "لا توجد برامج بعد",
+        "description": "أضف برنامجًا إلى إحدى الكليات للبدء.",
+        "filteredTitle": "لا توجد نتائج مطابقة",
+        "filteredDescription": "لا يوجد برنامج يطابق البحث وعوامل التصفية الحالية."
+      },
+      "errorState": {
+        "title": "تعذر تحميل البرامج",
+        "retry": "إعادة المحاولة"
+      },
+      "dialog": {
+        "createTitle": "إضافة برنامج",
+        "editTitle": "تعديل البرنامج",
+        "createSubtitle": "املأ التفاصيل لإنشاء برنامج جديد.",
+        "editSubtitle": "قم بتحديث تفاصيل البرنامج.",
+        "facultyPlaceholder": "اختر الكلية",
+        "facultiesLoading": "جارٍ تحميل الكليات…",
+        "facultiesLoadFailed": "تعذر تحميل الكليات. حاول إعادة فتح هذه النافذة.",
+        "facultyRequired": "الكلية مطلوبة",
+        "codePlaceholder": "مثال: PHARM-101",
+        "codeRequired": "الرمز مطلوب",
+        "nameArPlaceholder": "اسم البرنامج بالعربية",
+        "nameEnPlaceholder": "اسم البرنامج بالإنجليزية",
+        "nameArRequired": "الاسم بالعربية مطلوب",
+        "nameEnRequired": "الاسم بالإنجليزية مطلوب",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "update": "تحديث"
+      },
+      "deleteDialog": {
+        "title": "حذف البرنامج",
+        "confirm": "حذف",
+        "message": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء."
+      },
+      "toasts": {
+        "created": "تم إنشاء البرنامج.",
+        "updated": "تم تحديث البرنامج.",
+        "deleted": "تم حذف البرنامج.",
+        "saveFailed": "تعذر حفظ البرنامج",
+        "deleteFailed": "تعذر حذف البرنامج",
+        "facultiesLoadFailed": "تعذر تحميل الكليات"
+      }
+    }
+  }
+}

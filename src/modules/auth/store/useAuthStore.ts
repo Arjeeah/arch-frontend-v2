@@ -1,28 +1,22 @@
 import { defineStore } from 'pinia'
+import { authStorage } from '@/app/config/authStorage'
+import { i18n } from '@/app/plugins/i18n'
 import { AuthService } from '../services/authService'
-import type { AuthUser, LoginCredentials } from '../types'
-
-const TOKEN_KEY = 'auth_token'
-const USER_KEY = 'auth_user'
+import type { AuthUser, LoginCredentials, UserRole } from '../types'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: localStorage.getItem(TOKEN_KEY) as string | null,
-    user: ((): AuthUser | null => {
-      try {
-        const raw = localStorage.getItem(USER_KEY)
-        return raw ? (JSON.parse(raw) as AuthUser) : null
-      } catch {
-        return null
-      }
-    })(),
+    token: authStorage.getToken(),
+    user: authStorage.getUser(),
     loading: false,
     error: null as string | null,
   }),
 
   getters: {
     isAuthenticated: (state) => !!state.token,
-    currentUser: (state) => state.user,
+    currentUser: (state): AuthUser | null => state.user,
+    role: (state): UserRole | null => state.user?.role ?? null,
+    userName: (state): string | null => state.user?.name ?? null,
   },
 
   actions: {
@@ -33,12 +27,11 @@ export const useAuthStore = defineStore('auth', {
         const { token, user } = await AuthService.login(credentials)
         this.token = token
         this.user = user
-        localStorage.setItem(TOKEN_KEY, token)
-        localStorage.setItem(USER_KEY, JSON.stringify(user))
+        authStorage.setSession(token, user)
         return { success: true }
       } catch (err) {
         const axiosErr = err as { response?: { data?: { message?: string } } }
-        this.error = axiosErr?.response?.data?.message ?? 'Login failed'
+        this.error = axiosErr?.response?.data?.message ?? i18n.global.t('login.errors.failed')
         return { success: false }
       } finally {
         this.loading = false
@@ -51,11 +44,15 @@ export const useAuthStore = defineStore('auth', {
       } catch {
         // ignore errors — always clear local state
       } finally {
-        this.token = null
-        this.user = null
-        localStorage.removeItem(TOKEN_KEY)
-        localStorage.removeItem(USER_KEY)
+        this.clearSession()
       }
+    },
+
+    /** Drops the session locally, without calling the API. */
+    clearSession(): void {
+      this.token = null
+      this.user = null
+      authStorage.clear()
     },
 
     async init(): Promise<void> {
@@ -63,14 +60,13 @@ export const useAuthStore = defineStore('auth', {
       try {
         const user = await AuthService.me()
         this.user = user
-        localStorage.setItem(USER_KEY, JSON.stringify(user))
+        authStorage.setUser(user)
       } catch (err) {
         const status = (err as { response?: { status?: number } })?.response?.status
-        if (status === 401) {
-          // Token is expired/invalid — clear everything and redirect to login
-          await this.logout()
-        }
-        // Network error or 5xx → keep the token, user stays logged in
+        // 401 → the axios response interceptor already redirected; just make
+        // sure the in-memory state matches the cleared storage.
+        // Network error or 5xx → keep the token, user stays logged in.
+        if (status === 401) this.clearSession()
       }
     },
 

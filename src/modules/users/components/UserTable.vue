@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { SquarePen, Ban } from 'lucide-vue-next'
 import { formatDate } from '@/shared/utils/date'
 import UserStatusBadge from './UserStatusBadge.vue'
-import { roleLabel } from '../types'
 import type { User } from '../types'
 
 defineProps<{
@@ -17,9 +17,14 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 
 function facultyNames(user: User) {
   return user.faculties.length ? user.faculties.map((f) => f.nameEN).join(', ') : '-'
+}
+
+function roleLabelT(role: User['role']): string {
+  return t(`common.roles.${role}`)
 }
 </script>
 
@@ -30,25 +35,39 @@ function facultyNames(user: User) {
       class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px]"
     >
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Name</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('users.table.name')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Email</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('users.table.email')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Role</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('users.table.role')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Faculty</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('users.table.faculty')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('users.table.status')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Created At</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('users.table.createdAt')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Actions</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('users.table.actions')
+        }}</span>
       </div>
     </div>
 
@@ -91,7 +110,7 @@ function facultyNames(user: User) {
         <!-- Name -->
         <div class="flex items-center px-[13px] flex-1 min-w-0 overflow-hidden">
           <button
-            class="text-[15px] font-sans text-black hover:text-primary transition-colors text-left truncate w-full"
+            class="text-[15px] font-sans text-black hover:text-primary transition-colors text-start truncate w-full"
             @click="router.push(`/users/${user.id}`)"
           >
             {{ user.name }}
@@ -106,7 +125,7 @@ function facultyNames(user: User) {
         <!-- Role -->
         <div class="flex items-center justify-center px-[13px] flex-1 min-w-0 overflow-hidden">
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            roleLabel(user.role)
+            roleLabelT(user.role)
           }}</span>
         </div>
 
@@ -133,27 +152,19 @@ function facultyNames(user: User) {
         <div class="flex justify-center items-center px-[13px] gap-[15px] w-[90px] shrink-0">
           <button
             class="text-[#4285F4] hover:opacity-70 transition-opacity"
-            title="Edit user"
+            :title="t('users.table.editAction')"
             @click="emit('edit', user)"
           >
             <SquarePen class="w-6 h-6" />
           </button>
           <button
             class="text-danger hover:opacity-70 transition-opacity"
-            title="Delete user"
+            :title="t('users.table.deleteAction')"
             @click="emit('delete', user)"
           >
             <Ban class="w-6 h-6" />
           </button>
         </div>
-      </div>
-
-      <!-- Empty state -->
-      <div
-        v-if="!users.length"
-        class="flex justify-center items-center bg-white border border-border rounded-[4px] py-12"
-      >
-        <span class="text-sm text-text-muted font-sans">No users match the current filters.</span>
       </div>
     </template>
   </div>

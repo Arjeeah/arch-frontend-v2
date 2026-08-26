@@ -24,6 +24,10 @@ export default {
         'text-secondary': '#727272',
         'text-muted': '#B6B6B6',
         'text-placeholder': '#808080',
+        // The value typed into an outlined control (`AppSelect`,
+        // `AppSearchInput`, `SettingsTagsInput`). Eight files carried it as a
+        // raw `text-[#313144]`, which CLAUDE.md forbids — this is the token.
+        'text-input': '#313144',
         border: {
           DEFAULT: '#E4E4E4',
           input: '#EBEBEB',

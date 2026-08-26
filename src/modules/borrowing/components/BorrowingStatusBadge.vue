@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import type { BorrowingStatus } from '../types'
 
-defineProps<{ status: BorrowingStatus }>()
+const props = defineProps<{ status: BorrowingStatus }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
   <span
-    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-display font-medium capitalize"
+    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-display font-medium"
     :class="{
       'bg-warning/20 text-warning': status === 'pending',
       'bg-primary/10 text-primary': status === 'approved',
@@ -16,6 +19,6 @@ defineProps<{ status: BorrowingStatus }>()
       'bg-danger text-white': status === 'overdue',
     }"
   >
-    {{ status }}
+    {{ t(`borrowing.status.${props.status}`) }}
   </span>
 </template>

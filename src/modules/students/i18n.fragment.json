@@ -1,0 +1,282 @@
+{
+  "en": {
+    "nav": {
+      "students": "Students"
+    },
+    "students": {
+      "title": "Students",
+      "subtitle": "The student register and the paper files behind it",
+      "resultCount": "{count} students",
+      "draftNotice": "This record was created by the AI from a scanned file. Check the details, then confirm it.",
+      "emptyTitle": "No students yet",
+      "emptyDescription": "Students appear here once they are added by hand or created from a scanned file.",
+      "emptyFilteredTitle": "No students match these filters",
+      "emptyFilteredDescription": "Try a different name, number, faculty or status.",
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "graduated": "Graduated",
+        "transferred": "Transferred",
+        "withdrawn": "Withdrawn"
+      },
+      "location": {
+        "in_location": "In the archive",
+        "borrowed": "On loan"
+      },
+      "fileStatus": {
+        "complete": "Complete",
+        "incomplete": "Incomplete",
+        "draft": "Draft"
+      },
+      "columns": {
+        "studentNumber": "Student no.",
+        "name": "Name",
+        "faculty": "Faculty",
+        "program": "Program",
+        "enrollmentYear": "Enrolled",
+        "location": "File location",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "name": "Search by name",
+        "studentNumber": "Search by student number",
+        "allFaculties": "All faculties",
+        "allStatuses": "All statuses"
+      },
+      "fields": {
+        "studentNumber": "Student number",
+        "name": "Full name",
+        "nationality": "Nationality",
+        "email": "Email",
+        "phone": "Phone",
+        "faculty": "Faculty",
+        "program": "Program",
+        "enrollmentYear": "Enrollment year",
+        "graduationYear": "Graduation year",
+        "studentStatus": "Student status",
+        "locationStatus": "File location",
+        "drawer": "Drawer",
+        "createdAt": "Created"
+      },
+      "placeholders": {
+        "studentNumber": "e.g. 1625",
+        "name": "Full name as written on the file",
+        "nationality": "e.g. Libyan",
+        "faculty": "Select a faculty",
+        "program": "Select a program",
+        "programBlocked": "Select a faculty first",
+        "drawer": "Search drawers by label",
+        "drawerEmpty": "No drawer matches that label",
+        "drawerMinChars": "Type at least 2 characters"
+      },
+      "actions": {
+        "create": "Add student",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "retry": "Try again",
+        "clearFilters": "Clear filters",
+        "clearDrawer": "Clear the selected drawer",
+        "backToList": "Back to students",
+        "promote": "Confirm student"
+      },
+      "states": {
+        "loading": "Loading…",
+        "noFaculty": "No faculty on file"
+      },
+      "form": {
+        "createTitle": "Add student",
+        "editTitle": "Edit student"
+      },
+      "errors": {
+        "required": "This field is required",
+        "maxLength": "Use at most {max} characters",
+        "email": "Enter a valid email address",
+        "yearRange": "Enter a year between 1900 and 2100",
+        "graduationBeforeEnrollment": "Graduation cannot be before enrollment",
+        "lookupFailed": "Could not load the list of options",
+        "saveFailed": "Could not save this student",
+        "deleteFailed": "Could not delete this student",
+        "promoteFailed": "Could not confirm this student",
+        "listFailed": "Could not load students",
+        "detailFailed": "Could not load this student",
+        "notFound": "This student no longer exists."
+      },
+      "toasts": {
+        "created": "{name} added",
+        "updated": "{name} updated",
+        "deleted": "{name} deleted",
+        "promoted": "{name} confirmed as an active student"
+      },
+      "deleteDialog": {
+        "title": "Delete student",
+        "message": "Delete {name}? Their documents lose the record they hang off, and this cannot be undone."
+      },
+      "promoteDialog": {
+        "title": "Confirm student",
+        "message": "Confirm {name} as an active student? Do this once the details read correctly."
+      },
+      "documents": {
+        "title": "Documents",
+        "count": "{count} on file",
+        "upload": "Upload document",
+        "required": "Required documents",
+        "pipelineUnavailable": "Pipeline status is unavailable right now — the documents themselves are unaffected.",
+        "emptyTitle": "No documents yet",
+        "emptyDescription": "Upload a scan to start the extraction pipeline for this student.",
+        "open": "Open",
+        "columns": {
+          "fileNumber": "File no.",
+          "type": "Type",
+          "fileStatus": "File status",
+          "pipeline": "Processing",
+          "confidence": "Confidence",
+          "submitted": "Submitted",
+          "open": "Open"
+        }
+      }
+    }
+  },
+  "ar": {
+    "nav": {
+      "students": "الطلاب"
+    },
+    "students": {
+      "title": "الطلاب",
+      "subtitle": "سجل الطلاب والملفات الورقية المرتبطة بهم",
+      "resultCount": "{count} طالب",
+      "draftNotice": "أنشأ الذكاء الاصطناعي هذا السجل من ملف ممسوح ضوئيًا. راجع البيانات ثم اعتمدها.",
+      "emptyTitle": "لا يوجد طلاب بعد",
+      "emptyDescription": "يظهر الطلاب هنا بعد إضافتهم يدويًا أو إنشائهم من ملف ممسوح ضوئيًا.",
+      "emptyFilteredTitle": "لا يوجد طلاب مطابقون لعوامل التصفية",
+      "emptyFilteredDescription": "جرّب اسمًا أو رقم قيد أو كلية أو حالة أخرى.",
+      "status": {
+        "draft": "مسودة",
+        "active": "نشط",
+        "graduated": "متخرج",
+        "transferred": "منقول",
+        "withdrawn": "منسحب"
+      },
+      "location": {
+        "in_location": "في الأرشيف",
+        "borrowed": "معار"
+      },
+      "fileStatus": {
+        "complete": "مكتمل",
+        "incomplete": "غير مكتمل",
+        "draft": "مسودة"
+      },
+      "columns": {
+        "studentNumber": "رقم القيد",
+        "name": "الاسم",
+        "faculty": "الكلية",
+        "program": "البرنامج",
+        "enrollmentYear": "سنة القيد",
+        "location": "موقع الملف",
+        "status": "الحالة",
+        "actions": "إجراءات"
+      },
+      "filters": {
+        "name": "البحث بالاسم",
+        "studentNumber": "البحث برقم القيد",
+        "allFaculties": "كل الكليات",
+        "allStatuses": "كل الحالات"
+      },
+      "fields": {
+        "studentNumber": "رقم القيد",
+        "name": "الاسم الكامل",
+        "nationality": "الجنسية",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الهاتف",
+        "faculty": "الكلية",
+        "program": "البرنامج",
+        "enrollmentYear": "سنة القيد",
+        "graduationYear": "سنة التخرج",
+        "studentStatus": "حالة الطالب",
+        "locationStatus": "موقع الملف",
+        "drawer": "الدرج",
+        "createdAt": "تاريخ الإنشاء"
+      },
+      "placeholders": {
+        "studentNumber": "مثال: 1625",
+        "name": "الاسم الكامل كما هو مكتوب في الملف",
+        "nationality": "مثال: ليبي",
+        "faculty": "اختر الكلية",
+        "program": "اختر البرنامج",
+        "programBlocked": "اختر الكلية أولًا",
+        "drawer": "ابحث عن الدرج بالاسم",
+        "drawerEmpty": "لا يوجد درج مطابق",
+        "drawerMinChars": "اكتب حرفين على الأقل"
+      },
+      "actions": {
+        "create": "إضافة طالب",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "retry": "إعادة المحاولة",
+        "clearFilters": "مسح عوامل التصفية",
+        "clearDrawer": "إلغاء اختيار الدرج",
+        "backToList": "العودة إلى الطلاب",
+        "promote": "اعتماد الطالب"
+      },
+      "states": {
+        "loading": "جارٍ التحميل…",
+        "noFaculty": "لا توجد كلية مسجلة"
+      },
+      "form": {
+        "createTitle": "إضافة طالب",
+        "editTitle": "تعديل بيانات الطالب"
+      },
+      "errors": {
+        "required": "هذا الحقل مطلوب",
+        "maxLength": "استخدم {max} حرفًا كحد أقصى",
+        "email": "أدخل بريدًا إلكترونيًا صالحًا",
+        "yearRange": "أدخل سنة بين 1900 و2100",
+        "graduationBeforeEnrollment": "لا يمكن أن تسبق سنة التخرج سنة القيد",
+        "lookupFailed": "تعذر تحميل قائمة الخيارات",
+        "saveFailed": "تعذر حفظ بيانات الطالب",
+        "deleteFailed": "تعذر حذف الطالب",
+        "promoteFailed": "تعذر اعتماد الطالب",
+        "listFailed": "تعذر تحميل قائمة الطلاب",
+        "detailFailed": "تعذر تحميل بيانات الطالب",
+        "notFound": "لم يعد هذا الطالب موجودًا."
+      },
+      "toasts": {
+        "created": "تمت إضافة {name}",
+        "updated": "تم تحديث بيانات {name}",
+        "deleted": "تم حذف {name}",
+        "promoted": "تم اعتماد {name} كطالب نشط"
+      },
+      "deleteDialog": {
+        "title": "حذف الطالب",
+        "message": "هل تريد حذف {name}؟ ستفقد مستنداته السجل المرتبط بها، ولا يمكن التراجع عن ذلك."
+      },
+      "promoteDialog": {
+        "title": "اعتماد الطالب",
+        "message": "هل تريد اعتماد {name} كطالب نشط؟ نفّذ ذلك بعد التأكد من صحة البيانات."
+      },
+      "documents": {
+        "title": "المستندات",
+        "count": "{count} مستند",
+        "upload": "رفع مستند",
+        "required": "المستندات المطلوبة",
+        "pipelineUnavailable": "حالة المعالجة غير متاحة حاليًا — لا يؤثر ذلك على المستندات نفسها.",
+        "emptyTitle": "لا توجد مستندات بعد",
+        "emptyDescription": "ارفع نسخة ممسوحة ضوئيًا لبدء معالجة مستندات هذا الطالب.",
+        "open": "فتح",
+        "columns": {
+          "fileNumber": "رقم الملف",
+          "type": "النوع",
+          "fileStatus": "حالة الملف",
+          "pipeline": "المعالجة",
+          "confidence": "درجة الثقة",
+          "submitted": "تاريخ التسليم",
+          "open": "فتح"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,200 @@
+{
+  "en": {
+    "nav": {
+      "imports": "Excel imports"
+    },
+    "imports": {
+      "title": "Excel imports",
+      "subtitle": "Download the template, fill it in, then upload it to create records in bulk.",
+      "entityLabel": "What are you importing?",
+      "entities": {
+        "faculties": "Faculties",
+        "programs": "Programs",
+        "students": "Students",
+        "users": "Users",
+        "student_documents": "Student documents"
+      },
+      "template": {
+        "title": "Import template",
+        "description": "An Excel workbook with a Template sheet and a Notes sheet describing every column.",
+        "columns": "Template columns",
+        "optional": "optional",
+        "download": "Download template"
+      },
+      "upload": {
+        "title": "Upload a file",
+        "description": "One XLSX or CSV workbook per import.",
+        "dropLabel": "Drop the file here or",
+        "browse": "choose a file",
+        "hint": "XLSX or CSV, up to {size} MB",
+        "remove": "Remove file",
+        "submit": "Start import"
+      },
+      "status": {
+        "pending": "Queued",
+        "processing": "Importing",
+        "completed": "Finished",
+        "failed": "Failed"
+      },
+      "table": {
+        "entity": "Type",
+        "file": "File",
+        "status": "Status",
+        "progress": "Rows processed",
+        "started": "Started",
+        "actions": "Actions",
+        "counts": "{processed} processed · {success} ok · {failed} failed",
+        "unknownEntity": "Unknown"
+      },
+      "jobs": {
+        "title": "Import history",
+        "polling": "Updating {count} job(s)…",
+        "localNote": "This history is tracked in your browser — the API has no endpoint that lists past import jobs."
+      },
+      "empty": {
+        "title": "No imports yet",
+        "description": "Upload a filled-in template above to start your first import."
+      },
+      "actions": {
+        "viewErrors": "View failed rows",
+        "downloadErrors": "Download error file",
+        "hideErrors": "Hide",
+        "refresh": "Refresh status",
+        "remove": "Remove from list",
+        "retry": "Try again",
+        "clearHistory": "Clear list"
+      },
+      "errors": {
+        "title": "Failed rows",
+        "row": "Row",
+        "column": "Column",
+        "message": "Why it failed",
+        "rowData": "Row data",
+        "sourceNote": "Read from the error sheet the server generates — the API exposes failed rows as a spreadsheet only.",
+        "loadFailed": "Could not load the failed rows",
+        "emptyTitle": "No failed rows",
+        "emptyDescription": "This import finished without any row-level errors."
+      },
+      "toasts": {
+        "queued": "File uploaded — the import is queued.",
+        "uploadFailed": "Could not upload the file",
+        "templateDownloaded": "Template download started",
+        "templateFailed": "Could not download the template",
+        "errorsDownloaded": "Error file download started",
+        "errorsFailed": "Could not download the error file",
+        "historyCleared": "Import history cleared from this browser",
+        "refreshFailed": "Could not refresh the import status",
+        "jobRemoved": "Import removed from this list"
+      },
+      "confirmClear": {
+        "title": "Clear the import history?",
+        "message": "This only clears the list in your browser. Nothing that was already imported is affected.",
+        "confirm": "Clear list"
+      },
+      "confirmRemove": {
+        "title": "Remove this job from the history?",
+        "message": "This only removes the row from your browser. Nothing that was already imported is affected.",
+        "confirm": "Remove"
+      }
+    }
+  },
+  "ar": {
+    "nav": {
+      "imports": "الاستيراد من Excel"
+    },
+    "imports": {
+      "title": "الاستيراد من Excel",
+      "subtitle": "نزّل القالب وعبّئه ثم ارفعه لإنشاء السجلات دفعة واحدة.",
+      "entityLabel": "ما الذي تريد استيراده؟",
+      "entities": {
+        "faculties": "الكليات",
+        "programs": "البرامج",
+        "students": "الطلاب",
+        "users": "المستخدمون",
+        "student_documents": "مستندات الطلاب"
+      },
+      "template": {
+        "title": "قالب الاستيراد",
+        "description": "ملف Excel يضم ورقة القالب وورقة ملاحظات تشرح كل عمود.",
+        "columns": "أعمدة القالب",
+        "optional": "اختياري",
+        "download": "تنزيل القالب"
+      },
+      "upload": {
+        "title": "رفع ملف",
+        "description": "ملف XLSX أو CSV واحد لكل عملية استيراد.",
+        "dropLabel": "أفلت الملف هنا أو",
+        "browse": "اختر ملفًا",
+        "hint": "XLSX أو CSV، بحد أقصى {size} ميجابايت",
+        "remove": "إزالة الملف",
+        "submit": "بدء الاستيراد"
+      },
+      "status": {
+        "pending": "في الانتظار",
+        "processing": "جارٍ الاستيراد",
+        "completed": "انتهى",
+        "failed": "فشل"
+      },
+      "table": {
+        "entity": "النوع",
+        "file": "الملف",
+        "status": "الحالة",
+        "progress": "الصفوف المعالجة",
+        "started": "وقت البدء",
+        "actions": "إجراءات",
+        "counts": "{processed} صفًا · {success} ناجح · {failed} فاشل",
+        "unknownEntity": "غير معروف"
+      },
+      "jobs": {
+        "title": "سجل الاستيراد",
+        "polling": "يجري تحديث {count} من العمليات…",
+        "localNote": "يُتابَع هذا السجل من هذا المتصفح وحده، إذ لا توفّر الواجهة البرمجية قائمة بعمليات الاستيراد السابقة."
+      },
+      "empty": {
+        "title": "لا توجد عمليات استيراد بعد",
+        "description": "ارفع قالبًا معبّأً من الأعلى لبدء أول عملية استيراد."
+      },
+      "actions": {
+        "viewErrors": "عرض الصفوف الفاشلة",
+        "downloadErrors": "تنزيل ملف الأخطاء",
+        "hideErrors": "إخفاء",
+        "refresh": "تحديث الحالة",
+        "remove": "إزالة من القائمة",
+        "retry": "إعادة المحاولة",
+        "clearHistory": "مسح السجل"
+      },
+      "errors": {
+        "title": "الصفوف الفاشلة",
+        "row": "الصف",
+        "column": "العمود",
+        "message": "سبب الفشل",
+        "rowData": "بيانات الصف",
+        "sourceNote": "تُقرأ هذه الصفوف من ملف الأخطاء الذي ينشئه الخادم، فالواجهة البرمجية لا تعرضها إلا كملف جدول بيانات.",
+        "loadFailed": "تعذّر تحميل الصفوف الفاشلة",
+        "emptyTitle": "لا توجد صفوف فاشلة",
+        "emptyDescription": "اكتملت هذه العملية دون أي خطأ في الصفوف."
+      },
+      "toasts": {
+        "queued": "تم رفع الملف وجدولة الاستيراد.",
+        "uploadFailed": "تعذّر رفع الملف",
+        "templateDownloaded": "بدأ تنزيل القالب",
+        "templateFailed": "تعذّر تنزيل القالب",
+        "errorsDownloaded": "بدأ تنزيل ملف الأخطاء",
+        "errorsFailed": "تعذّر تنزيل ملف الأخطاء",
+        "historyCleared": "تم مسح سجل الاستيراد من هذا المتصفح",
+        "refreshFailed": "تعذّر تحديث حالة الاستيراد",
+        "jobRemoved": "تمت إزالة عملية الاستيراد من هذه القائمة"
+      },
+      "confirmClear": {
+        "title": "مسح سجل الاستيراد؟",
+        "message": "سيُمسح ما في هذا المتصفح فقط، ولن تتأثر البيانات التي جرى استيرادها.",
+        "confirm": "مسح السجل"
+      },
+      "confirmRemove": {
+        "title": "إزالة هذه العملية من السجل؟",
+        "message": "ستُزال الصفوف من متصفحك فقط، ولن تتأثر البيانات التي جرى استيرادها.",
+        "confirm": "إزالة"
+      }
+    }
+  }
+}

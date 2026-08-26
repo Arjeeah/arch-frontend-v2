@@ -2,36 +2,57 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import axios from 'axios'
 import { ArrowLeft, Pencil } from 'lucide-vue-next'
+import AppErrorState from '@/shared/components/AppErrorState.vue'
 import { formatDate } from '@/shared/utils/date'
+import { useToasts } from '@/shared/composables/useToasts'
+import { getApiErrorMessage } from '@/shared/utils/apiError'
 import UserStatusBadge from '../components/UserStatusBadge.vue'
 import CreateUserDialog from '../components/CreateUserDialog.vue'
 import { useUsersStore } from '../stores/useUsersStore'
-import { roleLabel } from '../types'
-import type { UserInput } from '../types'
+import type { User, UserInput } from '../types'
 
 const store = useUsersStore()
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
+const toasts = useToasts()
 
+// verify against live API: `users.id` is a UUID string (`HasUuids` on the
+// `User` model), never a numeric id — do not `parseInt` this.
 const userId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
-  if (!raw) return null
-  const n = parseInt(raw, 10)
-  return isNaN(n) ? null : n
+  return raw || null
 })
 
-const user = computed(() =>
-  userId.value !== null ? (store.users.find((u) => u.id === userId.value) ?? null) : null,
-)
+const user = ref<User | null>(null)
+const notFound = ref(false)
+const loadError = ref<string | null>(null)
 
-onMounted(() => {
-  if (userId.value !== null) {
-    store.fetchUser(userId.value).catch(() => {
-      // store exposes the message via store.error
-    })
+/**
+ * A 404 and a dropped connection are different answers. `load` used to fold
+ * every failure into `notFound`, so a 500 or a timeout told the operator the
+ * record does not exist — and the only way to re-attempt was to navigate away
+ * and back, because the not-found branch offers no retry.
+ */
+async function load() {
+  if (!userId.value) return
+  notFound.value = false
+  loadError.value = null
+  try {
+    user.value = await store.fetchUser(userId.value)
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      notFound.value = true
+    } else {
+      loadError.value = store.error ?? t('users.detail.loadError')
+    }
   }
-})
+}
+
+onMounted(load)
 
 function initials(name: string) {
   return name
@@ -49,10 +70,11 @@ const editOpen = ref(false)
 async function handleSave(data: UserInput) {
   if (!user.value) return
   try {
-    await store.updateUser(user.value.id, data)
+    user.value = await store.updateUser(user.value.id, data)
+    toasts.success(t('users.toast.updated'))
     editOpen.value = false
-  } catch {
-    // store exposes the message via store.error
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, t('users.toast.saveFailed')))
   }
 }
 </script>
@@ -60,17 +82,25 @@ async function handleSave(data: UserInput) {
 <template>
   <!-- Loading -->
   <div v-if="!user && store.loading" class="flex items-center justify-center py-24">
-    <p class="text-text-secondary font-sans">Loading…</p>
+    <p class="text-text-secondary font-sans">{{ t('users.detail.loading') }}</p>
   </div>
 
-  <!-- Not found -->
-  <div v-else-if="!user" class="flex flex-col items-center justify-center py-24 gap-4">
-    <p class="text-text-secondary font-sans">{{ store.error ?? 'User not found.' }}</p>
+  <!-- Load failed for any reason other than "gone" — retryable -->
+  <AppErrorState
+    v-else-if="loadError"
+    :title="t('users.detail.loadError')"
+    :description="loadError"
+    @retry="load"
+  />
+
+  <!-- Genuinely not there -->
+  <div v-else-if="!user || notFound" class="flex flex-col items-center justify-center py-24 gap-4">
+    <p class="text-text-secondary font-sans">{{ t('users.detail.notFound') }}</p>
     <button
       class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-display"
       @click="router.push('/users')"
     >
-      Back to Users
+      {{ t('users.detail.backToUsers') }}
     </button>
   </div>
 
@@ -92,19 +122,19 @@ async function handleSave(data: UserInput) {
     <!-- Info blocks -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
-        <p class="text-xs text-text-muted font-display mb-1">Role</p>
+        <p class="text-xs text-text-muted font-display mb-1">{{ t('users.detail.role') }}</p>
         <p class="text-base font-display font-semibold text-text-primary">
-          {{ roleLabel(user.role) }}
+          {{ t(`common.roles.${user.role}`) }}
         </p>
       </div>
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
-        <p class="text-xs text-text-muted font-display mb-1">Faculties</p>
+        <p class="text-xs text-text-muted font-display mb-1">{{ t('users.detail.faculties') }}</p>
         <p class="text-base font-display font-semibold text-text-primary">
           {{ user.faculties.length ? user.faculties.map((f) => f.nameEN).join(', ') : '-' }}
         </p>
       </div>
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
-        <p class="text-xs text-text-muted font-display mb-1">Created At</p>
+        <p class="text-xs text-text-muted font-display mb-1">{{ t('users.detail.createdAt') }}</p>
         <p class="text-base font-display font-semibold text-text-primary">
           {{ formatDate(user.createdAt) }}
         </p>
@@ -120,15 +150,15 @@ async function handleSave(data: UserInput) {
         class="flex items-center gap-2 px-5 py-2 rounded-lg border border-border text-sm font-display font-medium text-text-secondary hover:bg-surface transition-colors"
         @click="router.push('/users')"
       >
-        <ArrowLeft class="w-4 h-4" />
-        Back
+        <ArrowLeft class="w-4 h-4 rtl:-scale-x-100" />
+        {{ t('users.detail.back') }}
       </button>
       <button
         class="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-display font-medium hover:bg-primary-mid transition-colors"
         @click="editOpen = true"
       >
         <Pencil class="w-4 h-4" />
-        Edit User
+        {{ t('users.detail.edit') }}
       </button>
     </div>
   </div>

@@ -1,107 +1,69 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { i18n } from '@/app/plugins/i18n'
 import { borrowingApi } from '../api/borrowingApi'
-import type { Borrowing, BorrowingInput } from '../types'
+import type { BorrowingCreateInput, BorrowingUpdateInput } from '../types'
+
+/**
+ * Single-record borrowing mutations. The paginated list itself lives in
+ * `useServerTable` inside `BorrowingListPage` — this store only owns the
+ * create/update/delete/workflow calls; the page calls `refresh()` on the
+ * table afterwards so server-derived state (status, borrowed_at, overdue
+ * flags, …) stays authoritative.
+ */
+/**
+ * Store-level copy. These fallbacks land in `error`, which the pages render
+ * verbatim, so they have to be translated — an Arabic operator whose
+ * connection dropped mid-delete read an English sentence inside an otherwise
+ * Arabic dialog. A store is not a component, so it goes through the i18n
+ * instance directly, the way `useImportsStore` does.
+ */
+function tr(key: string): string {
+  return i18n.global.t(key)
+}
 
 export const useBorrowingStore = defineStore('borrowing', () => {
-  const items = ref<Borrowing[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchAll() {
+  async function run<T>(action: () => Promise<T>, failureMessage: string): Promise<T> {
     loading.value = true
     error.value = null
     try {
-      items.value = await borrowingApi.list()
-    } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to load borrowings')
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function create(input: BorrowingInput) {
-    loading.value = true
-    error.value = null
-    try {
-      const created = await borrowingApi.create(input)
-      items.value.unshift(created)
-      return created
-    } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to create borrowing')
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function update(id: number, input: Partial<BorrowingInput>) {
-    loading.value = true
-    error.value = null
-    try {
-      const updated = await borrowingApi.update(id, input)
-      const idx = items.value.findIndex((i) => i.id === id)
-      if (idx !== -1) items.value[idx] = updated
-      return updated
-    } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to update borrowing')
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function remove(id: number) {
-    loading.value = true
-    error.value = null
-    try {
-      await borrowingApi.delete(id)
-      const idx = items.value.findIndex((i) => i.id === id)
-      if (idx !== -1) items.value.splice(idx, 1)
-    } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to delete borrowing')
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * Runs a workflow transition, then reloads the list so server-derived state
-   * (status, borrowed_at, returned_at, overdue flags) stays authoritative.
-   */
-  async function runTransition(action: () => Promise<Borrowing>, failureMessage: string) {
-    loading.value = true
-    error.value = null
-    try {
-      await action()
+      return await action()
     } catch (err) {
       error.value = getApiErrorMessage(err, failureMessage)
-      loading.value = false
       throw err
+    } finally {
+      loading.value = false
     }
-    loading.value = false
-    await fetchAll()
   }
 
-  const approve = (id: number) =>
-    runTransition(() => borrowingApi.approve(id), 'Failed to approve borrowing')
+  const create = (input: BorrowingCreateInput) =>
+    run(() => borrowingApi.create(input), tr('borrowing.toast.saveFailed'))
 
-  const reject = (id: number) =>
-    runTransition(() => borrowingApi.reject(id), 'Failed to reject borrowing')
+  const update = (id: string, input: BorrowingUpdateInput) =>
+    run(() => borrowingApi.update(id, input), tr('borrowing.toast.saveFailed'))
 
-  const markBorrowed = (id: number) =>
-    runTransition(() => borrowingApi.markBorrowed(id), 'Failed to mark as borrowed')
+  const remove = (id: string) =>
+    run(() => borrowingApi.delete(id), tr('borrowing.toast.actionFailed'))
 
-  const markReturned = (id: number) =>
-    runTransition(() => borrowingApi.markReturned(id), 'Failed to mark as returned')
+  const approve = (id: string) =>
+    run(() => borrowingApi.approve(id), tr('borrowing.toast.actionFailed'))
+
+  const reject = (id: string, rejectionReason: string) =>
+    run(() => borrowingApi.reject(id, rejectionReason), tr('borrowing.toast.actionFailed'))
+
+  const markBorrowed = (id: string) =>
+    run(() => borrowingApi.markBorrowed(id), tr('borrowing.toast.actionFailed'))
+
+  const markReturned = (id: string) =>
+    run(() => borrowingApi.markReturned(id), tr('borrowing.toast.actionFailed'))
 
   return {
-    items,
     loading,
     error,
-    fetchAll,
     create,
     update,
     remove,

@@ -1,0 +1,326 @@
+{
+  "en": {
+    "nav": {
+      "studentDocuments": "Student Documents"
+    },
+    "studentDocuments": {
+      "title": "Student documents",
+      "subtitle": "Scanned files and where each one has got to in the extraction pipeline",
+      "resultCount": "{count} documents",
+      "untitled": "Unnumbered file",
+      "noFile": "No scan attached",
+      "noStudent": "Not linked to a student yet",
+      "emptyTitle": "No documents yet",
+      "emptyDescription": "Upload a scan to create the first document and start the extraction pipeline.",
+      "emptyFilteredTitle": "No documents match these filters",
+      "emptyFilteredDescription": "Try a different file number, student, type or status.",
+      "fileStatus": {
+        "complete": "Complete",
+        "incomplete": "Incomplete",
+        "draft": "Draft"
+      },
+      "columns": {
+        "fileNumber": "File no.",
+        "student": "Student",
+        "type": "Type",
+        "fileStatus": "File status",
+        "submitted": "Submitted",
+        "file": "Scan",
+        "actions": "Actions"
+      },
+      "filters": {
+        "fileNumber": "Search by file number",
+        "student": "Filter by student",
+        "studentEmpty": "No student matches that search",
+        "studentMinChars": "Type at least 2 characters",
+        "allTypes": "All document types",
+        "allStatuses": "All file statuses"
+      },
+      "fields": {
+        "student": "Student",
+        "documentType": "Document type",
+        "fileStatus": "File status",
+        "submittedAt": "Submitted on",
+        "createdAt": "Created",
+        "notes": "Notes",
+        "file": "Scanned file"
+      },
+      "placeholders": {
+        "student": "Search by name or student number",
+        "documentType": "Select a document type",
+        "notes": "Anything worth recording about this file"
+      },
+      "actions": {
+        "upload": "Upload document",
+        "submitUpload": "Upload and queue",
+        "edit": "Edit",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "reset": "Start over",
+        "retry": "Try again",
+        "clearFilters": "Clear filters",
+        "clearStudent": "Clear the selected student",
+        "backToList": "Back to documents",
+        "openFile": "Open scan"
+      },
+      "states": {
+        "loading": "Loading…"
+      },
+      "upload": {
+        "title": "Upload a document",
+        "subtitle": "The scan is staged first, then attached — attaching it is what starts the extraction pipeline.",
+        "dropLabel": "Drag the scan here",
+        "browse": "browse",
+        "hint": "PDF, PNG, JPG or TIFF · up to {max} MB",
+        "removeFile": "Remove this file",
+        "staged": "The file is already uploaded. Fix the details above and save again — it will not be sent twice.",
+        "queuedTitle": "{fileNumber} created and queued",
+        "queuedDescription": "Text extraction, AI analysis and embeddings run in the background. Open the document to follow along.",
+        "viewDocument": "Open the document",
+        "uploadAnother": "Upload another"
+      },
+      "pipelinePanel": {
+        "title": "Processing",
+        "autoRefresh": "Refreshing every 10s",
+        "unavailable": "Processing status is unavailable right now.",
+        "errorTitle": "The pipeline reported an error",
+        "pages": "Pages",
+        "ocr": "Text extracted",
+        "refinement": "AI analysis",
+        "embeddedPages": "Embedded pages",
+        "confidence": "AI confidence",
+        "yes": "Yes",
+        "no": "No",
+        "verifiedBy": "Verified by {name} {when}",
+        "unknownReviewer": "a reviewer",
+        "awaitingReview": "Extracted by the AI and waiting for a human to verify it."
+      },
+      "extraction": {
+        "title": "Extracted details",
+        "additional": "Other fields the AI returned",
+        "emptyTitle": "Nothing extracted yet",
+        "emptyDescription": "Details appear here once the AI analysis step finishes.",
+        "fields": {
+          "student_number": "Student number",
+          "student_name": "Student name",
+          "college": "Faculty",
+          "program": "Program",
+          "document_type": "Document type",
+          "enrollment_date": "Enrollment date"
+        }
+      },
+      "segments": {
+        "title": "Documents found in this scan",
+        "count": "{count} detected",
+        "unmatched": "No matching type",
+        "unavailable": "The segment breakdown is unavailable for this document.",
+        "emptyTitle": "No segments detected",
+        "emptyDescription": "The AI splits a scanned folder into the individual documents inside it; none were detected here.",
+        "columns": {
+          "sequence": "#",
+          "pages": "Pages",
+          "detected": "Detected as",
+          "matched": "Matched type",
+          "confidence": "Confidence"
+        }
+      },
+      "preview": {
+        "title": "Scan preview",
+        "unnamed": "Unnamed file",
+        "show": "Show preview",
+        "hide": "Hide preview"
+      },
+      "editDialog": {
+        "title": "Edit document",
+        "replaceFile": "Replace the scan",
+        "replaceHint": "Optional. Uploading a new scan replaces the current one and re-runs the extraction pipeline."
+      },
+      "deleteDialog": {
+        "title": "Delete document",
+        "message": "Delete {fileNumber}? The scan and everything the AI extracted from it go with it, and this cannot be undone."
+      },
+      "toasts": {
+        "created": "{fileNumber} uploaded and queued for processing",
+        "updated": "{fileNumber} updated",
+        "deleted": "{fileNumber} deleted"
+      },
+      "errors": {
+        "studentRequired": "Pick the student this file belongs to",
+        "typeRequired": "Pick a document type",
+        "fileRequired": "Attach the scanned file",
+        "fileRejected": "That file was not accepted. Use a PDF, PNG, JPG or TIFF of at most {max} MB.",
+        "notesTooLong": "Use at most {max} characters",
+        "lookupFailed": "Could not load the list of options",
+        "uploadFailed": "Could not upload this document",
+        "saveFailed": "Could not save this document",
+        "deleteFailed": "Could not delete this document",
+        "listFailed": "Could not load documents",
+        "detailFailed": "Could not load this document",
+        "notFound": "This document no longer exists."
+      }
+    }
+  },
+  "ar": {
+    "nav": {
+      "studentDocuments": "مستندات الطلاب"
+    },
+    "studentDocuments": {
+      "title": "مستندات الطلاب",
+      "subtitle": "الملفات الممسوحة ضوئيًا ومرحلة كل ملف في سلسلة المعالجة",
+      "resultCount": "{count} مستند",
+      "untitled": "ملف بلا رقم",
+      "noFile": "لا يوجد ملف مرفق",
+      "noStudent": "غير مرتبط بطالب بعد",
+      "emptyTitle": "لا توجد مستندات بعد",
+      "emptyDescription": "ارفع نسخة ممسوحة ضوئيًا لإنشاء أول مستند وبدء المعالجة.",
+      "emptyFilteredTitle": "لا توجد مستندات مطابقة لعوامل التصفية",
+      "emptyFilteredDescription": "جرّب رقم ملف أو طالبًا أو نوعًا أو حالة أخرى.",
+      "fileStatus": {
+        "complete": "مكتمل",
+        "incomplete": "غير مكتمل",
+        "draft": "مسودة"
+      },
+      "columns": {
+        "fileNumber": "رقم الملف",
+        "student": "الطالب",
+        "type": "النوع",
+        "fileStatus": "حالة الملف",
+        "submitted": "تاريخ التسليم",
+        "file": "الملف الممسوح",
+        "actions": "إجراءات"
+      },
+      "filters": {
+        "fileNumber": "البحث برقم الملف",
+        "student": "التصفية حسب الطالب",
+        "studentEmpty": "لا يوجد طالب مطابق",
+        "studentMinChars": "اكتب حرفين على الأقل",
+        "allTypes": "كل أنواع المستندات",
+        "allStatuses": "كل حالات الملف"
+      },
+      "fields": {
+        "student": "الطالب",
+        "documentType": "نوع المستند",
+        "fileStatus": "حالة الملف",
+        "submittedAt": "تاريخ التسليم",
+        "createdAt": "تاريخ الإنشاء",
+        "notes": "ملاحظات",
+        "file": "الملف الممسوح ضوئيًا"
+      },
+      "placeholders": {
+        "student": "ابحث بالاسم أو رقم القيد",
+        "documentType": "اختر نوع المستند",
+        "notes": "أي ملاحظة تستحق التسجيل عن هذا الملف"
+      },
+      "actions": {
+        "upload": "رفع مستند",
+        "submitUpload": "رفع وبدء المعالجة",
+        "edit": "تعديل",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "delete": "حذف",
+        "reset": "البدء من جديد",
+        "retry": "إعادة المحاولة",
+        "clearFilters": "مسح عوامل التصفية",
+        "clearStudent": "إلغاء اختيار الطالب",
+        "backToList": "العودة إلى المستندات",
+        "openFile": "فتح الملف"
+      },
+      "states": {
+        "loading": "جارٍ التحميل…"
+      },
+      "upload": {
+        "title": "رفع مستند",
+        "subtitle": "يُرفع الملف أولًا ثم يُربط بالمستند، وربطه هو ما يبدأ سلسلة المعالجة.",
+        "dropLabel": "اسحب الملف الممسوح إلى هنا",
+        "browse": "تصفح",
+        "hint": "PDF أو PNG أو JPG أو TIFF · حتى {max} ميجابايت",
+        "removeFile": "إزالة هذا الملف",
+        "staged": "تم رفع الملف بالفعل. صحّح البيانات أعلاه واحفظ مجددًا — لن يُرفع مرة أخرى.",
+        "queuedTitle": "تم إنشاء {fileNumber} وإضافته إلى قائمة المعالجة",
+        "queuedDescription": "يجري استخراج النص والتحليل الذكي وإنشاء التضمينات في الخلفية. افتح المستند لمتابعة التقدم.",
+        "viewDocument": "فتح المستند",
+        "uploadAnother": "رفع مستند آخر"
+      },
+      "pipelinePanel": {
+        "title": "المعالجة",
+        "autoRefresh": "تحديث كل 10 ثوانٍ",
+        "unavailable": "حالة المعالجة غير متاحة حاليًا.",
+        "errorTitle": "سجّلت سلسلة المعالجة خطأ",
+        "pages": "الصفحات",
+        "ocr": "استخراج النص",
+        "refinement": "التحليل الذكي",
+        "embeddedPages": "الصفحات المضمّنة",
+        "confidence": "درجة ثقة الذكاء الاصطناعي",
+        "yes": "نعم",
+        "no": "لا",
+        "verifiedBy": "تم التحقق بواسطة {name} {when}",
+        "unknownReviewer": "أحد المراجعين",
+        "awaitingReview": "استخرج الذكاء الاصطناعي البيانات وهي بانتظار تحقق بشري."
+      },
+      "extraction": {
+        "title": "البيانات المستخرجة",
+        "additional": "حقول أخرى أعادها الذكاء الاصطناعي",
+        "emptyTitle": "لم تُستخرج بيانات بعد",
+        "emptyDescription": "تظهر البيانات هنا بعد اكتمال خطوة التحليل الذكي.",
+        "fields": {
+          "student_number": "رقم القيد",
+          "student_name": "اسم الطالب",
+          "college": "الكلية",
+          "program": "البرنامج",
+          "document_type": "نوع المستند",
+          "enrollment_date": "تاريخ القيد"
+        }
+      },
+      "segments": {
+        "title": "المستندات المكتشفة داخل الملف",
+        "count": "{count} مستند مكتشف",
+        "unmatched": "لا يوجد نوع مطابق",
+        "unavailable": "تفصيل المستندات الداخلية غير متاح لهذا الملف.",
+        "emptyTitle": "لم يتم اكتشاف مستندات داخلية",
+        "emptyDescription": "يقسّم الذكاء الاصطناعي الملف الممسوح إلى المستندات المنفردة داخله، ولم يُكتشف أي منها هنا.",
+        "columns": {
+          "sequence": "#",
+          "pages": "الصفحات",
+          "detected": "النوع المكتشف",
+          "matched": "النوع المطابق",
+          "confidence": "درجة الثقة"
+        }
+      },
+      "preview": {
+        "title": "معاينة الملف",
+        "unnamed": "ملف بلا اسم",
+        "show": "عرض المعاينة",
+        "hide": "إخفاء المعاينة"
+      },
+      "editDialog": {
+        "title": "تعديل المستند",
+        "replaceFile": "استبدال الملف الممسوح",
+        "replaceHint": "اختياري. رفع ملف جديد يستبدل الملف الحالي ويعيد تشغيل سلسلة المعالجة."
+      },
+      "deleteDialog": {
+        "title": "حذف المستند",
+        "message": "هل تريد حذف {fileNumber}؟ سيُحذف معه الملف الممسوح وكل ما استخرجه الذكاء الاصطناعي منه، ولا يمكن التراجع عن ذلك."
+      },
+      "toasts": {
+        "created": "تم رفع {fileNumber} وإضافته إلى قائمة المعالجة",
+        "updated": "تم تحديث {fileNumber}",
+        "deleted": "تم حذف {fileNumber}"
+      },
+      "errors": {
+        "studentRequired": "اختر الطالب صاحب هذا الملف",
+        "typeRequired": "اختر نوع المستند",
+        "fileRequired": "أرفق الملف الممسوح ضوئيًا",
+        "fileRejected": "لم يُقبل هذا الملف. استخدم ملف PDF أو PNG أو JPG أو TIFF بحجم لا يتجاوز {max} ميجابايت.",
+        "notesTooLong": "استخدم {max} حرفًا كحد أقصى",
+        "lookupFailed": "تعذر تحميل قائمة الخيارات",
+        "uploadFailed": "تعذر رفع هذا المستند",
+        "saveFailed": "تعذر حفظ هذا المستند",
+        "deleteFailed": "تعذر حذف هذا المستند",
+        "listFailed": "تعذر تحميل قائمة المستندات",
+        "detailFailed": "تعذر تحميل هذا المستند",
+        "notFound": "لم يعد هذا المستند موجودًا."
+      }
+    }
+  }
+}

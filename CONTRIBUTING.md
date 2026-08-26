@@ -39,10 +39,15 @@ Don't create files by hand. Run the generator for what you need:
 | What                 | Command                 |
 | -------------------- | ----------------------- |
 | New feature module   | `npm run gen:module`    |
-| New page in a module | `npm run gen:page`      |
-| New Pinia store      | `npm run gen:store`     |
 | New shared component | `npm run gen:component` |
-| New API file         | `npm run gen:api`       |
+
+`gen:module` is the only way to scaffold module code — it generates a
+complete module (types, api, store, table, dialog, list page) in one pass,
+with the store and page already wired to the generated api (real CRUD, no
+manual rewiring). There is currently no generator for adding a single
+page/store/api file to an _existing_ module; `gen:page`, `gen:store`, and
+`gen:api` were removed because they pointed at Handlebars templates that no
+longer exist in the repo.
 
 ## Naming conventions
 

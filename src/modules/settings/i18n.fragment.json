@@ -1,0 +1,178 @@
+{
+  "en": {
+    "settings": {
+      "title": "Settings",
+      "subtitle": "System-wide configuration, grouped by area.",
+      "groups": {
+        "general": "General",
+        "storage": "Storage",
+        "borrowing": "Borrowing",
+        "ocr": "OCR",
+        "security": "Security",
+        "notifications": "Notifications",
+        "backup": "Backup"
+      },
+      "actions": {
+        "save": "Save changes",
+        "reset": "Reset to defaults"
+      },
+      "resetConfirm": {
+        "title": "Reset to defaults",
+        "message": "This group's settings will revert to the system defaults, discarding any customization. This action cannot be undone."
+      },
+      "toasts": {
+        "saveSuccess": "Settings saved.",
+        "saveError": "Could not save settings.",
+        "resetSuccess": "Settings reset to defaults.",
+        "resetError": "Could not reset settings.",
+        "overrideCapacitySuccess": "Storage capacity threshold updated.",
+        "overrideCapacityError": "Could not update the storage capacity threshold."
+      },
+      "fields": {
+        "systemName": "System name",
+        "defaultLanguage": "Default language",
+        "timezone": "Timezone",
+        "timezoneHelper": "IANA timezone identifier, e.g. Africa/Tripoli",
+        "dateFormat": "Date format",
+        "dateFormatHelper": "PHP date format string, e.g. Y-m-d",
+        "capacityWarningThreshold": "Capacity warning threshold (%)",
+        "maxFileSize": "Maximum file size",
+        "maxFileSizeHelper": "In megabytes",
+        "allowedExtensions": "Allowed file extensions",
+        "defaultDurationDays": "Default borrowing duration (days)",
+        "maxActivePerUser": "Maximum active borrowings per user",
+        "extensionLimit": "Extension limit",
+        "ocrEnabled": "OCR enabled",
+        "languages": "OCR languages",
+        "confidenceThreshold": "Confidence threshold (%)",
+        "failedLoginLockoutCount": "Failed login lockout count",
+        "sessionTimeout": "Session timeout",
+        "sessionTimeoutHelper": "In minutes",
+        "passwordPolicy": "Password policy",
+        "passwordPolicyHelper": "Pipe-delimited rules, e.g. min:8{'|'}mixed_case{'|'}numbers",
+        "perRoleEnableMap": "Notify by role",
+        "perRoleEnableMapHelper": "Which roles receive in-app notifications.",
+        "mailEnabled": "Email notifications enabled",
+        "scheduleCron": "Backup schedule",
+        "scheduleCronHelper": "Cron expression, e.g. 0 2 * * *",
+        "retentionDays": "Retention period (days)",
+        "destinations": "Backup destinations"
+      },
+      "options": {
+        "languageAr": "Arabic",
+        "languageEn": "English",
+        "languageAra": "Arabic",
+        "languageEng": "English"
+      },
+      "tagsInput": {
+        "placeholder": "Type a value and press Enter"
+      },
+      "overrideCapacity": {
+        "trigger": "Override capacity threshold",
+        "title": "Override storage capacity threshold",
+        "description": "Temporarily raise the warning threshold, e.g. during a large ingestion batch. This is logged for audit purposes.",
+        "newLimitLabel": "New threshold (%)",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Why is this override needed?",
+        "cancel": "Cancel",
+        "confirm": "Apply override",
+        "errors": {
+          "reasonRequired": "A reason is required.",
+          "limitRange": "Enter a value between 1 and 100."
+        }
+      },
+      "errors": {
+        "loadFailed": "Couldn't load settings",
+        "retry": "Try again"
+      }
+    }
+  },
+  "ar": {
+    "settings": {
+      "title": "الإعدادات",
+      "subtitle": "إعدادات النظام العامة، مقسّمة حسب المجال.",
+      "groups": {
+        "general": "عام",
+        "storage": "التخزين",
+        "borrowing": "الإعارة",
+        "ocr": "التعرّف الضوئي على الحروف",
+        "security": "الأمان",
+        "notifications": "الإشعارات",
+        "backup": "النسخ الاحتياطي"
+      },
+      "actions": {
+        "save": "حفظ التغييرات",
+        "reset": "استعادة الإعدادات الافتراضية"
+      },
+      "resetConfirm": {
+        "title": "استعادة الإعدادات الافتراضية",
+        "message": "ستعود إعدادات هذه المجموعة إلى القيم الافتراضية للنظام، مع فقدان أي تخصيص. لا يمكن التراجع عن هذا الإجراء."
+      },
+      "toasts": {
+        "saveSuccess": "تم حفظ الإعدادات.",
+        "saveError": "تعذّر حفظ الإعدادات.",
+        "resetSuccess": "تمت إعادة ضبط الإعدادات إلى القيم الافتراضية.",
+        "resetError": "تعذّرت إعادة ضبط الإعدادات.",
+        "overrideCapacitySuccess": "تم تحديث حد تنبيه سعة التخزين.",
+        "overrideCapacityError": "تعذّر تحديث حد تنبيه سعة التخزين."
+      },
+      "fields": {
+        "systemName": "اسم النظام",
+        "defaultLanguage": "اللغة الافتراضية",
+        "timezone": "المنطقة الزمنية",
+        "timezoneHelper": "معرّف منطقة زمنية بصيغة IANA، مثل Africa/Tripoli",
+        "dateFormat": "تنسيق التاريخ",
+        "dateFormatHelper": "صيغة تاريخ بلغة PHP، مثل Y-m-d",
+        "capacityWarningThreshold": "حد تنبيه سعة التخزين (%)",
+        "maxFileSize": "الحد الأقصى لحجم الملف",
+        "maxFileSizeHelper": "بالميجابايت",
+        "allowedExtensions": "امتدادات الملفات المسموح بها",
+        "defaultDurationDays": "مدة الإعارة الافتراضية (أيام)",
+        "maxActivePerUser": "الحد الأقصى للإعارات النشطة لكل مستخدم",
+        "extensionLimit": "حد التمديد",
+        "ocrEnabled": "تفعيل التعرّف الضوئي على الحروف",
+        "languages": "لغات التعرّف الضوئي",
+        "confidenceThreshold": "حد الثقة (%)",
+        "failedLoginLockoutCount": "عدد محاولات الدخول الفاشلة قبل الحظر",
+        "sessionTimeout": "مهلة الجلسة",
+        "sessionTimeoutHelper": "بالدقائق",
+        "passwordPolicy": "سياسة كلمة المرور",
+        "passwordPolicyHelper": "قواعد مفصولة بعلامة {'|'}، مثل min:8{'|'}mixed_case{'|'}numbers",
+        "perRoleEnableMap": "الإشعارات حسب الدور",
+        "perRoleEnableMapHelper": "الأدوار التي تستلم إشعارات داخل النظام.",
+        "mailEnabled": "تفعيل إشعارات البريد الإلكتروني",
+        "scheduleCron": "جدول النسخ الاحتياطي",
+        "scheduleCronHelper": "تعبير cron، مثل 0 2 * * *",
+        "retentionDays": "مدة الاحتفاظ (أيام)",
+        "destinations": "وجهات النسخ الاحتياطي"
+      },
+      "options": {
+        "languageAr": "العربية",
+        "languageEn": "الإنجليزية",
+        "languageAra": "العربية",
+        "languageEng": "الإنجليزية"
+      },
+      "tagsInput": {
+        "placeholder": "اكتب قيمة واضغط Enter"
+      },
+      "overrideCapacity": {
+        "trigger": "تجاوز حد سعة التخزين",
+        "title": "تجاوز حد تنبيه سعة التخزين",
+        "description": "رفع حد التنبيه مؤقتًا، مثلًا أثناء دفعة استيراد كبيرة. يتم تسجيل هذا الإجراء لأغراض التدقيق.",
+        "newLimitLabel": "الحد الجديد (%)",
+        "reasonLabel": "السبب",
+        "reasonPlaceholder": "لماذا هذا التجاوز مطلوب؟",
+        "cancel": "إلغاء",
+        "confirm": "تطبيق التجاوز",
+        "errors": {
+          "reasonRequired": "السبب مطلوب.",
+          "limitRange": "أدخل قيمة بين 1 و100."
+        }
+      },
+      "errors": {
+        "loadFailed": "تعذّر تحميل الإعدادات",
+        "retry": "إعادة المحاولة"
+      }
+    }
+  }
+}

@@ -1,58 +1,68 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { i18n } from '@/app/plugins/i18n'
+import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { auditApi } from '../api/auditApi'
-import type { AuditLog, TimelineEntry, AuditStat } from '../types'
+import type { AuditStat, TimelineEntry } from '../types'
 
+/** Store-level copy. Components read the same keys through `useI18n`. */
+function tr(key: string): string {
+  return i18n.global.t(key)
+}
+
+/**
+ * Stats and the live timeline. The log table is `useServerTable` state owned by
+ * the page — the store used to reimplement paging, loading and a page count of
+ * its own, and lost the composable's stale-response guard doing it.
+ *
+ * The two calls are deliberately separate. They used to share one
+ * `Promise.all`, so an archivist's 403 on the super-admin-only timeline
+ * (`AuditLogPolicy::viewTimeline`) rejected the whole thing and threw away the
+ * stats result that had already succeeded.
+ */
 export const useAuditStore = defineStore('audit', () => {
   const stats = ref<AuditStat | null>(null)
-  const timeline = ref<TimelineEntry[]>([])
-  const logs = ref<AuditLog[]>([])
-  const loading = ref(false)
-  const logsLoading = ref(false)
-  const totalPages = ref(1)
+  const statsLoading = ref(false)
+  const statsError = ref<string | null>(null)
 
-  const fetchDashboardData = async () => {
-    loading.value = true
+  const timeline = ref<TimelineEntry[]>([])
+  const timelineLoading = ref(false)
+  const timelineError = ref<string | null>(null)
+
+  async function fetchStats(): Promise<void> {
+    statsLoading.value = true
+    statsError.value = null
     try {
-      const [statsRes, timelineRes] = await Promise.all([
-        auditApi.getStats(),
-        auditApi.getTimeline(),
-      ])
-      stats.value = statsRes.data
-      timeline.value = timelineRes.data.data || timelineRes.data
+      stats.value = await auditApi.getStats()
     } catch (err) {
-      console.error('Failed to fetch audit dashboard data', err)
+      stats.value = null
+      statsError.value = getApiErrorMessage(err, tr('audit.stats.error'))
     } finally {
-      loading.value = false
+      statsLoading.value = false
     }
   }
 
-  const fetchLogs = async (params: {
-    search?: string
-    role?: string
-    page?: number
-    order?: string
-  }) => {
-    logsLoading.value = true
+  async function fetchTimeline(): Promise<void> {
+    timelineLoading.value = true
+    timelineError.value = null
     try {
-      const res = await auditApi.getLogs(params)
-      logs.value = res.data.data
-      totalPages.value = res.data.meta?.last_page || 1
+      timeline.value = await auditApi.getTimeline()
     } catch (err) {
-      console.error('Failed to fetch logs', err)
+      timeline.value = []
+      timelineError.value = getApiErrorMessage(err, tr('audit.timeline.error'))
     } finally {
-      logsLoading.value = false
+      timelineLoading.value = false
     }
   }
 
   return {
     stats,
+    statsLoading,
+    statsError,
     timeline,
-    logs,
-    loading,
-    logsLoading,
-    totalPages,
-    fetchDashboardData,
-    fetchLogs,
+    timelineLoading,
+    timelineError,
+    fetchStats,
+    fetchTimeline,
   }
 })

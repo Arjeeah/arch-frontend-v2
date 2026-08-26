@@ -1,5 +1,9 @@
 <script setup lang="ts">
-defineProps<{ status: 'Active' | 'Inactive' }>()
+import { useI18n } from 'vue-i18n'
+
+const props = defineProps<{ status: 'Active' | 'Inactive' }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -9,6 +13,6 @@ defineProps<{ status: 'Active' | 'Inactive' }>()
       status === 'Active' ? 'bg-success-bg text-success-text' : 'bg-inactive-bg text-inactive-text'
     "
   >
-    {{ status }}
+    {{ props.status === 'Active' ? t('users.status.active') : t('users.status.inactive') }}
   </span>
 </template>

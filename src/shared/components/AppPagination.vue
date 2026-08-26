@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 const props = defineProps<{
   currentPage: number
@@ -7,6 +9,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ 'update:currentPage': [page: number] }>()
+
+const { t } = useI18n()
 
 const visiblePages = computed((): (number | '...')[] => {
   const { currentPage: cur, totalPages: total } = props
@@ -19,12 +23,20 @@ const visiblePages = computed((): (number | '...')[] => {
 
 <template>
   <div class="flex items-center justify-center gap-1">
+    <!--
+      `<html dir="rtl">` reverses this flex row, so "previous" moves to the
+      right-hand side — the glyph has to flip with it. `rtl:-scale-x-100` is the
+      convention the rest of the app uses for direction-sensitive icons; the
+      literal `‹`/`›` characters these buttons used to hold could not follow.
+    -->
     <button
+      type="button"
+      :aria-label="t('common.previousPage')"
       class="w-8 h-8 flex items-center justify-center rounded border border-border text-text-secondary hover:bg-surface disabled:opacity-40"
       :disabled="currentPage === 1"
       @click="emit('update:currentPage', currentPage - 1)"
     >
-      ‹
+      <ChevronLeft class="w-4 h-4 rtl:-scale-x-100" />
     </button>
 
     <template v-for="page in visiblePages" :key="String(page)">
@@ -36,6 +48,9 @@ const visiblePages = computed((): (number | '...')[] => {
       </span>
       <button
         v-else
+        type="button"
+        :aria-label="t('common.goToPage', { page })"
+        :aria-current="page === currentPage ? 'page' : undefined"
         class="w-8 h-8 flex items-center justify-center rounded text-sm font-display font-medium transition-colors"
         :class="
           page === currentPage
@@ -49,11 +64,13 @@ const visiblePages = computed((): (number | '...')[] => {
     </template>
 
     <button
+      type="button"
+      :aria-label="t('common.nextPage')"
       class="w-8 h-8 flex items-center justify-center rounded border border-border text-text-secondary hover:bg-surface disabled:opacity-40"
       :disabled="currentPage === totalPages"
       @click="emit('update:currentPage', currentPage + 1)"
     >
-      ›
+      <ChevronRight class="w-4 h-4 rtl:-scale-x-100" />
     </button>
   </div>
 </template>

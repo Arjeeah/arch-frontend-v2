@@ -1,3 +1,1799 @@
 {
-  "app.title": "Arch Frontend v2"
+  "app": {
+    "title": "ARCH"
+  },
+  "audit": {
+    "title": "Audit logs & Timeline",
+    "export": {
+      "label": "Export audit log",
+      "success": "The audit log export has started downloading.",
+      "error": "Could not export the audit log"
+    },
+    "stats": {
+      "operationsToday": "Operations today",
+      "totalDocuments": "Total documents",
+      "borrowingsToday": "Borrowings today",
+      "securityAlerts": "Security alerts",
+      "securityAlertsHint": "Failed sign-ins in the last 24 hours",
+      "error": "Could not load the audit stats"
+    },
+    "timeline": {
+      "title": "Recent timeline",
+      "empty": "No recent activity.",
+      "error": "Could not load the timeline"
+    },
+    "logs": {
+      "title": "Audit logs history",
+      "emptyTitle": "No audit entries yet",
+      "emptyDescription": "Activity is recorded here as people use the system.",
+      "noMatchesTitle": "No matching entries",
+      "noMatchesDescription": "No audit entry matches the current filters.",
+      "error": "Could not load audit logs"
+    },
+    "columns": {
+      "timestamp": "Timestamp",
+      "user": "User",
+      "role": "Role",
+      "action": "Action",
+      "targetEntity": "Target entity",
+      "referenceId": "Reference ID"
+    },
+    "filters": {
+      "allRoles": "All roles",
+      "allActions": "All actions",
+      "referenceIdPlaceholder": "Search by reference ID"
+    },
+    "sort": {
+      "newest": "Newest first",
+      "oldest": "Oldest first"
+    }
+  },
+  "borrowing": {
+    "title": "Borrowing",
+    "subtitle": "Manage borrowing records",
+    "addBorrowing": "Add Borrowing",
+    "searchPlaceholder": "Search this page…",
+    "allStatus": "All Status",
+    "empty": {
+      "title": "No borrowing records",
+      "description": "No borrowing records match the current filters.",
+      "noMatchesTitle": "No matches on this page",
+      "noMatchesDescription": "Nothing on this page matches your search. Clear it, or move to another page."
+    },
+    "stats": {
+      "active": {
+        "label": "Active Borrowings",
+        "subLabel": "Borrowed right now — this page only"
+      },
+      "overdue": {
+        "label": "Overdue Items",
+        "subLabel": "Past their due date — this page only"
+      },
+      "dueSoon": {
+        "label": "Due Soon",
+        "subLabel": "Due within 7 days — this page only"
+      },
+      "returnedThisWeek": {
+        "label": "Returned This Week",
+        "subLabel": "Returned in the past week — this page only"
+      }
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "borrowed": "Borrowed",
+      "returned": "Returned",
+      "overdue": "Overdue"
+    },
+    "table": {
+      "document": "Document",
+      "borrower": "Borrower",
+      "notes": "Notes",
+      "dueDate": "Due Date",
+      "borrowedAt": "Borrowed At",
+      "returnedAt": "Returned At",
+      "status": "Status",
+      "actions": "Actions",
+      "rejectionReasonPrefix": "Reason:"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "markBorrowed": "Mark Borrowed",
+      "markReturned": "Return",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "confirm": {
+      "reject": {
+        "title": "Reject Request",
+        "confirm": "Reject",
+        "message": "Reject the borrowing request for {label}?",
+        "reasonLabel": "Rejection reason",
+        "reasonPlaceholder": "Explain why this request is being rejected"
+      },
+      "return": {
+        "title": "Mark as Returned",
+        "confirm": "Mark Returned",
+        "message": "Record {label} as returned? This cannot be undone."
+      },
+      "delete": {
+        "title": "Delete Borrowing",
+        "confirm": "Delete",
+        "message": "Delete the borrowing record for {label}? This action cannot be undone."
+      }
+    },
+    "toast": {
+      "created": "Borrowing request submitted",
+      "updated": "Borrowing request updated",
+      "deleted": "Borrowing request cancelled",
+      "approved": "Borrowing request approved",
+      "rejected": "Borrowing request rejected",
+      "markedBorrowed": "Marked as picked up",
+      "returned": "Marked as returned",
+      "saveFailed": "Failed to save borrowing request",
+      "actionFailed": "Action failed",
+      "rejectReasonRequired": "A rejection reason is required"
+    },
+    "dialog": {
+      "createTitle": "Create Borrowing",
+      "editTitle": "Edit Borrowing",
+      "createSubtitle": "Search for the archived document to request.",
+      "editSubtitle": "Only the notes can be changed once a request exists.",
+      "documentLabel": "Document",
+      "documentPlaceholder": "Search by file number…",
+      "documentMinChars": "Type at least {n} characters",
+      "documentEmpty": "No matching documents",
+      "documentSearchError": "Could not search documents",
+      "documentLocked": "The borrowed document cannot be changed after the request is created.",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Optional notes for this request",
+      "dueDateHint": "The due date is set automatically when an archivist approves the request.",
+      "cancel": "Cancel",
+      "save": "Save Borrowing",
+      "update": "Update Borrowing",
+      "errors": {
+        "documentRequired": "Select a document to borrow"
+      },
+      "documentSearching": "Searching…",
+      "documentClear": "Clear selection"
+    },
+    "error": {
+      "title": "Could not load borrowings",
+      "retry": "Try again"
+    }
+  },
+  "common": {
+    "auditActions": {
+      "student_file_checkout": "File checked out",
+      "student_file_returned": "File returned",
+      "document_scanned": "Document scanned",
+      "document_ocr_processed": "OCR completed",
+      "cabinet_capacity_updated": "Cabinet capacity updated",
+      "borrowing_requested": "Borrowing requested",
+      "borrowing_extension_requested": "Extension requested",
+      "high_school_cert_uploaded": "Certificate uploaded",
+      "duplicate_file_removed_soft_delete": "Duplicate file removed",
+      "excel_import_completed": "Excel import completed",
+      "view_reports": "Reports viewed",
+      "view_student_files": "Student files viewed",
+      "login": "Signed in",
+      "failed_login": "Failed sign-in",
+      "report_generated": "Report generated",
+      "report_downloaded": "Report downloaded"
+    },
+    "cancel": "Cancel",
+    "clearSelection": "Clear selection",
+    "confirm": "Confirm",
+    "dismissNotification": "Dismiss notification",
+    "errorTitle": "Something went wrong",
+    "export": "Export Report",
+    "fileAlreadySelected": "{name} is already selected",
+    "fileBrowse": "browse",
+    "fileCountExceeded": "{name} exceeds the limit of {max} files",
+    "fileDropLabel": "Drag files here",
+    "fileHintCount": "max {max} files",
+    "fileHintSize": "up to {max} MB each",
+    "fileRemove": "Remove file",
+    "fileTooLarge": "{name} is larger than {max} MB",
+    "fileTypeRejected": "{name} is not an accepted file type",
+    "goToPage": "Go to page {page}",
+    "language": "Language",
+    "live": "Live",
+    "loadResultsFailed": "Could not load results",
+    "loading": "Loading…",
+    "logoAlt": "ARCH system",
+    "logout": "Log out",
+    "nextPage": "Next page",
+    "noData": "No data",
+    "noResults": "No results found",
+    "nothingHere": "Nothing here yet",
+    "pipelineStatus": {
+      "pending": "Pending",
+      "ocr_processing": "Extracting text",
+      "ocr_completed": "Text extracted",
+      "refining": "AI analysis",
+      "refined": "Analysis complete",
+      "embedding": "Building embeddings",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "previousPage": "Previous page",
+    "retry": "Try again",
+    "roles": {
+      "super_admin": "Super Admin",
+      "archivist": "Archivist",
+      "faculty_staff": "Faculty Staff",
+      "system": "System",
+      "unknown": "Unknown"
+    },
+    "searchPlaceholder": "Search…",
+    "searching": "Searching…",
+    "select": "Select",
+    "typeAtLeast": "Type at least {n} characters"
+  },
+  "dashboard": {
+    "title": "System Dashboard",
+    "archivistTitle": "Archive Dashboard",
+    "facultyTitle": "Faculty Dashboard",
+    "refresh": "Refresh",
+    "refreshed": "Dashboard updated",
+    "refreshedPartial": "Dashboard updated, but {failed} of {total} panels failed to load",
+    "refreshFailed": "Could not refresh the dashboard",
+    "retry": "Try again",
+    "loadFailed": "Could not load this panel",
+    "linkUnavailable": "This screen is not available for your account yet",
+    "stats": {
+      "totalArchive": "Total Files",
+      "totalArchiveHint": "Documents in the archive",
+      "totalUsers": "Total Users",
+      "totalUsersHint": "All system users",
+      "activeBorrows": "Active Borrows",
+      "activeBorrowsHint": "Files out of the archive",
+      "securityAlerts": "Security Alerts",
+      "securityAlertsHint": "Failed logins in the last 24 hours",
+      "totalFiles": "Total Files",
+      "totalFilesHint": "Documents in the archive",
+      "borrowedNow": "Borrowed Now",
+      "borrowedNowHint": "Files currently out",
+      "overdue": "Overdue",
+      "overdueHint": "Past their due date",
+      "scansToday": "Scans Today",
+      "scansTodayHint": "Documents added today",
+      "scansTodayChange": "{change} vs yesterday",
+      "facultyFiles": "Faculty Files",
+      "facultyFilesHint": "Documents in your faculties",
+      "myBorrowings": "My Borrowings",
+      "myBorrowingsHint": "Files you have out",
+      "pendingRequests": "Pending Requests",
+      "pendingRequestsHint": "Awaiting approval"
+    },
+    "storage": {
+      "title": "Storage",
+      "usedOfTotal": "{used} of {total}",
+      "noWarnings": "No capacity warnings."
+    },
+    "warnings": {
+      "storage_capacity": "Storage is at {percent} of capacity. Review capacity soon."
+    },
+    "facultyStorage": {
+      "title": "Storage by Faculty",
+      "empty": "No faculty storage recorded yet"
+    },
+    "systemHealth": {
+      "title": "System Health",
+      "storage": "Storage used",
+      "warnings": "Active warnings",
+      "documents": "Documents indexed",
+      "operationsToday": "Operations today",
+      "empty": "No health data available",
+      "cta": "System Settings"
+    },
+    "usersByRole": {
+      "title": "Users by Role",
+      "empty": "No users found",
+      "cta": "View Users"
+    },
+    "weeklyDigest": {
+      "title": "Weekly Digest",
+      "overdue": "Overdue files",
+      "dueSoon": "Due in 7 days",
+      "weeklyBorrowing": "Borrowings this week",
+      "storage": "Storage usage",
+      "empty": "Nothing to report",
+      "cta": "View Full Digest"
+    },
+    "ocrQueue": {
+      "title": "OCR Queue",
+      "pending": "Pending",
+      "completed": "Completed",
+      "failed": "Failed",
+      "today": "Documents scanned today.",
+      "unavailable": "The server is not reporting OCR counts yet."
+    },
+    "capacityWarning": {
+      "title": "A drawer is {percent} full",
+      "location": "Cabinet {cabinet} · {drawer}",
+      "unknownCabinet": "unnamed cabinet",
+      "unknownDrawer": "unnamed drawer",
+      "override": "Capacity can be overridden from the storage settings."
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "action": "Action",
+      "user": "User",
+      "target": "Target",
+      "time": "When",
+      "empty": "No activity yet",
+      "emptyHint": "Actions on files and borrowings will show up here."
+    },
+    "borrowStatus": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "borrowed": "Borrowed",
+      "returned": "Returned",
+      "overdue": "Overdue"
+    },
+    "borrowTable": {
+      "document": "Document",
+      "student": "Student",
+      "actor": "Borrowed by",
+      "requestedBy": "Requested by",
+      "status": "Status",
+      "dueDate": "Due date",
+      "daysOverdue": "Days late",
+      "timestamp": "Requested",
+      "requestsTitle": "Pending Requests",
+      "requestsEmpty": "No pending requests",
+      "overdueTitle": "Overdue Files",
+      "overdueEmpty": "Nothing is overdue",
+      "borrowingsTitle": "Recent Borrowings",
+      "borrowingsEmpty": "No borrowings yet"
+    },
+    "faculty": {
+      "knownFault": "The dashboard service failed on a pending borrowing request"
+    }
+  },
+  "documentTypes": {
+    "title": "Document Types",
+    "subtitle": "Manage the document types students can submit and when they're required",
+    "addNew": "Add Document Type",
+    "searchPlaceholder": "Search by name…",
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "status": "Status",
+      "isRequired": "Required by default",
+      "required": "Required",
+      "optional": "Optional"
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "allTypes": "All types"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "empty": {
+      "title": "No document types yet",
+      "description": "Add a document type so students can start submitting it.",
+      "filteredTitle": "No matching document types",
+      "filteredDescription": "No document type matches the current search and filters."
+    },
+    "errorState": {
+      "title": "Could not load document types",
+      "retry": "Try again"
+    },
+    "dialog": {
+      "createTitle": "Add Document Type",
+      "editTitle": "Edit Document Type",
+      "createSubtitle": "Fill in the details to create a new document type.",
+      "editSubtitle": "Update the document type's details.",
+      "namePlaceholder": "e.g. National ID copy",
+      "descriptionPlaceholder": "Optional notes shown to staff reviewing this document",
+      "nameRequired": "Name is required",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update"
+    },
+    "conditions": {
+      "label": "Conditions",
+      "enable": "Only required under certain conditions",
+      "matchLabel": "Match",
+      "and": "all",
+      "or": "any",
+      "ofTheFollowing": "of the following conditions",
+      "fieldPlaceholder": "Field (e.g. faculty_id)",
+      "opIn": "is one of",
+      "opNotIn": "is not one of",
+      "valuePlaceholder": "Value",
+      "valueListPlaceholder": "Comma-separated values",
+      "remove": "Remove condition",
+      "addCondition": "Add condition",
+      "atLeastOne": "Add at least one condition, or clear the checkbox above.",
+      "incomplete": "Every condition needs both a field and a value.",
+      "emptyList": "A list condition needs at least one value between the commas.",
+      "tooltip": "{count} condition(s) configured"
+    },
+    "deleteDialog": {
+      "title": "Delete Document Type",
+      "confirm": "Delete",
+      "message": "Are you sure you want to delete \"{name}\"? This cannot be undone."
+    },
+    "toasts": {
+      "created": "Document type created.",
+      "updated": "Document type updated.",
+      "deleted": "Document type deleted.",
+      "saveFailed": "Failed to save document type",
+      "deleteFailed": "Failed to delete document type"
+    }
+  },
+  "faculties": {
+    "title": "Faculties",
+    "subtitle": "Manage faculties and their programs",
+    "addFaculty": "Add Faculty",
+    "searchPlaceholder": "Search",
+    "allStatus": "All Status",
+    "empty": {
+      "title": "No faculties found",
+      "description": "No faculties match the current filters."
+    },
+    "toast": {
+      "created": "Faculty created successfully",
+      "updated": "Faculty updated successfully",
+      "deleted": "Faculty deleted successfully",
+      "saveFailed": "Failed to save faculty",
+      "deleteFailed": "Failed to delete faculty"
+    },
+    "deleteDialog": {
+      "title": "Delete Faculty",
+      "confirm": "Delete",
+      "message": "Are you sure you want to delete {name}? This action cannot be undone."
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "code": "Code",
+      "nameAr": "Name (AR)",
+      "nameEn": "Name (EN)",
+      "programs": "Programs",
+      "status": "Status",
+      "actions": "Actions",
+      "editAction": "Edit",
+      "deleteAction": "Delete"
+    },
+    "dialog": {
+      "createTitle": "Create Faculty",
+      "editTitle": "Edit Faculty",
+      "createSubtitle": "Add a new faculty to the system.",
+      "editSubtitle": "Update faculty details.",
+      "codeLabel": "Code",
+      "codePlaceholder": "Enter Code",
+      "nameArLabel": "Name AR",
+      "nameArPlaceholder": "e.g. تقنية المعلومات",
+      "nameEnLabel": "Name EN",
+      "nameEnPlaceholder": "e.g. Information Technology",
+      "statusLabel": "Status",
+      "statusHelp": "Set faculty status as active or inactive",
+      "cancel": "Cancel",
+      "save": "Save Faculty",
+      "update": "Update Faculty",
+      "errors": {
+        "codeRequired": "Code is required",
+        "nameArRequired": "Name AR is required",
+        "nameEnRequired": "Name EN is required"
+      }
+    },
+    "error": {
+      "title": "Could not load faculties",
+      "retry": "Try again"
+    }
+  },
+  "header": {
+    "searchPlaceholder": "Search…",
+    "notifications": "Notifications",
+    "accountMenu": "Account menu",
+    "fallbackUser": "User"
+  },
+  "imports": {
+    "title": "Excel imports",
+    "subtitle": "Download the template, fill it in, then upload it to create records in bulk.",
+    "entityLabel": "What are you importing?",
+    "entities": {
+      "faculties": "Faculties",
+      "programs": "Programs",
+      "students": "Students",
+      "users": "Users",
+      "student_documents": "Student documents"
+    },
+    "template": {
+      "title": "Import template",
+      "description": "An Excel workbook with a Template sheet and a Notes sheet describing every column.",
+      "columns": "Template columns",
+      "optional": "optional",
+      "download": "Download template"
+    },
+    "upload": {
+      "title": "Upload a file",
+      "description": "One XLSX or CSV workbook per import.",
+      "dropLabel": "Drop the file here or",
+      "browse": "choose a file",
+      "hint": "XLSX or CSV, up to {size} MB",
+      "remove": "Remove file",
+      "submit": "Start import"
+    },
+    "status": {
+      "pending": "Queued",
+      "processing": "Importing",
+      "completed": "Finished",
+      "failed": "Failed"
+    },
+    "table": {
+      "entity": "Type",
+      "file": "File",
+      "status": "Status",
+      "progress": "Rows processed",
+      "started": "Started",
+      "actions": "Actions",
+      "counts": "{processed} processed · {success} ok · {failed} failed",
+      "unknownEntity": "Unknown"
+    },
+    "jobs": {
+      "title": "Import history",
+      "polling": "Updating {count} job(s)…",
+      "localNote": "This history is tracked in your browser — the API has no endpoint that lists past import jobs."
+    },
+    "empty": {
+      "title": "No imports yet",
+      "description": "Upload a filled-in template above to start your first import."
+    },
+    "actions": {
+      "viewErrors": "View failed rows",
+      "downloadErrors": "Download error file",
+      "hideErrors": "Hide",
+      "refresh": "Refresh status",
+      "remove": "Remove from list",
+      "retry": "Try again",
+      "clearHistory": "Clear list"
+    },
+    "errors": {
+      "title": "Failed rows",
+      "row": "Row",
+      "column": "Column",
+      "message": "Why it failed",
+      "rowData": "Row data",
+      "sourceNote": "Read from the error sheet the server generates — the API exposes failed rows as a spreadsheet only.",
+      "loadFailed": "Could not load the failed rows",
+      "emptyTitle": "No failed rows",
+      "emptyDescription": "This import finished without any row-level errors."
+    },
+    "toasts": {
+      "queued": "File uploaded — the import is queued.",
+      "uploadFailed": "Could not upload the file",
+      "templateDownloaded": "Template download started",
+      "templateFailed": "Could not download the template",
+      "errorsDownloaded": "Error file download started",
+      "errorsFailed": "Could not download the error file",
+      "historyCleared": "Import history cleared from this browser",
+      "refreshFailed": "Could not refresh the import status",
+      "jobRemoved": "Import removed from this list"
+    },
+    "confirmClear": {
+      "title": "Clear the import history?",
+      "message": "This only clears the list in your browser. Nothing that was already imported is affected.",
+      "confirm": "Clear list"
+    },
+    "confirmRemove": {
+      "title": "Remove this job from the history?",
+      "message": "This only removes the row from your browser. Nothing that was already imported is affected.",
+      "confirm": "Remove"
+    }
+  },
+  "locations": {
+    "common": {
+      "cancel": "Cancel",
+      "create": "Create",
+      "saveChanges": "Save Changes",
+      "edit": "Edit",
+      "delete": "Delete",
+      "actions": "Actions",
+      "name": "Name",
+      "description": "Description",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "loading": "Loading…",
+      "backToRooms": "Back to Rooms",
+      "backToCabinets": "Back to Cabinets",
+      "errorTitle": "Something went wrong",
+      "retry": "Try again",
+      "noMatchesTitle": "No matches",
+      "noMatchesDescription": "Nothing matches the current search or filter. Try clearing them.",
+      "loadFailed": "Could not load this list"
+    },
+    "capacity": {
+      "slotsSuffix": "slots",
+      "status": {
+        "normal": "Normal",
+        "warning": "Warning",
+        "critical": "Critical"
+      }
+    },
+    "rooms": {
+      "title": "Archive Rooms",
+      "subtitle": "Browse archive rooms and drill into their cabinets and drawers",
+      "addRoom": "Add Room",
+      "searchPlaceholder": "Search rooms",
+      "filterAllStatuses": "All Statuses",
+      "emptyTitle": "No rooms yet",
+      "emptyDescription": "Add your first archive room to start organizing cabinets and drawers.",
+      "viewCabinets": "View cabinets",
+      "deleteTitle": "Delete Room",
+      "deleteMessage": "Are you sure you want to delete \"{name}\"? Its cabinets and drawers will be deleted too. This action cannot be undone.",
+      "columns": {
+        "name": "Name",
+        "description": "Description",
+        "cabinets": "Cabinets",
+        "status": "Status"
+      },
+      "dialog": {
+        "createTitle": "Add Room",
+        "editTitle": "Edit Room",
+        "namePlaceholder": "e.g. Ground Floor Archive",
+        "descriptionPlaceholder": "Optional notes about this room",
+        "nameRequired": "Name is required"
+      },
+      "toasts": {
+        "created": "Room created",
+        "updated": "Room updated",
+        "deleted": "Room deleted",
+        "saveFailed": "Could not save the room",
+        "deleteFailed": "Could not delete the room"
+      }
+    },
+    "cabinets": {
+      "subtitle": "Cabinets in this room. Each cabinet holds 4 drawers automatically.",
+      "addCabinet": "Add Cabinet",
+      "searchPlaceholder": "Search cabinets",
+      "filterAllStatuses": "All Statuses",
+      "emptyTitle": "No cabinets yet",
+      "emptyDescription": "Add a cabinet to this room — its 4 drawers are created automatically.",
+      "viewDrawers": "View drawers",
+      "roomLoadFailed": "Could not load this room",
+      "deleteTitle": "Delete Cabinet",
+      "deleteMessage": "Are you sure you want to delete \"{name}\"? Its drawers will be deleted too. This action cannot be undone.",
+      "columns": {
+        "name": "Name",
+        "position": "Position",
+        "drawers": "Drawers",
+        "status": "Status"
+      },
+      "dialog": {
+        "createTitle": "Add Cabinet",
+        "editTitle": "Edit Cabinet",
+        "namePlaceholder": "e.g. Cabinet A1",
+        "nameRequired": "Name is required",
+        "positionX": "Position X",
+        "positionY": "Position Y",
+        "positionInvalid": "Enter a valid number",
+        "roomContext": "Room: {room}",
+        "autoDrawersHint": "4 drawers will be created automatically for this cabinet."
+      },
+      "toasts": {
+        "created": "Cabinet created",
+        "updated": "Cabinet updated",
+        "deleted": "Cabinet deleted",
+        "saveFailed": "Could not save the cabinet",
+        "deleteFailed": "Could not delete the cabinet"
+      }
+    },
+    "drawers": {
+      "subtitle": "Drawers in this cabinet",
+      "subtitleWithRoom": "Drawers in this cabinet — {room}",
+      "addDrawer": "Add Drawer",
+      "filterAllStatuses": "All Statuses",
+      "emptyTitle": "No drawers yet",
+      "emptyDescription": "This cabinet has no drawers. Add one, or edit the cabinet to restore its default 4.",
+      "cabinetLoadFailed": "Could not load this cabinet",
+      "deleteTitle": "Delete Drawer",
+      "deleteMessage": "Are you sure you want to delete drawer #{number}? This action cannot be undone.",
+      "columns": {
+        "number": "No.",
+        "label": "Label",
+        "capacity": "Capacity",
+        "status": "Status"
+      },
+      "dialog": {
+        "createTitle": "Add Drawer",
+        "editTitle": "Edit Drawer",
+        "number": "Drawer Number",
+        "numberInvalid": "Enter a whole number of 1 or more",
+        "capacity": "Capacity",
+        "capacityInvalid": "Enter a valid capacity",
+        "label": "Label",
+        "labelPlaceholder": "Optional label, e.g. \"A–M\"",
+        "cabinetContext": "Cabinet: {cabinet}"
+      },
+      "toasts": {
+        "created": "Drawer created",
+        "updated": "Drawer updated",
+        "deleted": "Drawer deleted",
+        "saveFailed": "Could not save the drawer",
+        "deleteFailed": "Could not delete the drawer"
+      }
+    }
+  },
+  "login": {
+    "title": "Sign in",
+    "emailLabel": "Enter your email address",
+    "emailPlaceholder": "email address",
+    "passwordLabel": "Enter your Password",
+    "passwordPlaceholder": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot Password",
+    "submit": "Log in",
+    "dismissError": "Dismiss",
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "passwordRequired": "Password is required",
+      "failed": "Login failed"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "User Management",
+    "archive": "Archive Room",
+    "borrowing": "Borrowing",
+    "facultyManagement": "Faculty Management",
+    "faculties": "Faculties",
+    "audit": "Audit Logs",
+    "reports": "Reports",
+    "settings": "Settings",
+    "imports": "Excel imports",
+    "search": "Search",
+    "studentDocuments": "Student Documents",
+    "students": "Students",
+    "programs": "Programs",
+    "documentTypes": "Document Types",
+    "notifications": "Notifications"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "backToDashboard": "Back to dashboard",
+    "backToLogin": "Back to sign in"
+  },
+  "notifications": {
+    "bell": {
+      "title": "Notifications",
+      "markAllRead": "Mark all read",
+      "empty": "You're all caught up.",
+      "viewAll": "View all notifications",
+      "loadError": "Couldn't load notifications",
+      "retry": "Try again"
+    },
+    "list": {
+      "title": "Notifications",
+      "subtitle": "Everything the system has sent you, in one place.",
+      "markAllRead": "Mark all as read",
+      "filters": {
+        "all": "All",
+        "unread": "Unread",
+        "read": "Read"
+      },
+      "emptyTitle": "No notifications yet",
+      "emptyDescription": "Notifications about your borrowings, uploads and system alerts will show up here.",
+      "markRead": "Mark as read",
+      "delete": "Delete",
+      "deleteConfirmTitle": "Delete notification",
+      "deleteConfirmMessage": "This notification will be removed permanently. This action cannot be undone.",
+      "emptyFilteredDescription": "No notifications match this filter.",
+      "loadError": "Couldn't load notifications",
+      "retry": "Try again"
+    },
+    "toasts": {
+      "markReadError": "Could not mark this notification as read.",
+      "markAllReadSuccess": "All notifications marked as read.",
+      "markAllReadError": "Could not mark all notifications as read.",
+      "deleteSuccess": "Notification deleted.",
+      "deleteError": "Could not delete this notification.",
+      "markReadSuccess": "Notification marked as read.",
+      "noDestination": "This notification has no page to open yet."
+    },
+    "types": {
+      "borrowingApproved": {
+        "title": "Borrowing request approved",
+        "body": "Your borrowing request has been approved. You may pick up the file."
+      },
+      "borrowingDueSoon": {
+        "title": "Borrowing due soon",
+        "body": "Your borrowed file is due in 3 days. Please return it on time."
+      },
+      "borrowingOverdue": {
+        "title": "Borrowing overdue",
+        "body": "A borrowed file is past its due date."
+      },
+      "borrowingRequested": {
+        "title": "New borrowing request",
+        "body": "A new borrowing request has been submitted and requires review."
+      },
+      "duplicateFileDetected": {
+        "title": "Duplicate file detected",
+        "body": "A duplicate document was detected and soft-deleted."
+      },
+      "ocrFailed": {
+        "title": "OCR processing failed",
+        "body": "OCR extraction failed for a document and requires review."
+      },
+      "securityAlert": {
+        "title": "Security alert: repeated failed logins",
+        "body": "{count} failed login attempts for {email} in the last 15 minutes."
+      },
+      "storageCapacityWarning": {
+        "title": "Storage capacity warning",
+        "body": "Storage usage is at {percent}% of total capacity."
+      }
+    }
+  },
+  "pipeline": {
+    "nav": {
+      "group": "Document pipeline",
+      "import": "Bulk import",
+      "monitor": "Pipeline monitor"
+    },
+    "fileStatus": {
+      "complete": "Complete",
+      "incomplete": "Incomplete",
+      "draft": "Draft"
+    },
+    "upload": {
+      "title": "Bulk import",
+      "subtitle": "Upload a batch of scanned files to send them through the automated pipeline.",
+      "openMonitor": "Open the monitor",
+      "dropTitle": "Choose the files",
+      "dropLabel": "Drag files here or",
+      "dropHint": "PDF, PNG, JPG or TIFF · up to {size} MB per file · {max} files per batch",
+      "browse": "browse",
+      "removeFile": "Remove file",
+      "ruleTypes": "Accepted formats: PDF, PNG, JPG, JPEG, TIFF",
+      "ruleSize": "Maximum size per file: {size} MB",
+      "ruleCount": "Up to {max} files in one batch",
+      "rejected": "Rejected {count} of the dropped files — the reasons are listed under the drop zone.",
+      "uploading": "Uploading…",
+      "selectionSummary": "{count} files selected · {size}",
+      "clear": "Clear selection",
+      "cancel": "Cancel upload",
+      "submit": "Start import",
+      "clearConfirmTitle": "Clear the selection?",
+      "clearConfirmBody": "This removes {count} files from the list. Nothing is deleted from the archive.",
+      "successToast": "{count} documents queued for processing.",
+      "partialToast": "Only {queued} of the {submitted} files sent were accepted. Re-import the rest in smaller batches, and check the server's upload limits.",
+      "partialWarning": "The server accepted {queued} of the {submitted} files sent. The rest were dropped before validation — usually PHP's max_file_uploads or post_max_size limit.",
+      "errorToast": "Could not start the import.",
+      "cancelled": "Upload cancelled.",
+      "queuedTitle": "{count} documents queued",
+      "queuedBody": "Processing has started in the background. Follow its progress on the monitor.",
+      "showIds": "Show document ids",
+      "hideIds": "Hide document ids",
+      "dismissResult": "Dismiss"
+    },
+    "monitor": {
+      "title": "Pipeline monitor",
+      "subtitle": "Where every document stands as it moves through text extraction, AI analysis and indexing.",
+      "live": "Live · refreshing every {seconds}s",
+      "refresh": "Refresh",
+      "importAction": "Import documents",
+      "cards": {
+        "total": "Documents in the pipeline",
+        "inFlight": "In progress",
+        "inFlightHint": "Moving on its own",
+        "completed": "Completed",
+        "failed": "Failed",
+        "failedHint": "Needs a retry"
+      },
+      "breakdownTitle": "Breakdown by stage",
+      "breakdownHint": "Counts across the whole archive, not the page below.",
+      "loading": "Loading",
+      "searchPlaceholder": "Search by file number",
+      "allFileStatuses": "All file statuses",
+      "allStates": "All pipeline stages",
+      "pageFilterHint": "Showing {shown} of {loaded} loaded rows. The server cannot filter by pipeline stage yet, so this narrows the current page only.",
+      "listError": "Could not load the document list.",
+      "countsError": "Could not load the stage counts.",
+      "emptyTitle": "No documents yet",
+      "emptyBody": "Start by importing a batch of scanned files.",
+      "noneInStateTitle": "Nothing in this stage on this page",
+      "noneInStateBody": "Try another page, or clear the stage filter.",
+      "clearStateFilter": "Clear stage filter",
+      "totalRows": "{total} documents in total",
+      "columns": {
+        "document": "Document",
+        "student": "Student",
+        "state": "Stage",
+        "pages": "Pages",
+        "confidence": "Confidence",
+        "created": "Added",
+        "actions": "Actions"
+      },
+      "toggleDetail": "Toggle details",
+      "unnumbered": "No file number",
+      "unassigned": "Not linked to a student",
+      "statusUnavailable": "Status unavailable",
+      "retry": "Retry",
+      "retryUnavailable": "Retry is only available for failed documents, or ones stuck after text extraction.",
+      "retryToast": "Document sent back through the pipeline.",
+      "retryError": "Could not retry this document.",
+      "openFile": "Open the file"
+    },
+    "detail": {
+      "errorTitle": "Failure reason",
+      "apiLabel": "Server's label for the state",
+      "rawStatus": "Status code",
+      "ocrPages": "Pages extracted",
+      "embeddedPages": "Pages indexed",
+      "refinement": "AI analysis",
+      "verification": "Human review",
+      "verifiedBy": "Verified by {name}",
+      "notVerified": "Not reviewed yet",
+      "present": "Present",
+      "none": "None",
+      "unknownUser": "Unknown user"
+    }
+  },
+  "programs": {
+    "title": "Programs",
+    "subtitle": "Manage the academic programs offered under each faculty",
+    "addNew": "Add Program",
+    "searchPlaceholder": "Search by name…",
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "faculty": "Faculty",
+      "status": "Status"
+    },
+    "filters": {
+      "allFaculties": "All faculties",
+      "allStatuses": "All statuses"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "empty": {
+      "title": "No programs yet",
+      "description": "Add a program to a faculty to get started.",
+      "filteredTitle": "No matching programs",
+      "filteredDescription": "No program matches the current search and filters."
+    },
+    "errorState": {
+      "title": "Could not load programs",
+      "retry": "Try again"
+    },
+    "dialog": {
+      "createTitle": "Add Program",
+      "editTitle": "Edit Program",
+      "createSubtitle": "Fill in the details to create a new program.",
+      "editSubtitle": "Update the program's details.",
+      "facultyPlaceholder": "Select a faculty",
+      "facultiesLoading": "Loading faculties…",
+      "facultiesLoadFailed": "Could not load faculties. Try reopening this dialog.",
+      "facultyRequired": "Faculty is required",
+      "codePlaceholder": "e.g. PHARM-101",
+      "codeRequired": "Code is required",
+      "nameArPlaceholder": "Program name in Arabic",
+      "nameEnPlaceholder": "Program name in English",
+      "nameArRequired": "Arabic name is required",
+      "nameEnRequired": "English name is required",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update"
+    },
+    "deleteDialog": {
+      "title": "Delete Program",
+      "confirm": "Delete",
+      "message": "Are you sure you want to delete \"{name}\"? This cannot be undone."
+    },
+    "toasts": {
+      "created": "Program created.",
+      "updated": "Program updated.",
+      "deleted": "Program deleted.",
+      "saveFailed": "Failed to save program",
+      "deleteFailed": "Failed to delete program",
+      "facultiesLoadFailed": "Failed to load faculties"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Queue a system report and download it once the server has built it.",
+    "generate": {
+      "title": "Generate a report"
+    },
+    "form": {
+      "type": "Report type",
+      "typePlaceholder": "Choose a report type",
+      "format": "Format",
+      "formatPlaceholder": "Choose a format",
+      "filters": "Filters",
+      "facultyScopedHint": "This report is faculty-scoped — faculty staff only ever see their own faculty's rows.",
+      "submit": "Generate report"
+    },
+    "types": {
+      "audit_logs": "Audit logs",
+      "borrowings": "Borrowings",
+      "student_documents": "Student documents",
+      "users": "Users",
+      "weekly_digest": "Weekly digest",
+      "faculty_report": "Faculty report"
+    },
+    "formats": {
+      "csv": "CSV",
+      "xlsx": "Excel (XLSX)",
+      "pdf": "PDF"
+    },
+    "filters": {
+      "any": "Any",
+      "action": "Action",
+      "user_id": "User ID",
+      "role": "Role",
+      "reference_id": "Reference ID",
+      "date_from": "From date",
+      "date_to": "To date",
+      "status": "Status",
+      "faculty_id": "Faculty ID",
+      "program_id": "Program ID",
+      "document_type_id": "Document type",
+      "file_status": "File status",
+      "week_start": "Week starting",
+      "faculty_ids": "Faculties"
+    },
+    "filterValues": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "borrowed": "Borrowed",
+      "returned": "Returned",
+      "overdue": "Overdue",
+      "complete": "Complete",
+      "incomplete": "Incomplete",
+      "draft": "Draft",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "hints": {
+      "idList": "Comma-separated numbers, e.g. 1, 2, 3",
+      "uuid": "A UUID"
+    },
+    "status": {
+      "pending": "Queued",
+      "processing": "Building",
+      "completed": "Ready",
+      "failed": "Failed"
+    },
+    "table": {
+      "type": "Type",
+      "format": "Format",
+      "status": "Status",
+      "rows": "Rows",
+      "created": "Requested",
+      "expires": "Expires",
+      "expired": "Expired",
+      "actions": "Actions"
+    },
+    "jobs": {
+      "title": "Report queue",
+      "polling": "Updating {count} job(s)…",
+      "retentionNote": "Generated files are kept for 7 days. This queue is tracked in your browser — the API has no endpoint that lists past report jobs."
+    },
+    "empty": {
+      "title": "No reports yet",
+      "description": "Generate one above and it will appear here until the file is ready to download."
+    },
+    "actions": {
+      "download": "Download",
+      "refresh": "Refresh status",
+      "remove": "Remove from list",
+      "retry": "Try again",
+      "clearHistory": "Clear list"
+    },
+    "digest": {
+      "title": "Weekly digest",
+      "description": "The same numbers the weekly digest report is built from, calculated right now.",
+      "overdue": "Overdue files",
+      "dueSoon": "Due within 7 days",
+      "weeklyBorrowings": "Borrowings this week",
+      "storage": "Storage used",
+      "errorTitle": "Could not load the weekly digest"
+    },
+    "errors": {
+      "typeRequired": "Choose a report type",
+      "formatRequired": "Choose a format this report type supports",
+      "idList": "Enter whole numbers separated by commas",
+      "dateOrder": "The end date must be on or after the start date",
+      "typesTitle": "Could not load the report types"
+    },
+    "toasts": {
+      "queued": "Report queued — it will appear in the list when it is ready.",
+      "queueFailed": "Could not queue the report",
+      "downloaded": "Download started",
+      "downloadFailed": "Could not download the report",
+      "historyCleared": "Report list cleared from this browser",
+      "refreshFailed": "Could not refresh the report status",
+      "jobRemoved": "Report removed from this list"
+    },
+    "confirmClear": {
+      "title": "Clear the report list?",
+      "message": "This only clears the list in your browser. No generated file is deleted from the server.",
+      "confirm": "Clear list"
+    },
+    "emptyTypes": {
+      "title": "No report types available",
+      "description": "This account is not allowed to generate any of the system reports. Ask a super admin if you think that is wrong."
+    },
+    "confirmRemove": {
+      "title": "Remove this report from the list?",
+      "message": "The generated file stays on the server, but this browser is the only place holding a link to it — the API has no report index to find it again.",
+      "confirm": "Remove"
+    }
+  },
+  "review": {
+    "navLabel": "Review Queue",
+    "title": "Review Queue",
+    "subtitle": "Confirm or correct what the AI read off each scan — worst confidence first.",
+    "header": {
+      "pending": "{count} awaiting review",
+      "position": "{index} of {count}"
+    },
+    "list": {
+      "title": "Queue",
+      "untitled": "Untitled document"
+    },
+    "confidence": {
+      "label": "Extraction confidence",
+      "unknown": "No score",
+      "percent": "{value}%",
+      "title": "Extraction confidence: {value}%"
+    },
+    "preview": {
+      "title": "Scanned document",
+      "openInNewTab": "Open",
+      "emptyTitle": "Nothing to preview",
+      "noFile": "This document has no stored file.",
+      "selectRow": "Pick a document from the queue to start reviewing."
+    },
+    "fields": {
+      "studentNumber": "Student number",
+      "studentName": "Student name",
+      "college": "Faculty",
+      "program": "Program",
+      "documentType": "Document type",
+      "enrollmentDate": "Enrollment date",
+      "additionalFields": "Additional fields"
+    },
+    "form": {
+      "title": "Extracted identity",
+      "additionalFields": "Additional fields",
+      "addField": "Add field",
+      "noAdditionalFields": "The extractor found nothing beyond the fields above.",
+      "fieldKey": "Field",
+      "fieldValue": "Value",
+      "removeField": "Remove field",
+      "notExtracted": "Not extracted",
+      "datePlaceholder": "YYYY-MM-DD",
+      "loadingOptions": "Loading…",
+      "optionsUnavailable": "List unavailable — Refresh to retry",
+      "noCollege": "No faculty selected",
+      "noDocumentType": "No document type selected",
+      "unlistedOption": "{value} — not on record",
+      "aiSaid": "AI read: {value}",
+      "blank": "(blank)",
+      "revert": "Restore the AI value",
+      "unsaved": "Unsaved changes",
+      "noSelectionTitle": "No document selected",
+      "noSelectionDescription": "Pick a row from the queue to start reviewing."
+    },
+    "filter": {
+      "all": "All confidence levels",
+      "below": "Below {value}%"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "retry": "Try again",
+      "previous": "Previous document",
+      "next": "Next document",
+      "saveAndNext": "Save & next",
+      "verifyAndNext": "Verify & next",
+      "saveCorrections": "Save corrections | Save 1 correction | Save {count} corrections",
+      "verifyAsIs": "Verify as-is",
+      "reset": "Undo edits"
+    },
+    "diff": {
+      "title": "AI vs. reviewer",
+      "acceptedAsIs": "Accepted as extracted",
+      "correctedCount": "No corrections | 1 field corrected | {count} fields corrected",
+      "by": "by {name} · {when}",
+      "unknownUser": "Unknown user"
+    },
+    "discard": {
+      "title": "Discard these corrections?",
+      "message": "Verifying as-is saves the AI's reading and throws away every correction on this document — yours, and any an earlier reviewer already saved.",
+      "confirm": "Discard and verify"
+    },
+    "shortcuts": {
+      "hint": "Shortcuts: J / K to move between documents · Ctrl/⌘ + Enter to verify and advance · Ctrl/⌘ + S to save corrections"
+    },
+    "empty": {
+      "title": "Nothing left to review",
+      "description": "Every extraction has been checked by a human. Refresh when a new batch finishes processing."
+    },
+    "errors": {
+      "loadTitle": "Could not load the review queue",
+      "save": "Could not save the corrections",
+      "verify": "Could not verify this document",
+      "lookups": "Could not load the faculty and document-type lists"
+    },
+    "toasts": {
+      "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
+      "verified": "Document verified"
+    },
+    "writeUnavailable": "Saving is unavailable: the API does not send this document’s refinement id yet, so corrections cannot be addressed to it."
+  },
+  "search": {
+    "title": "Archive Search",
+    "subtitle": "Search the text of every scanned page in the archive.",
+    "form": {
+      "label": "Search query",
+      "placeholder": "طالب صيدلة رقم 1625",
+      "submit": "Search",
+      "clear": "Clear",
+      "hint": "Press Enter to search. Documents are Arabic, so the box types right-to-left.",
+      "tooShort": "Enter at least {count} character | Enter at least {count} characters",
+      "tooLong": "Keep the query under {max} characters"
+    },
+    "filters": {
+      "title": "Filters",
+      "faculty": "Faculty",
+      "allFaculties": "All faculties",
+      "program": "Program",
+      "allPrograms": "All programs",
+      "status": "Student status",
+      "allStatuses": "All statuses",
+      "limit": "Results per search",
+      "limitOption": "{count} results",
+      "loading": "Loading…",
+      "reset": "Reset filters",
+      "loadFailed": "The faculty and program lists could not be loaded — you can still search without them.",
+      "retryLookups": "Retry"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "graduated": "Graduated",
+      "transferred": "Transferred",
+      "withdrawn": "Withdrawn"
+    },
+    "mode": {
+      "semantic": "Semantic search",
+      "semanticHint": "Meaning-based match across document embeddings.",
+      "keyword": "Keyword fallback",
+      "keywordHint": "Semantic search is unavailable, so these results come from an exact-word match — expect to miss documents that phrase things differently.",
+      "whyLabel": "Why?",
+      "hideReason": "Hide details",
+      "reasonLabel": "Reason reported by the server"
+    },
+    "results": {
+      "summary": "Matching pages: {results} · Documents: {documents}",
+      "matchingPages": "{count} page | {count} pages",
+      "page": "Page {page}",
+      "pageUnknown": "Page unknown",
+      "fileNumber": "File {number}",
+      "unassigned": "Not linked to a student",
+      "openStudent": "Open student",
+      "openDocument": "Open document",
+      "match": "{percent}% match",
+      "rank": "Relevance {score}",
+      "showMore": "Show {count} more page | Show {count} more pages",
+      "showLess": "Show fewer pages"
+    },
+    "empty": {
+      "title": "No matches",
+      "description": "Nothing in the archive matched “{query}”. Try fewer words, or clear the filters."
+    },
+    "idle": {
+      "title": "Search the archive",
+      "description": "Type a student name or number, or any phrase that appears inside a scanned document."
+    },
+    "error": {
+      "title": "Search failed",
+      "retry": "Try again"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "System-wide configuration, grouped by area.",
+    "groups": {
+      "general": "General",
+      "storage": "Storage",
+      "borrowing": "Borrowing",
+      "ocr": "OCR",
+      "security": "Security",
+      "notifications": "Notifications",
+      "backup": "Backup"
+    },
+    "actions": {
+      "save": "Save changes",
+      "reset": "Reset to defaults"
+    },
+    "resetConfirm": {
+      "title": "Reset to defaults",
+      "message": "This group's settings will revert to the system defaults, discarding any customization. This action cannot be undone."
+    },
+    "toasts": {
+      "saveSuccess": "Settings saved.",
+      "saveError": "Could not save settings.",
+      "resetSuccess": "Settings reset to defaults.",
+      "resetError": "Could not reset settings.",
+      "overrideCapacitySuccess": "Storage capacity threshold updated.",
+      "overrideCapacityError": "Could not update the storage capacity threshold."
+    },
+    "fields": {
+      "systemName": "System name",
+      "defaultLanguage": "Default language",
+      "timezone": "Timezone",
+      "timezoneHelper": "IANA timezone identifier, e.g. Africa/Tripoli",
+      "dateFormat": "Date format",
+      "dateFormatHelper": "PHP date format string, e.g. Y-m-d",
+      "capacityWarningThreshold": "Capacity warning threshold (%)",
+      "maxFileSize": "Maximum file size",
+      "maxFileSizeHelper": "In megabytes",
+      "allowedExtensions": "Allowed file extensions",
+      "defaultDurationDays": "Default borrowing duration (days)",
+      "maxActivePerUser": "Maximum active borrowings per user",
+      "extensionLimit": "Extension limit",
+      "ocrEnabled": "OCR enabled",
+      "languages": "OCR languages",
+      "confidenceThreshold": "Confidence threshold (%)",
+      "failedLoginLockoutCount": "Failed login lockout count",
+      "sessionTimeout": "Session timeout",
+      "sessionTimeoutHelper": "In minutes",
+      "passwordPolicy": "Password policy",
+      "passwordPolicyHelper": "Pipe-delimited rules, e.g. min:8{'|'}mixed_case{'|'}numbers",
+      "perRoleEnableMap": "Notify by role",
+      "perRoleEnableMapHelper": "Which roles receive in-app notifications.",
+      "mailEnabled": "Email notifications enabled",
+      "scheduleCron": "Backup schedule",
+      "scheduleCronHelper": "Cron expression, e.g. 0 2 * * *",
+      "retentionDays": "Retention period (days)",
+      "destinations": "Backup destinations"
+    },
+    "options": {
+      "languageAr": "Arabic",
+      "languageEn": "English",
+      "languageAra": "Arabic",
+      "languageEng": "English"
+    },
+    "tagsInput": {
+      "placeholder": "Type a value and press Enter"
+    },
+    "overrideCapacity": {
+      "trigger": "Override capacity threshold",
+      "title": "Override storage capacity threshold",
+      "description": "Temporarily raise the warning threshold, e.g. during a large ingestion batch. This is logged for audit purposes.",
+      "newLimitLabel": "New threshold (%)",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Why is this override needed?",
+      "cancel": "Cancel",
+      "confirm": "Apply override",
+      "errors": {
+        "reasonRequired": "A reason is required.",
+        "limitRange": "Enter a value between 1 and 100."
+      }
+    },
+    "errors": {
+      "loadFailed": "Couldn't load settings",
+      "retry": "Try again"
+    }
+  },
+  "studentDocuments": {
+    "title": "Student documents",
+    "subtitle": "Scanned files and where each one has got to in the extraction pipeline",
+    "resultCount": "{count} documents",
+    "untitled": "Unnumbered file",
+    "noFile": "No scan attached",
+    "noStudent": "Not linked to a student yet",
+    "emptyTitle": "No documents yet",
+    "emptyDescription": "Upload a scan to create the first document and start the extraction pipeline.",
+    "emptyFilteredTitle": "No documents match these filters",
+    "emptyFilteredDescription": "Try a different file number, student, type or status.",
+    "fileStatus": {
+      "complete": "Complete",
+      "incomplete": "Incomplete",
+      "draft": "Draft"
+    },
+    "columns": {
+      "fileNumber": "File no.",
+      "student": "Student",
+      "type": "Type",
+      "fileStatus": "File status",
+      "submitted": "Submitted",
+      "file": "Scan",
+      "actions": "Actions"
+    },
+    "filters": {
+      "fileNumber": "Search by file number",
+      "student": "Filter by student",
+      "studentEmpty": "No student matches that search",
+      "studentMinChars": "Type at least 2 characters",
+      "allTypes": "All document types",
+      "allStatuses": "All file statuses"
+    },
+    "fields": {
+      "student": "Student",
+      "documentType": "Document type",
+      "fileStatus": "File status",
+      "submittedAt": "Submitted on",
+      "createdAt": "Created",
+      "notes": "Notes",
+      "file": "Scanned file"
+    },
+    "placeholders": {
+      "student": "Search by name or student number",
+      "documentType": "Select a document type",
+      "notes": "Anything worth recording about this file"
+    },
+    "actions": {
+      "upload": "Upload document",
+      "submitUpload": "Upload and queue",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "reset": "Start over",
+      "retry": "Try again",
+      "clearFilters": "Clear filters",
+      "clearStudent": "Clear the selected student",
+      "backToList": "Back to documents",
+      "openFile": "Open scan"
+    },
+    "states": {
+      "loading": "Loading…"
+    },
+    "upload": {
+      "title": "Upload a document",
+      "subtitle": "The scan is staged first, then attached — attaching it is what starts the extraction pipeline.",
+      "dropLabel": "Drag the scan here",
+      "browse": "browse",
+      "hint": "PDF, PNG, JPG or TIFF · up to {max} MB",
+      "removeFile": "Remove this file",
+      "staged": "The file is already uploaded. Fix the details above and save again — it will not be sent twice.",
+      "queuedTitle": "{fileNumber} created and queued",
+      "queuedDescription": "Text extraction, AI analysis and embeddings run in the background. Open the document to follow along.",
+      "viewDocument": "Open the document",
+      "uploadAnother": "Upload another"
+    },
+    "pipelinePanel": {
+      "title": "Processing",
+      "autoRefresh": "Refreshing every 10s",
+      "unavailable": "Processing status is unavailable right now.",
+      "errorTitle": "The pipeline reported an error",
+      "pages": "Pages",
+      "ocr": "Text extracted",
+      "refinement": "AI analysis",
+      "embeddedPages": "Embedded pages",
+      "confidence": "AI confidence",
+      "yes": "Yes",
+      "no": "No",
+      "verifiedBy": "Verified by {name} {when}",
+      "unknownReviewer": "a reviewer",
+      "awaitingReview": "Extracted by the AI and waiting for a human to verify it."
+    },
+    "extraction": {
+      "title": "Extracted details",
+      "additional": "Other fields the AI returned",
+      "emptyTitle": "Nothing extracted yet",
+      "emptyDescription": "Details appear here once the AI analysis step finishes.",
+      "fields": {
+        "student_number": "Student number",
+        "student_name": "Student name",
+        "college": "Faculty",
+        "program": "Program",
+        "document_type": "Document type",
+        "enrollment_date": "Enrollment date"
+      }
+    },
+    "segments": {
+      "title": "Documents found in this scan",
+      "count": "{count} detected",
+      "unmatched": "No matching type",
+      "unavailable": "The segment breakdown is unavailable for this document.",
+      "emptyTitle": "No segments detected",
+      "emptyDescription": "The AI splits a scanned folder into the individual documents inside it; none were detected here.",
+      "columns": {
+        "sequence": "#",
+        "pages": "Pages",
+        "detected": "Detected as",
+        "matched": "Matched type",
+        "confidence": "Confidence"
+      }
+    },
+    "preview": {
+      "title": "Scan preview",
+      "unnamed": "Unnamed file",
+      "show": "Show preview",
+      "hide": "Hide preview"
+    },
+    "editDialog": {
+      "title": "Edit document",
+      "replaceFile": "Replace the scan",
+      "replaceHint": "Optional. Uploading a new scan replaces the current one and re-runs the extraction pipeline."
+    },
+    "deleteDialog": {
+      "title": "Delete document",
+      "message": "Delete {fileNumber}? The scan and everything the AI extracted from it go with it, and this cannot be undone."
+    },
+    "toasts": {
+      "created": "{fileNumber} uploaded and queued for processing",
+      "updated": "{fileNumber} updated",
+      "deleted": "{fileNumber} deleted"
+    },
+    "errors": {
+      "studentRequired": "Pick the student this file belongs to",
+      "typeRequired": "Pick a document type",
+      "fileRequired": "Attach the scanned file",
+      "fileRejected": "That file was not accepted. Use a PDF, PNG, JPG or TIFF of at most {max} MB.",
+      "notesTooLong": "Use at most {max} characters",
+      "lookupFailed": "Could not load the list of options",
+      "uploadFailed": "Could not upload this document",
+      "saveFailed": "Could not save this document",
+      "deleteFailed": "Could not delete this document",
+      "listFailed": "Could not load documents",
+      "detailFailed": "Could not load this document",
+      "notFound": "This document no longer exists."
+    }
+  },
+  "students": {
+    "title": "Students",
+    "subtitle": "The student register and the paper files behind it",
+    "resultCount": "{count} students",
+    "draftNotice": "This record was created by the AI from a scanned file. Check the details, then confirm it.",
+    "emptyTitle": "No students yet",
+    "emptyDescription": "Students appear here once they are added by hand or created from a scanned file.",
+    "emptyFilteredTitle": "No students match these filters",
+    "emptyFilteredDescription": "Try a different name, number, faculty or status.",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "graduated": "Graduated",
+      "transferred": "Transferred",
+      "withdrawn": "Withdrawn"
+    },
+    "location": {
+      "in_location": "In the archive",
+      "borrowed": "On loan"
+    },
+    "fileStatus": {
+      "complete": "Complete",
+      "incomplete": "Incomplete",
+      "draft": "Draft"
+    },
+    "columns": {
+      "studentNumber": "Student no.",
+      "name": "Name",
+      "faculty": "Faculty",
+      "program": "Program",
+      "enrollmentYear": "Enrolled",
+      "location": "File location",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filters": {
+      "name": "Search by name",
+      "studentNumber": "Search by student number",
+      "allFaculties": "All faculties",
+      "allStatuses": "All statuses"
+    },
+    "fields": {
+      "studentNumber": "Student number",
+      "name": "Full name",
+      "nationality": "Nationality",
+      "email": "Email",
+      "phone": "Phone",
+      "faculty": "Faculty",
+      "program": "Program",
+      "enrollmentYear": "Enrollment year",
+      "graduationYear": "Graduation year",
+      "studentStatus": "Student status",
+      "locationStatus": "File location",
+      "drawer": "Drawer",
+      "createdAt": "Created"
+    },
+    "placeholders": {
+      "studentNumber": "e.g. 1625",
+      "name": "Full name as written on the file",
+      "nationality": "e.g. Libyan",
+      "faculty": "Select a faculty",
+      "program": "Select a program",
+      "programBlocked": "Select a faculty first",
+      "drawer": "Search drawers by label",
+      "drawerEmpty": "No drawer matches that label",
+      "drawerMinChars": "Type at least 2 characters"
+    },
+    "actions": {
+      "create": "Add student",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "retry": "Try again",
+      "clearFilters": "Clear filters",
+      "clearDrawer": "Clear the selected drawer",
+      "backToList": "Back to students",
+      "promote": "Confirm student"
+    },
+    "states": {
+      "loading": "Loading…",
+      "noFaculty": "No faculty on file"
+    },
+    "form": {
+      "createTitle": "Add student",
+      "editTitle": "Edit student"
+    },
+    "errors": {
+      "required": "This field is required",
+      "maxLength": "Use at most {max} characters",
+      "email": "Enter a valid email address",
+      "yearRange": "Enter a year between 1900 and 2100",
+      "graduationBeforeEnrollment": "Graduation cannot be before enrollment",
+      "lookupFailed": "Could not load the list of options",
+      "saveFailed": "Could not save this student",
+      "deleteFailed": "Could not delete this student",
+      "promoteFailed": "Could not confirm this student",
+      "listFailed": "Could not load students",
+      "detailFailed": "Could not load this student",
+      "notFound": "This student no longer exists."
+    },
+    "toasts": {
+      "created": "{name} added",
+      "updated": "{name} updated",
+      "deleted": "{name} deleted",
+      "promoted": "{name} confirmed as an active student"
+    },
+    "deleteDialog": {
+      "title": "Delete student",
+      "message": "Delete {name}? Their documents lose the record they hang off, and this cannot be undone."
+    },
+    "promoteDialog": {
+      "title": "Confirm student",
+      "message": "Confirm {name} as an active student? Do this once the details read correctly."
+    },
+    "documents": {
+      "title": "Documents",
+      "count": "{count} on file",
+      "upload": "Upload document",
+      "required": "Required documents",
+      "pipelineUnavailable": "Pipeline status is unavailable right now — the documents themselves are unaffected.",
+      "emptyTitle": "No documents yet",
+      "emptyDescription": "Upload a scan to start the extraction pipeline for this student.",
+      "open": "Open",
+      "columns": {
+        "fileNumber": "File no.",
+        "type": "Type",
+        "fileStatus": "File status",
+        "pipeline": "Processing",
+        "confidence": "Confidence",
+        "submitted": "Submitted",
+        "open": "Open"
+      }
+    }
+  },
+  "users": {
+    "title": "User Management",
+    "subtitle": "Manage system users and their roles",
+    "addUser": "Add User",
+    "searchPlaceholder": "Search",
+    "allRoles": "All Roles",
+    "allStatus": "All Status",
+    "allFaculties": "All Faculties",
+    "empty": {
+      "title": "No users found",
+      "description": "No users match the current filters."
+    },
+    "toast": {
+      "created": "User created successfully",
+      "updated": "User updated successfully",
+      "deleted": "User deleted successfully",
+      "saveFailed": "Failed to save user",
+      "deleteFailed": "Failed to delete user",
+      "loadFailed": "Failed to load user"
+    },
+    "deleteDialog": {
+      "title": "Delete User",
+      "confirm": "Delete",
+      "message": "Are you sure you want to delete {name}? This action cannot be undone."
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "faculty": "Faculty",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions",
+      "editAction": "Edit user",
+      "deleteAction": "Delete user"
+    },
+    "detail": {
+      "loading": "Loading…",
+      "notFound": "User not found.",
+      "backToUsers": "Back to Users",
+      "role": "Role",
+      "faculties": "Faculties",
+      "createdAt": "Created At",
+      "back": "Back",
+      "edit": "Edit User",
+      "loadError": "Could not load this user"
+    },
+    "dialog": {
+      "createTitle": "Create User",
+      "editTitle": "Edit User",
+      "createSubtitle": "Add a new user to the system and assign their role and permissions.",
+      "editSubtitle": "Update user information and role assignment.",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "Enter full name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "User{'@'}limu.edu.ly",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select role",
+      "facultiesLabel": "Faculties",
+      "passwordLabel": "Default Password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "statusLabel": "Status",
+      "statusHelp": "Set user account as active or inactive",
+      "cancel": "Cancel",
+      "save": "Save User",
+      "update": "Update User",
+      "errors": {
+        "nameRequired": "Full name is required",
+        "emailRequired": "Email is required",
+        "roleRequired": "Role is required",
+        "passwordRequired": "Password is required",
+        "facultyRequired": "Select at least one faculty"
+      },
+      "facultiesHintEdit": "Leave empty to keep the current faculties. Picking any replaces the whole assignment."
+    },
+    "facultyPicker": {
+      "loadError": "Could not load faculties",
+      "retry": "Retry",
+      "empty": "No faculties available"
+    },
+    "error": {
+      "title": "Could not load users",
+      "retry": "Try again"
+    }
+  }
 }

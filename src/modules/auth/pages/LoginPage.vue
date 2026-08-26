@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Eye, EyeOff } from 'lucide-vue-next'
+import { landingFor } from '@/app/router'
 import { useAuthStore } from '../store/useAuthStore'
 import pattern from '@/assets/login-pattern.png'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const isDev = import.meta.env.DEV
+const { t } = useI18n()
 
 const credentials = reactive({ email: '', password: '' })
 const showPassword = ref(false)
@@ -30,14 +32,14 @@ function validate() {
   fieldErrors.password = ''
   let ok = true
   if (!credentials.email) {
-    fieldErrors.email = 'Email is required'
+    fieldErrors.email = t('login.errors.emailRequired')
     ok = false
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.email)) {
-    fieldErrors.email = 'Enter a valid email address'
+    fieldErrors.email = t('login.errors.emailInvalid')
     ok = false
   }
   if (!credentials.password) {
-    fieldErrors.password = 'Password is required'
+    fieldErrors.password = t('login.errors.passwordRequired')
     ok = false
   }
   return ok
@@ -48,7 +50,11 @@ async function handleLogin() {
   if (!validate()) return
   const { success } = await authStore.login(credentials)
   if (success) {
-    const redirect = (router.currentRoute.value.query.redirect as string) || '/dashboard'
+    // `ROLE_LANDING` is the single source of truth for where a role starts —
+    // hardcoding `/dashboard` here made `/` and the login flow disagree the
+    // moment a role's landing moved.
+    const redirect =
+      (router.currentRoute.value.query.redirect as string) || landingFor(authStore.role)
     router.push(redirect)
   }
 }
@@ -60,9 +66,15 @@ async function handleLogin() {
     class="relative min-h-screen overflow-hidden bg-white bg-no-repeat bg-cover bg-center"
     :style="{ backgroundImage: `url(${pattern})` }"
   >
-    <!-- Curved blue shape — pinned to the right, scales to cover -->
+    <!--
+      Curved blue shape — pinned to the trailing edge, scales to cover.
+      `end-0` plus `rtl:-scale-x-100` mirrors the whole composition under
+      `dir="rtl"`, which `applyDocumentLocale` sets before the first paint: an
+      Arabic reader used to get RTL text in a left-pinned form with the artwork
+      still on the right, so the page read backwards.
+    -->
     <svg
-      class="absolute top-0 right-0 h-full pointer-events-none"
+      class="absolute top-0 end-0 h-full pointer-events-none rtl:-scale-x-100"
       style="width: auto; aspect-ratio: 1172 / 800"
       viewBox="0 0 1172 800"
       preserveAspectRatio="xMaxYMid slice"
@@ -88,15 +100,15 @@ async function handleLogin() {
       </defs>
     </svg>
 
-    <!-- Form — positioned exactly per Figma: left 49px, top 64px, width 751px -->
-    <form
-      class="absolute z-10"
-      style="left: 49px; top: 64px; width: 751px"
-      @submit.prevent="handleLogin"
-    >
+    <!--
+      Form — positioned per Figma at 49px from the leading edge, 64px down,
+      751px wide. Logical `start-*`, not an inline `left`, so it swaps sides
+      with the artwork in Arabic.
+    -->
+    <form class="absolute z-10 start-[49px] top-[64px] w-[751px]" @submit.prevent="handleLogin">
       <!-- "Sign in" heading — Poppins 500, 55px -->
       <h1 class="font-display font-medium text-black" style="font-size: 55px; line-height: 82px">
-        Sign in
+        {{ t('login.title') }}
       </h1>
 
       <!-- API error banner -->
@@ -105,7 +117,12 @@ async function handleLogin() {
         class="mt-4 bg-danger/10 text-danger rounded-lg px-4 py-3 text-sm font-display flex items-center gap-2"
       >
         <span class="flex-1">{{ loginError }}</span>
-        <button type="button" class="opacity-60 hover:opacity-100" @click="loginError = ''">
+        <button
+          type="button"
+          class="opacity-60 hover:opacity-100"
+          :aria-label="t('login.dismissError')"
+          @click="loginError = ''"
+        >
           ✕
         </button>
       </div>
@@ -113,7 +130,7 @@ async function handleLogin() {
       <!-- Email field group — top:173 on page, 27px below heading -->
       <div style="margin-top: 27px">
         <p class="font-display font-normal text-black" style="font-size: 22px; line-height: 33px">
-          Enter your email address
+          {{ t('login.emailLabel') }}
         </p>
         <p v-if="fieldErrors.email" class="mt-1 text-xs text-danger font-display">
           {{ fieldErrors.email }}
@@ -121,7 +138,7 @@ async function handleLogin() {
         <input
           v-model="credentials.email"
           type="email"
-          placeholder="email address"
+          :placeholder="t('login.emailPlaceholder')"
           class="mt-[10px] w-full bg-white rounded-[9px] px-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           style="
             height: 75px;
@@ -137,7 +154,7 @@ async function handleLogin() {
       <!-- Password field group — top:319 on page, 22px below email -->
       <div style="margin-top: 22px">
         <p class="font-display font-normal text-black" style="font-size: 22px; line-height: 33px">
-          Enter your Password
+          {{ t('login.passwordLabel') }}
         </p>
         <p v-if="fieldErrors.password" class="mt-1 text-xs text-danger font-display">
           {{ fieldErrors.password }}
@@ -146,8 +163,8 @@ async function handleLogin() {
           <input
             v-model="credentials.password"
             :type="showPassword ? 'text' : 'password'"
-            placeholder="Password"
-            class="w-full bg-white rounded-[9px] px-4 pr-12 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            :placeholder="t('login.passwordPlaceholder')"
+            class="w-full bg-white rounded-[9px] px-4 pe-12 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             style="
               height: 75px;
               border: 1px solid #adadad;
@@ -159,7 +176,8 @@ async function handleLogin() {
           />
           <button
             type="button"
-            class="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+            class="absolute end-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+            :aria-label="showPassword ? t('login.hidePassword') : t('login.showPassword')"
             @click="showPassword = !showPassword"
           >
             <EyeOff v-if="showPassword" class="w-5 h-5" />
@@ -181,7 +199,7 @@ async function handleLogin() {
             class="font-display font-medium"
             style="font-size: 14px; line-height: 21px; color: #3974d5"
           >
-            Remember me
+            {{ t('login.rememberMe') }}
           </span>
         </label>
 
@@ -191,7 +209,7 @@ async function handleLogin() {
           style="font-size: 14px; line-height: 21px; color: #3974d5"
           @click.prevent
         >
-          Forgot Password
+          {{ t('login.forgotPassword') }}
         </a>
       </div>
 
@@ -218,16 +236,7 @@ async function handleLogin() {
           v-if="authStore.loading"
           class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
         />
-        <span v-else>Log in</span>
-      </button>
-      <!-- Dev-only shortcut -->
-      <button
-        v-if="isDev"
-        type="button"
-        class="mt-4 w-full text-center text-xs font-display text-text-muted hover:text-text-secondary transition-colors"
-        @click="router.push('/dashboard')"
-      >
-        [dev] skip login → dashboard
+        <span v-else>{{ t('login.submit') }}</span>
       </button>
     </form>
   </div>

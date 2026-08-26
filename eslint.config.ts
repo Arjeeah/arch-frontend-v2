@@ -42,6 +42,13 @@ export default defineConfigWithVueTs(
           type: 'app',
           pattern: 'src/app/**',
         },
+        // Dev-only pages (the component gallery). Declared so the boundary
+        // rule actually applies — an undeclared directory is exempt from
+        // `boundaries/dependencies` entirely.
+        {
+          type: 'dev-page',
+          pattern: 'src/pages/**',
+        },
       ],
       'boundaries/ignore': ['**/*.test.ts', '**/*.spec.ts'],
       // Required for boundaries plugin to resolve @-aliased imports (defined in tsconfig.app.json)
@@ -72,13 +79,22 @@ export default defineConfigWithVueTs(
               from: { type: 'shared' },
               allow: { to: { type: 'shared' } },
             },
-            // app can import shared, app, and module pages (router wires up all modules)
+            // dev-only pages exist to demo shared components, so that is all
+            // they may reach for — never a feature module's internals
+            {
+              from: { type: 'dev-page' },
+              allow: { to: { type: 'shared' } },
+            },
+            // app can import shared, app, and module pages (router wires up all
+            // modules) — plus the dev pages, which the router registers behind
+            // an `import.meta.env.DEV` guard
             {
               from: { type: 'app' },
               allow: [
                 { to: { type: 'shared' } },
                 { to: { type: 'app' } },
                 { to: { type: 'module' } },
+                { to: { type: 'dev-page' } },
               ],
             },
           ],
