@@ -76,13 +76,36 @@ async function prefillStudent(): Promise<void> {
 }
 void prefillStudent()
 
+/**
+ * `AppFileUpload` phrases its own rejection reasons in hardcoded English and
+ * lists them under the dropzone — it lives in `src/shared/`, so this stream
+ * cannot translate them there. Report the constraint in the reader's language
+ * instead of echoing the English string into a toast as well.
+ */
 function onUploadRejected(messages: string[]): void {
-  for (const message of messages) toasts.error(message)
+  if (messages.length === 0) return
+  toasts.error(t('studentDocuments.errors.fileRejected', { max: UPLOAD_MAX_SIZE_MB }))
+}
+
+/** Drops a scan a previous attempt left staged on the server. */
+async function discardStaged(): Promise<void> {
+  const orphan = stagedUploadId.value
+  if (!orphan) return
+  stagedUploadId.value = null
+  try {
+    await documentLookupsApi.discardTemp(orphan)
+  } catch {
+    // Not worth reporting — the backend expires temp uploads after 24 hours.
+  }
 }
 
 watch(files, () => {
   delete errors.file
   uploadProgress.value = {}
+  // Choosing a different scan invalidates whatever a failed attempt staged.
+  // Without this, `submit()` sees a non-null `stagedUploadId`, skips the
+  // upload step and attaches the *previous* file to the new document.
+  void discardStaged()
 })
 
 function toFileStatus(raw: string): FileStatus {
@@ -96,6 +119,9 @@ function validate(): boolean {
   if (!form.documentTypeId) errors.documentTypeId = t('studentDocuments.errors.typeRequired')
   if (files.value.length === 0 && !stagedUploadId.value)
     errors.file = t('studentDocuments.errors.fileRequired')
+  // Mirrors `StoreStudentDocumentRequest`: `notes` is `max:1000`.
+  if (form.notes.trim().length > 1000)
+    errors.notes = t('studentDocuments.errors.notesTooLong', { max: 1000 })
 
   return Object.keys(errors).length === 0
 }
@@ -140,8 +166,7 @@ async function submit(): Promise<void> {
 
 /** Clears the form for a second upload, dropping any file left staged. */
 async function startOver(): Promise<void> {
-  const orphan = stagedUploadId.value
-  stagedUploadId.value = null
+  await discardStaged()
   created.value = null
   files.value = []
   uploadProgress.value = {}
@@ -150,14 +175,6 @@ async function startOver(): Promise<void> {
   form.submittedAt = ''
   form.notes = ''
   for (const key of Object.keys(errors)) delete errors[key]
-
-  if (orphan) {
-    try {
-      await documentLookupsApi.discardTemp(orphan)
-    } catch {
-      // The backend expires temp uploads after 24 hours anyway.
-    }
-  }
 }
 
 function goToDocument(): void {
@@ -249,7 +266,11 @@ function goToDocument(): void {
           <FormInput id="document-submitted" v-model="form.submittedAt" type="date" />
         </FormField>
 
-        <FormField :label="t('studentDocuments.fields.notes')" field-id="document-notes">
+        <FormField
+          :label="t('studentDocuments.fields.notes')"
+          field-id="document-notes"
+          :error="errors.notes"
+        >
           <FormInput
             id="document-notes"
             v-model="form.notes"

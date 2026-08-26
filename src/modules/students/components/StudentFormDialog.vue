@@ -158,6 +158,16 @@ watch(
 )
 
 /**
+ * Option labels are locale-picked at fetch time, so a language switch has to
+ * refetch both lists — the cache check above would otherwise keep serving the
+ * previous language's names for as long as the tab stays open.
+ */
+watch(locale, () => {
+  if (faculties.value.length > 0) void loadFaculties()
+  if (form.facultyId) void loadPrograms(form.facultyId)
+})
+
+/**
  * Changing faculty invalidates the chosen program — the backend has no
  * cross-check, so a stale program would be saved against the wrong faculty.
  */

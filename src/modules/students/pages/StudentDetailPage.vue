@@ -107,6 +107,11 @@ async function handleSave(input: StudentInput): Promise<void> {
     await store.update(current.id, input)
     toasts.success(t('students.toasts.updated', { name: input.name }))
     editOpen.value = false
+    // `required_document_types` is computed server-side from the student's
+    // faculty/program, and `update` does not return it — an edit that moves the
+    // student to another program would otherwise leave the checklist showing
+    // the old programme's requirements.
+    await store.fetchStudent(current.id)
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('students.errors.saveFailed')))
   }

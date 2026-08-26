@@ -34,6 +34,7 @@ const form = reactive({
 })
 const replacementFiles = ref<File[]>([])
 const notesError = ref('')
+const fileError = ref('')
 
 const fileStatusOptions = computed(() =>
   FILE_STATUSES.map((value) => ({ value, label: t(`studentDocuments.fileStatus.${value}`) })),
@@ -50,9 +51,24 @@ watch(
     form.submittedAt = toDateInputValue(document?.submittedAt)
     replacementFiles.value = []
     notesError.value = ''
+    fileError.value = ''
   },
   { immediate: true },
 )
+
+watch(replacementFiles, () => {
+  fileError.value = ''
+})
+
+/**
+ * `AppFileUpload` phrases its rejection reasons in hardcoded English and it
+ * lives in `src/shared/`, outside this stream — so surface the constraint in
+ * the reader's language rather than repeating its wording.
+ */
+function onFileRejected(messages: string[]): void {
+  if (messages.length === 0) return
+  fileError.value = t('studentDocuments.errors.fileRejected', { max: UPLOAD_MAX_SIZE_MB })
+}
 
 function toFileStatus(raw: string): FileStatus {
   return FILE_STATUSES.find((status) => status === raw) ?? 'complete'
@@ -103,7 +119,7 @@ function submit(): void {
         />
       </FormField>
 
-      <FormField :label="t('studentDocuments.editDialog.replaceFile')">
+      <FormField :label="t('studentDocuments.editDialog.replaceFile')" :error="fileError">
         <AppFileUpload
           v-model:files="replacementFiles"
           :accept="UPLOAD_ACCEPT"
@@ -115,6 +131,7 @@ function submit(): void {
           :hint="t('studentDocuments.editDialog.replaceHint')"
           :remove-label="t('studentDocuments.upload.removeFile')"
           :disabled="saving"
+          @error="onFileRejected"
         />
       </FormField>
     </form>

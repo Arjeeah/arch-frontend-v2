@@ -127,12 +127,6 @@ export const studentLookupsApi = {
     return data.data.map(drawerOption)
   },
 
-  /** One drawer by id, so an already-assigned drawer can label itself. */
-  drawer: async (id: string): Promise<LookupOption | null> => {
-    const { data } = await http.get<{ data: DrawerResource }>(`${DRAWERS_URL}/${id}`)
-    return data.data ? drawerOption(data.data) : null
-  },
-
   /**
    * AI pipeline state for one document. The student's documents come from
    * `StudentResource`, which carries no pipeline fields, so the detail page

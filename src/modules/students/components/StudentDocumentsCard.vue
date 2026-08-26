@@ -66,7 +66,6 @@ watch(
  * 0–100 before it reaches `confidence_score`, so the stored value is already a
  * percentage. Values of 1 or less are treated as the raw 0–1 form, which is
  * what an un-rescaled path (or a genuinely hopeless 1% score) would look like.
- * // verify against live API
  */
 function confidencePercent(score: number | null | undefined): number | null {
   if (score === null || score === undefined) return null

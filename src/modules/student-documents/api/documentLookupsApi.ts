@@ -84,6 +84,9 @@ interface SegmentResponse {
 /** Guards the page-walk below against a mis-reported `last_page`. */
 const MAX_LOOKUP_PAGES = 10
 
+/** Upload ceiling: `TempUploadRequest` allows 10 MB, which needs real minutes. */
+const UPLOAD_TIMEOUT_MS = 120_000
+
 function toPipelineStatus(raw: string | null): PipelineStatus {
   return PIPELINE_STATUSES.find((status) => status === raw) ?? 'pending'
 }
@@ -150,12 +153,19 @@ export const documentLookupsApi = {
    * Stages a file and returns the temp-upload id to hand to document create.
    * The record expires after 24 hours, so a form left open overnight has to
    * re-upload. `onProgress` receives 0–100.
+   *
+   * The shared axios instance times out at 15s, which is fine for JSON and far
+   * too short for a 10 MB scan on a branch-office line — the request would be
+   * aborted mid-body and read as a failure. Overridden per request rather than
+   * on the instance, which belongs to `src/app/` and is not this stream's to
+   * change.
    */
   uploadTemp: async (file: File, onProgress?: (percent: number) => void): Promise<TempUpload> => {
     const body = new FormData()
     body.append('file', file)
 
     const { data } = await http.post<TempUploadResponse>(UPLOADS_URL, body, {
+      timeout: UPLOAD_TIMEOUT_MS,
       onUploadProgress: (event) => {
         if (!onProgress || !event.total) return
         onProgress(Math.round((event.loaded / event.total) * 100))

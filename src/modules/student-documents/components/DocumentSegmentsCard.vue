@@ -27,9 +27,11 @@ const columns = computed(() => [
 ])
 
 /**
- * `DocumentSegment::confidence_score` is a `decimal:2` the segmenter writes
- * straight from the model, so unlike `RefinementData` it is *not* rescaled —
- * a value at or below 1 is a 0–1 fraction. // verify against live API
+ * Already a percentage. `SegmentDocumentBundle` writes `confidence_score` from
+ * `AiRefiner::refineWith()`, which returns a `RefinementData` — and
+ * `RefinementData::fromArray` rescales the model's 0.0–1.0 answer to 0–100
+ * before the DTO is built. The `<= 1` branch below is only a guard for a value
+ * that reached the column by some other route.
  */
 function percent(score: number | null): number | null {
   if (score === null) return null

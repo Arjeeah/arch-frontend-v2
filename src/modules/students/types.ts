@@ -121,7 +121,11 @@ export interface PipelineSnapshot {
   hasOcrContent: boolean
   pageCount: number
   hasRefinement: boolean
-  /** 0–1 from the refinement step; null before the AI has run. */
+  /**
+   * `DocumentRefinement::confidence_score`, already a 0–100 percentage —
+   * `RefinementData::fromArray` rescales the model's 0.0–1.0 answer before it
+   * is stored. Null before the AI has run.
+   */
   confidenceScore: number | null
   isVerified: boolean
   verifiedBy: string | null

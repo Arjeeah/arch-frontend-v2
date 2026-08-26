@@ -18,7 +18,7 @@ const { t, locale } = useI18n()
 /**
  * `RefinementData::fromArray` rescales the model's 0.0–1.0 confidence to 0–100
  * before it is stored, so `confidence_score` is already a percentage. A value
- * of 1 or less is read as the raw 0–1 form instead. // verify against live API
+ * of 1 or less is read as the raw 0–1 form instead.
  */
 const confidencePercent = computed(() => {
   const score = props.snapshot?.confidenceScore

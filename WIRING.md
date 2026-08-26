@@ -45,6 +45,13 @@ register. The page hides every mutating control and renders names as plain text
 for that role, which is why `students/:id` is restricted and the list never
 links into it for them.
 
+`students/:id` **must keep** its `roles` key. The detail page reads
+`GET /v1/pipeline/status/{id}` for each of the student's documents, and
+`PipelinePolicy::viewStatus` allows only `archivist` and `super_admin` — opening
+the route to `faculty_staff` would give them a page that 403s per document.
+`/v1/students` and `/v1/student-documents` themselves have no policy, so every
+role gate in this stream is enforced by the router, not the API.
+
 Register `student-documents/upload` before `student-documents/:id`. Vue Router 4
 ranks a static segment above a param, so either order resolves correctly — the
 convention just keeps the intent readable.
@@ -99,3 +106,49 @@ contract requires.
 - **`src/app/config/api.ts` is untouched.** Both modules declare their own URL
   constants at the top of their api files, matching the "module owns its wire
   surface" convention. Nothing needs adding to `API_ENDPOINTS`.
+
+## Accepted debt
+
+Known, deliberate, and each one has a reason. None blocks integration.
+
+- **`PipelineStatusChip.vue` exists twice**, once per module. `boundaries`
+  forbids importing across `src/modules/`, and `src/shared/` is not this
+  stream's territory. If a later pass moves it to `src/shared/`, delete both
+  copies; the status set and the tone map are identical.
+- **Three shared components render hardcoded English** that shows through on
+  these screens: `AppConfirmDialog`'s "Cancel", `DataTable`'s "Loading…" /
+  "No data", and `AppFileUpload`'s file-rejection reasons. All in
+  `src/shared/`, so untouched here. Both upload surfaces already restate the
+  rejection in the reader's language (`studentDocuments.errors.fileRejected`),
+  but `AppFileUpload` still lists its own English reason underneath.
+- **Escape inside `AppAsyncSelect` closes the whole dialog.** The typeahead
+  calls `preventDefault()` but not `stopPropagation()`, and `AppDialog` listens
+  for Escape on `document`, so dismissing the drawer/student dropdown also
+  discards the form. Both components are shared.
+- **No pipeline retry button on the document detail page**, although
+  `POST /v1/pipeline/{studentDocument}/retry` exists and a `failed` document has
+  no other recovery path than re-uploading the scan. Left out deliberately: S2
+  owns pipeline actions, and duplicating the control here would fork the
+  behaviour. Worth adding once S2 has landed.
+- **No pipeline-status filter on the document list.** `allowedFilters` on
+  `StudentDocumentController@index` covers `file_number`, `student_id`,
+  `document_type_id` and `file_status` only, so "everything that failed OCR" is
+  not expressible from this screen — it needs a backend change, and the pipeline
+  monitor owns that view meanwhile.
+- **Faculty and program option lists page-walk.** `FacultyController` and
+  `ProgramController` both hardcode `paginate(10)` with no `per_page` override,
+  so filling a dropdown costs one request per ten rows (capped at 20 pages).
+  A `per_page` on either controller removes the loop.
+- **Promoting a DRAFT student only flips `student_status`.** Draft rows
+  legitimately carry null faculty/program/nationality/enrollment_year, and
+  `UpdateStudentRequest` is all-`sometimes`, so the promotion succeeds while
+  leaving them null. The edit dialog requires those fields, so the intended
+  flow is edit-then-promote — but nothing enforces the order. Product decision.
+- **`gen:module` was not used.** Neither module fits the generator's single flat
+  resource shape (cascading lookups, two-step upload, cross-endpoint pipeline
+  reads, a detail page it does not emit). Written to the `usersApi` /
+  `facultiesApi` reference pattern instead, with the same file layout.
+- **`notes` uses a single-line `FormInput`.** There is no shared textarea, and
+  adding one means touching `src/shared/`.
+- **The scan preview is behind a toggle.** Media is served from the API host,
+  which may refuse framing; the header link is always the reliable way in.
