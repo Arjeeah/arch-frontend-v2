@@ -141,6 +141,35 @@ const corrections = computed<Partial<RefinementIdentity>>(() => {
 
 const correctionCount = computed(() => Object.keys(corrections.value).length)
 
+/** A human has already accepted this row — `verified_at` is stamped. */
+const alreadyVerified = computed(() => Boolean(selected.value?.verifiedAt))
+
+/**
+ * Whether either write endpoint still has something to say about this row.
+ *
+ * A row somebody already verified, and that nobody has touched since, is
+ * finished. Both endpoints overwrite `verified_by`/`verified_at` unconditionally,
+ * so re-sending it would replace the reviewer who actually did the work with
+ * whoever happened to page past it — and that attribution is part of the eval
+ * record. Ctrl+Enter makes paging past a verified row a single keystroke, so
+ * this has to be checked rather than left to the operator.
+ */
+const hasPendingWork = computed(() => !alreadyVerified.value || isDirty.value)
+
+/**
+ * Verify-as-is copies `structured_data` over `verified_data`, so it throws away
+ * everything that differs from the AI's answer — unsaved edits and an earlier
+ * reviewer's *saved* corrections alike. Both cases get the confirm dialog;
+ * keying off `isDirty` alone would let one unprompted click delete the exact
+ * ground truth this screen exists to produce.
+ */
+const verifyWouldDiscard = computed(() => correctionCount.value > 0)
+
+/** Verified, untouched, and identical to the AI answer: no action can change it. */
+const isSettled = computed(
+  () => alreadyVerified.value && !isDirty.value && correctionCount.value === 0,
+)
+
 function resetForm(): void {
   loadForm(selected.value)
 }
@@ -155,7 +184,7 @@ function patchRow(documentId: string, patch: Partial<ReviewQueueItem>): void {
 
 async function saveCorrections(then: 'stay' | 'advance' = 'stay'): Promise<void> {
   const item = selected.value
-  if (!item || saving.value || correctionCount.value === 0) return
+  if (!item || saving.value || correctionCount.value === 0 || !hasPendingWork.value) return
 
   // Snapshot before awaiting — the row is patched in place on success, and the
   // count is what the toast reports.
@@ -182,7 +211,7 @@ async function saveCorrections(then: 'stay' | 'advance' = 'stay'): Promise<void>
 
 async function verifyAsIs(then: 'stay' | 'advance' = 'stay'): Promise<void> {
   const item = selected.value
-  if (!item || saving.value) return
+  if (!item || saving.value || isSettled.value) return
 
   saving.value = true
   try {
@@ -206,6 +235,12 @@ async function verifyAsIs(then: 'stay' | 'advance' = 'stay'): Promise<void> {
 /** The throughput action: whichever of the two endpoints this row needs, then next. */
 async function commitAndAdvance(): Promise<void> {
   if (!selected.value || saving.value) return
+  // Already verified and untouched: there is nothing to write, only somewhere
+  // to go. Writing anyway would re-stamp the row with the current reviewer.
+  if (!hasPendingWork.value) {
+    advance()
+    return
+  }
   if (correctionCount.value > 0) {
     await saveCorrections('advance')
     return
@@ -213,11 +248,11 @@ async function commitAndAdvance(): Promise<void> {
   await verifyAsIs('advance')
 }
 
-/** Verifying as-is throws away edits, so ask first when there are any. */
+/** Verifying as-is throws corrections away, so ask first when there are any. */
 const discardDialogOpen = ref(false)
 
 function requestVerifyAsIs(): void {
-  if (isDirty.value) {
+  if (verifyWouldDiscard.value) {
     discardDialogOpen.value = true
     return
   }
@@ -497,21 +532,24 @@ const positionLabel = computed(() => {
           <footer v-if="selected" class="flex flex-col gap-3 border-t border-border pt-4">
             <div class="flex flex-wrap items-center gap-2">
               <AppButton variant="primary" :loading="saving" @click="commitAndAdvance">
-                <CheckCheck class="h-4 w-4" />
+                <CheckCheck v-if="hasPendingWork" class="h-4 w-4" />
+                <ChevronRight v-else class="h-4 w-4 rtl:rotate-180" />
                 {{
-                  correctionCount > 0
-                    ? t('review.actions.saveAndNext')
-                    : t('review.actions.verifyAndNext')
+                  !hasPendingWork
+                    ? t('review.actions.next')
+                    : correctionCount > 0
+                      ? t('review.actions.saveAndNext')
+                      : t('review.actions.verifyAndNext')
                 }}
               </AppButton>
               <AppButton
                 variant="accent"
-                :disabled="saving || correctionCount === 0"
+                :disabled="saving || correctionCount === 0 || !hasPendingWork"
                 @click="saveCorrections('stay')"
               >
                 {{ t('review.actions.saveCorrections', correctionCount) }}
               </AppButton>
-              <AppButton variant="ghost" :disabled="saving" @click="requestVerifyAsIs">
+              <AppButton variant="ghost" :disabled="saving || isSettled" @click="requestVerifyAsIs">
                 {{ t('review.actions.verifyAsIs') }}
               </AppButton>
               <AppButton variant="ghost" :disabled="saving || !isDirty" @click="resetForm">

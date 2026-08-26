@@ -37,7 +37,9 @@ function primaryLabel(item: ReviewQueueItem): string {
     </div>
 
     <ul v-else class="flex flex-col" role="listbox" :aria-label="t('review.list.title')">
-      <li v-for="item in items" :key="item.documentId">
+      <!-- `presentation` keeps the listbox owning the options directly: an
+           `li` with its own implicit role between them breaks the mapping. -->
+      <li v-for="item in items" :key="item.documentId" role="presentation">
         <button
           type="button"
           role="option"

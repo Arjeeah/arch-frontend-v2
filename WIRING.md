@@ -85,3 +85,15 @@ intact through the merge: `review.actions.saveCorrections`,
    media URL in an `<img>`/`<iframe>`, neither of which can attach the bearer
    token. If media is moved behind a signed or authenticated route the pane goes
    blank and the module needs a blob-fetch path instead.
+
+3. **Three pre-existing `shared/` gaps this screen runs into.** All outside this
+   stream's territory, none blocking; listed so whoever owns `shared/` sees them,
+   since every module inherits them:
+   - `AppConfirmDialog` hardcodes an English **"Cancel"** on its cancel button, so
+     the discard dialog reads half-Arabic in the `ar` locale.
+   - `AppSelect` accepts no `disabled` and forwards no `id`/`aria-label` to its
+     native `<select>` (stray attrs land on the wrapper `div`). Consequence here:
+     the college and document-type selects stay editable while a save is in
+     flight, and their `FormField` label has nothing to point `for` at.
+   - `AppSelect`'s chevron is positioned with a physical `right-3`, so it sits on
+     the wrong side under `dir="rtl"`.

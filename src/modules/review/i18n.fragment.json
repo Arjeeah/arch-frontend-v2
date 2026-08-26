@@ -77,8 +77,8 @@
         "unknownUser": "Unknown user"
       },
       "discard": {
-        "title": "Discard your edits?",
-        "message": "Verifying as-is saves the AI's reading and throws away the changes you have not saved.",
+        "title": "Discard these corrections?",
+        "message": "Verifying as-is saves the AI's reading and throws away every correction on this document — yours, and any an earlier reviewer already saved.",
         "confirm": "Discard and verify"
       },
       "shortcuts": {
@@ -166,20 +166,20 @@
         "next": "المستند التالي",
         "saveAndNext": "حفظ والتالي",
         "verifyAndNext": "تأكيد والتالي",
-        "saveCorrections": "حفظ التصحيحات | حفظ تصحيح واحد | حفظ {count} تصحيحات",
+        "saveCorrections": "حفظ التصحيحات | حفظ تصحيح واحد | حفظ التصحيحات ({count})",
         "verifyAsIs": "تأكيد كما هي",
         "reset": "التراجع عن التعديلات"
       },
       "diff": {
         "title": "الذكاء الاصطناعي مقابل المراجع",
         "acceptedAsIs": "قُبلت البيانات كما استُخرجت",
-        "correctedCount": "بدون تصحيحات | صُحِّح حقل واحد | صُحِّحت {count} حقول",
+        "correctedCount": "بدون تصحيحات | صُحِّح حقل واحد | عدد الحقول المصحَّحة: {count}",
         "by": "بواسطة {name} · {when}",
         "unknownUser": "مستخدم غير معروف"
       },
       "discard": {
-        "title": "تجاهل تعديلاتك؟",
-        "message": "التأكيد كما هي يحفظ قراءة الذكاء الاصطناعي ويتجاهل التعديلات التي لم تحفظها.",
+        "title": "تجاهل هذه التصحيحات؟",
+        "message": "التأكيد كما هي يحفظ قراءة الذكاء الاصطناعي ويتجاهل كل تصحيح على هذا المستند، سواء كان من تعديلاتك أو مما حفظه مراجع سابق.",
         "confirm": "تجاهل وتأكيد"
       },
       "shortcuts": {
@@ -196,7 +196,7 @@
         "lookups": "تعذّر تحميل قائمتي الكليات وأنواع المستندات"
       },
       "toasts": {
-        "saved": "لا شيء للحفظ | حُفظ تصحيح واحد | حُفظت {count} تصحيحات",
+        "saved": "لا شيء للحفظ | حُفظ تصحيح واحد | حُفظت التصحيحات ({count})",
         "verified": "تم تأكيد المستند"
       }
     }

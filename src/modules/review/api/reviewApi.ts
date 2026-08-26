@@ -112,9 +112,12 @@ interface FacultyListResponse {
   meta?: PaginationMetaResource
 }
 
-/** `DocumentTypeResource` — note it exposes `name` only, no Arabic name. */
+/**
+ * `DocumentTypeResource` — note it exposes `name` only, no Arabic name.
+ * `DocumentType` uses `HasUuids`, so the id is a string (unlike `Faculty`).
+ */
 interface DocumentTypeResource {
-  id: number
+  id: string
   name: string
 }
 
@@ -298,9 +301,12 @@ export const reviewApi = {
       for (const response of rest) rows.push(...(response.data.data ?? []))
     }
 
+    // The Arabic name is the option's value because that is what the extractor
+    // writes into `college`; `name_en` only stands in when a record has no
+    // Arabic name, so that faculty stays selectable instead of vanishing.
     return rows
-      .filter((faculty) => Boolean(faculty.name_ar))
-      .map((faculty) => ({ value: faculty.name_ar, label: label(faculty) }))
+      .map((faculty) => ({ value: faculty.name_ar || faculty.name_en, label: label(faculty) }))
+      .filter((option) => Boolean(option.value))
   },
 
   /**
