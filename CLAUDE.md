@@ -137,6 +137,8 @@ dropped, and where per-endpoint quirks are documented.
 ## Auth, roles and routing
 
 - Never read or write `auth_token` / `auth_user` directly. `src/app/config/authStorage.ts` is the only module that touches them; the store, the axios interceptors and the router guard all import it.
+- To branch a screen on the signed-in role, use `readSessionRole()` / `roleAllowed(meta.roles)` from `src/app/config/sessionRole.ts`. It reduces the backend's hierarchical `roles[]` by precedence and reads the same source the router guard decides on, so a hidden control and a refused navigation can never disagree. Never re-implement it per module.
+- Before rendering a link, check the target's `meta.roles` (`roleAllowed`) as well as that it resolves — a link the guard will bounce is worse than no link.
 - `src/app/plugins/axios.ts` handles 401 globally (clear the session + redirect to `/login`). Modules must not add their own 401 branches — catch a failed request and show a toast, nothing more.
 - Route access is declared as `meta: { roles: ['super_admin'] }` in `src/app/router/index.ts`. Omit the `roles` key to allow every authenticated role; never write `roles: []` — an empty allowlist locks everyone out, in the guard and in `AppSidebar` alike. An unauthorised role is redirected to `/dashboard`, which must stay open to all roles.
 - Backend role slugs, exactly three: `super_admin`, `archivist`, `faculty_staff` (`AUTH_ROLES` / `UserRole` in `src/modules/auth/types`).
@@ -146,7 +148,9 @@ dropped, and where per-endpoint quirks are documented.
 
 ## i18n and RTL
 
-- Every user-facing string in shell chrome goes through `t()`; add the key to **both** `src/locales/en.json` and `src/locales/ar.json` in the same commit — a missing Arabic key silently falls back to English.
+- Every user-facing string in shell chrome goes through `t()`; add the key to **both** `src/locales/en.json` and `src/locales/ar.json` in the same commit — a missing Arabic key silently falls back to English. Mirror the addition into the owning module's `i18n.fragment.json` so re-merging the fragments stays idempotent.
+- Vocabulary shared across modules lives under `common.*` — `common.roles.*` (the three backend role slugs plus `system`/`unknown`), `common.auditActions.*` (every `AuditAction` case), `common.pipelineStatus.*` (every `PipelineStatus` case). Never re-translate one of these inside a module namespace: four different Arabic names for `super_admin` were in circulation before they were consolidated.
+- A store is not a component, so it cannot call `useI18n()`. Translate its message fallbacks through `i18n.global.t()` (see `useImportsStore`, `useAuditStore`).
 - `setLocale()` in `src/app/plugins/i18n.ts` is the only way to switch language. It persists to `localStorage['app_locale']` and sets `<html lang>` + `<html dir>`.
 - RTL is driven entirely by `<html dir>`. **New markup uses logical Tailwind utilities** — `ps-`/`pe-`/`ms-`/`me-`/`start-`/`end-`/`text-start`/`text-end` — never `pl-`/`pr-`/`ml-`/`mr-`/`left-`/`right-`/`text-left`. Tailwind 3.4 supports them natively. Retrofit existing physical classes as you touch a file, not big-bang.
 - `shared/` components cannot import `src/app/` (boundaries rule), so they take locale-affecting actions by emitting an event the layout handles — see `AppHeader`'s `locale-change`.
@@ -176,18 +180,19 @@ dropped, and where per-endpoint quirks are documented.
 
 Always use Tailwind tokens from `tailwind.config.ts`:
 
-| Token                    | Value   | Use for                   |
-| ------------------------ | ------- | ------------------------- |
-| `text-text-primary`      | #1F2937 | main text                 |
-| `text-text-secondary`    | #727272 | secondary/muted text      |
-| `text-text-muted`        | #B6B6B6 | placeholder-level text    |
-| `bg-primary`             | #2F6FB2 | primary blue              |
-| `bg-primary-mid`         | #2F6297 | darker blue (buttons)     |
-| `bg-primary-dark`        | #30476D | sidebar/header background |
-| `border-border`          | #E4E4E4 | default borders           |
-| `border-border-dropdown` | #B8BBC2 | dropdown borders          |
-| `font-sans`              | Inter   | body text                 |
-| `font-display`           | Poppins | headings, labels          |
+| Token                    | Value   | Use for                              |
+| ------------------------ | ------- | ------------------------------------ |
+| `text-text-primary`      | #1F2937 | main text                            |
+| `text-text-secondary`    | #727272 | secondary/muted text                 |
+| `text-text-muted`        | #B6B6B6 | placeholder-level text               |
+| `text-text-input`        | #313144 | value typed into an outlined control |
+| `bg-primary`             | #2F6FB2 | primary blue                         |
+| `bg-primary-mid`         | #2F6297 | darker blue (buttons)                |
+| `bg-primary-dark`        | #30476D | sidebar/header background            |
+| `border-border`          | #E4E4E4 | default borders                      |
+| `border-border-dropdown` | #B8BBC2 | dropdown borders                     |
+| `font-sans`              | Inter   | body text                            |
+| `font-display`           | Poppins | headings, labels                     |
 
 **Known exceptions** — these raw values are used consistently across the codebase and are part of the established design:
 
@@ -212,7 +217,8 @@ If you need a color not in either table above, add it to `tailwind.config.ts` �
 - `AppButton` — standard button
 - `FormInput` — styled text input, always emits `string` (cast to `Number()` for number fields)
 - `FormField` — label + input wrapper with error message slot
-- `SearchBar` — search input with magnifier icon
+- `SearchBar` — filled search pill with magnifier icon (header, in-card). Emits `submit` on Enter as well as `update:modelValue`
+- `AppSearchInput` — the outlined white variant the list pages use; same two emits
 - `FilterDropdown` — dropdown filter (use `AppSelect` for new filters instead)
 - `DataTable` — generic `<table>` shell with column definitions and a `#rows` slot for `<tr>` elements
 - `StatusBadge` — coloured pill badge for status values
@@ -224,18 +230,21 @@ If you need a color not in either table above, add it to `tailwind.config.ts` �
 - `AppAsyncSelect` — typeahead select; v-models an **option object** (`{ value, label } | null`, not a bare id) and takes `searchFn: (query) => Promise<{value,label}[]>`, `minChars` (2), `debounceMs` (300)
 - `AppEmptyState` — "nothing here yet" placeholder for empty lists
 - `AppErrorState` — failed-request placeholder with a retry action
+- `AppPipelineStatusChip` — one document's pipeline state; labels come from `common.pipelineStatus.*`, keyed by the raw `PipelineStatus` value. The three module-private copies this replaced had already drifted apart
 
 `src/shared/composables/`:
 
 - `useToasts()` — app-wide queue: `{ toasts, success, error, info, dismiss, clear }`; each helper is `(message, duration?)` and returns the toast id. `duration: 0` keeps a toast until dismissed. This is the only way to report a mutation's outcome — do not build per-page banners
 - `useDebouncedRef(source, delay = 300)` — **derives** a read-only ref from an existing one (`const q = ref(''); const dq = useDebouncedRef(q)`); it is not a self-debouncing writable ref
-- `useServerTable(fetcher, { perPage, filters, immediate })` — server-paginated list state: `{ rows, loading, error, page, perPage, total, totalPages, filters, isEmpty, setFilters, resetFilters, refresh }`. Sends `{ ...filters, page, per_page }`; `setFilters` resets to page 1 and issues exactly one request
+- `useServerTable(fetcher, { errorFallback, perPage, filters, immediate })` — server-paginated list state: `{ rows, loading, error, page, perPage, total, totalPages, filters, isEmpty, setFilters, resetFilters, refresh }`. Sends `{ ...filters, page, per_page }`; `setFilters` resets to page 1 and issues exactly one request. **`errorFallback` is required and must be a `t(...)` string** — it lands in `error`, which every list page renders verbatim, and `src/shared/` cannot translate it itself
 
 `src/shared/utils/`:
 
-- `apiError.ts` — `getApiErrorMessage(err)`, the message every `catch` block should pass to `toasts.error()`
+- `apiError.ts` — `getApiErrorMessage(err, fallback)`, the message every `catch` block should pass to `toasts.error()`. Always pass a translated `fallback`: when the response carries no `{ message }` body (network down, timeout, bare 500) the fallback is what the user reads
 - `casing.ts` — `keysToCamel` / `keysToSnake`, deep and array-aware (`Date`/`File`/`Blob`/`FormData` pass through untouched). Helpers for one-off conversion only — **not** the casing policy; see below
-- `date.ts` — `formatDate` and `relativeTime(value, locale?)`
+- `date.ts` — `formatDate`, `formatDateTime`, `relativeTime(value, locale?)`, `toDateInputValue`, `daysUntil`
+- `percent.ts` — `formatPercent(value0to100, locale)`; the one percent formatter, Latin digits and Latin `%`
+- `saveBlob.ts` — `saveBlob(blob, fileName)`, for the Sanctum-protected download endpoints (reports, import templates, import error sheets, the audit CSV)
 
 `src/composables/` (legacy location, client-side paging only):
 

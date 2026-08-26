@@ -73,9 +73,17 @@ Backend changes, flagged by the streams and unchanged by integration — see the
 per-stream files for the detail:
 
 - `ReviewQueueResource` does not send the refinement id, so Verify/Save on the
-  review queue 404 (S3 note 1).
+  review queue 404 (S3 note 1). **Mitigated on the frontend**: the mapper no
+  longer substitutes `document_id` (which addressed the wrong table and
+  guaranteed a 404), and the page disables both write actions with an
+  explanation. Adding `'refinement_id' => $refinement?->id` to the resource is
+  a one-line change and lights the screen up with no further frontend edit.
 - `StudentDocumentsExport::query()` casts `document_type_id` with `(int)`, so
-  that report filter can never match a UUID (S9 note 8).
+  that report filter can never match a UUID (S9 note 8), and
+  `ReportType::filterSchema()` mis-declares the field as `integer`.
+  **Mitigated on the frontend**: `ReportGenerateForm` withholds the filter, so
+  the user cannot generate a report that is certain to fail. Remove the key
+  from `UNSUPPORTED_FILTER_KEYS` once the cast is dropped.
 - `UserController::index` allowlists `status` as a partial filter, so the Users
   list's "Active" option also matches `inactive` (S10 note 2).
 - `UserResource` omits `faculties`, so a user's current faculties are not
@@ -87,3 +95,47 @@ per-stream files for the detail:
   restriction (S10 note 6).
 - `student_documents` cannot be filtered or sorted by `pipeline_status`, which
   is why the pipeline monitor hydrates per row (S2 note 2).
+
+## Adversarial audit — outcomes
+
+Four reviewers audited routing/roles, i18n/RTL, backend-contract fidelity and
+project standards after the merge. Everything they raised is either fixed in
+the commits above or recorded below.
+
+### Accepted debt
+
+- **`getApiErrorMessage`'s bare default is still the English literal
+  `'Something went wrong'`.** `src/shared/` may not import `src/app/`, so the
+  helper cannot translate. Every production call site passes a `t(...)`
+  fallback (verified: no string-literal fallback remains outside
+  `src/pages/dev/`), and the helper now prefers that fallback over axios's own
+  English `err.message`, so the default is unreachable in practice. Fixing it
+  properly means threading a translator through 80 call sites for a string
+  nobody can reach.
+- **`SearchForm.vue`'s query box is a sixth, un-extracted search input.** Five
+  list-page copies became `AppSearchInput`; this one is genuinely a different
+  control — it forces `dir="rtl"` regardless of UI language (the archive is
+  Arabic), carries a clear button and a length hint, and sits beside an
+  explicit submit button because every search costs an embedding call.
+  Extracting it would mean a variant prop that no second caller wants.
+- **Two notification bodies keep a mixed provenance.** `SecurityAlert` and
+  `StorageCapacityWarning` interpolate runtime values into their `body`; the
+  frontend re-renders both from `data` (`failure_count`, `attempted_email`,
+  `current_percent`), so they are fully translated — but any _new_ backend
+  notification whose body interpolates will fall back to the server's English
+  string until its `notifications.types.*` keys and any new `data` params are
+  added.
+
+### Rejected
+
+- **"`src/composables/usePagination.ts` is dead code — delete it."** It is not
+  dead: `tools/plop/generators/module.ts:626` emits
+  `import { usePagination } from '@/composables/usePagination'` into every
+  generated list page, and `tools/scripts/smoke-test-gen.ts` type-checks that
+  output in CI. Deleting the file would break the generator and the smoke test.
+  CLAUDE.md's description of it as the legacy client-side pagination helper is
+  accurate and stays.
+- **"Nine notification classes ship English titles."** Eight, not nine.
+  `WeeklyDigestNotification::via()` returns `['mail']`, so it never reaches the
+  database channel the bell and `/notifications` read; it has no in-app copy to
+  translate.
