@@ -8,7 +8,7 @@ import AppButton from '@/shared/components/AppButton.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import { useToasts } from '@/shared/composables/useToasts'
-import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { getApiErrorMessage, getApiErrorStatus } from '@/shared/utils/apiError'
 import { formatDate } from '@/shared/utils/date'
 import PipelineStatusPanel from '../components/PipelineStatusPanel.vue'
 import ExtractionDataCard from '../components/ExtractionDataCard.vue'
@@ -74,7 +74,16 @@ async function loadDocument(id: string): Promise<void> {
     document.value = await studentDocumentsApi.show(id)
   } catch (err) {
     document.value = null
-    documentError.value = getApiErrorMessage(err, t('studentDocuments.errors.detailFailed'))
+    // A deleted document answers 404 with `No query results for model
+    // [App\Models\StudentDocument] <uuid>`, which `getApiErrorMessage` now
+    // suppresses in favour of the fallback — so the fallback has to be the
+    // localized not-found line this screen was already written to show.
+    documentError.value = getApiErrorMessage(
+      err,
+      getApiErrorStatus(err) === 404
+        ? t('studentDocuments.errors.notFound')
+        : t('studentDocuments.errors.detailFailed'),
+    )
   } finally {
     documentLoading.value = false
   }

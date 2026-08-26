@@ -150,7 +150,11 @@ export const useSearchStore = defineStore('search', () => {
       if (currentRequest !== requestId) return false
       results.value = []
       meta.value = null
-      error.value = getApiErrorMessage(err, tr('search.error.title'))
+      // `search.error.title` is what the card's heading already renders, and
+      // `getApiErrorMessage` now answers the 500 this endpoint returns on a
+      // non-Postgres stack with the fallback instead of the raw failing SQL —
+      // so the fallback has to be a sentence, not the heading repeated.
+      error.value = getApiErrorMessage(err, tr('search.error.description'))
       throw err
     } finally {
       if (currentRequest === requestId) loading.value = false

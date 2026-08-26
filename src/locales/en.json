@@ -1333,6 +1333,7 @@
     },
     "error": {
       "title": "Search failed",
+      "description": "The search could not be completed. Please try again.",
       "retry": "Try again"
     }
   },
