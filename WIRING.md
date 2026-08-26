@@ -71,6 +71,17 @@ literal text: `search.form.tooShort`, `search.results.matchingPages` and
 reads as the plural index. Do not "clean up" the pipes, and keep the forms in
 that order (singular first) — Arabic relies on it for the dual ("حرفين").
 
+One constraint shapes the Arabic wording of those keys, and it is worth knowing
+before anyone "improves" it. vue-i18n is created without per-locale
+`pluralRules`, so the default rule gives exactly **two** buckets — `1` and `≥2`.
+Arabic needs six (1, 2, 3–10, 11–99, 100, 101+): a numeral takes a plural noun
+from 3 to 10 ("٥ صفحات") but a singular one from 11 up ("١١ صفحة"). No single
+`≥2` form can satisfy both, so the Arabic `≥2` forms are phrased to keep the
+numeral from governing a noun at all — `عدد الصفحات: {count}` and
+`عرض صفحات إضافية ({count})`, which read correctly for every count. If a future
+change adds Arabic `pluralRules` in `src/app/plugins/i18n.ts` (outside this
+stream's territory), these can become ordinary counted forms.
+
 ## Notes
 
 1. **Result links point at stream S4's routes.** A hit links to
@@ -122,6 +133,14 @@ that order (singular first) — Arabic relies on it for the dual ("حرفين").
    - A failed search reports twice — the `AppErrorState` in the results area
      plus a toast. Kept on purpose: on a long result page the error state can be
      scrolled out of view when a re-filter fails.
+   - Changing a filter twice in quick succession runs two searches, one per
+     interaction. The store's generation counter discards the stale response, so
+     the screen is always correct; the second embedding call is the price of not
+     debouncing a deliberate click. Debouncing filter-triggered searches would be
+     a behavioural change, not a bug fix, so it is left alone.
+   - A semantic score is theoretically negative (cosine similarity runs −1..1).
+     `SimilarityBar` clamps at 0, which is right for the bar but makes a negative
+     score indistinguishable from zero in the readout.
 
 7. **Nothing else.** No shared component, store, plugin or config file was
    changed or needs changing.

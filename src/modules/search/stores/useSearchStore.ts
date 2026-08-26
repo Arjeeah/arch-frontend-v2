@@ -106,16 +106,6 @@ export const useSearchStore = defineStore('search', () => {
       trimmedQuery.value.length <= QUERY_MAX_LENGTH,
   )
 
-  const hasFilters = computed(
-    () =>
-      filters.value.facultyId !== null ||
-      filters.value.programId !== null ||
-      filters.value.studentStatus !== null,
-  )
-
-  /** True when the semantic engine failed and keyword search answered instead. */
-  const isKeywordFallback = computed(() => meta.value?.mode === 'keyword')
-
   const isEmpty = computed(
     () => hasSearched.value && !loading.value && !error.value && results.value.length === 0,
   )
@@ -199,11 +189,18 @@ export const useSearchStore = defineStore('search', () => {
   /**
    * Picking a faculty invalidates the program choice (a program belongs to one
    * faculty), so the selection is cleared and the program list refetched.
+   *
+   * The refetch is deliberately **not** awaited. Refilling the program select
+   * and re-running the search are independent: the search sends `faculty_id`,
+   * which is already set on the line above, and never reads the program list.
+   * Awaiting the lookup made the results sit stale for as long as the academic
+   * endpoint took to answer — and because those endpoints hard-code
+   * `paginate(10)`, that is several round-trips, not one.
    */
-  async function setFacultyFilter(facultyId: number | null): Promise<void> {
+  function setFacultyFilter(facultyId: number | null): void {
     filters.value.facultyId = facultyId
     filters.value.programId = null
-    await loadPrograms(facultyId)
+    void loadPrograms(facultyId)
   }
 
   function setProgramFilter(programId: number | null): void {
@@ -214,12 +211,15 @@ export const useSearchStore = defineStore('search', () => {
     filters.value.studentStatus = status
   }
 
-  /** Clears the filter selects (and reloads the unfiltered program list). */
-  async function resetFilters(): Promise<void> {
+  /**
+   * Clears the filter selects (and reloads the unfiltered program list).
+   * Unawaited for the same reason as `setFacultyFilter`.
+   */
+  function resetFilters(): void {
     const hadFaculty = filters.value.facultyId !== null
     filters.value = { facultyId: null, programId: null, studentStatus: null }
     // The program list only needs refilling if it was narrowed to a faculty.
-    if (hadFaculty) await loadPrograms(null)
+    if (hadFaculty) void loadPrograms(null)
   }
 
   /** Wipes the query and every result — the "start over" action. */
@@ -249,8 +249,6 @@ export const useSearchStore = defineStore('search', () => {
     groups,
     trimmedQuery,
     isQueryValid,
-    hasFilters,
-    isKeywordFallback,
     isEmpty,
     search,
     loadLookups,

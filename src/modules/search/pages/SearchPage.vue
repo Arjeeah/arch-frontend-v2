@@ -52,7 +52,7 @@ async function rerunIfSearched(): Promise<void> {
 }
 
 async function onFaculty(facultyId: number | null): Promise<void> {
-  await store.setFacultyFilter(facultyId)
+  store.setFacultyFilter(facultyId)
   await rerunIfSearched()
 }
 
@@ -72,7 +72,7 @@ async function onLimit(limit: number): Promise<void> {
 }
 
 async function onResetFilters(): Promise<void> {
-  await store.resetFilters()
+  store.resetFilters()
   await rerunIfSearched()
 }
 </script>

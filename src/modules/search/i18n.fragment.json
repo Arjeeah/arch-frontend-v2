@@ -123,7 +123,7 @@
       },
       "results": {
         "summary": "الصفحات المطابقة: {results} · المستندات: {documents}",
-        "matchingPages": "صفحة واحدة | {count} صفحة",
+        "matchingPages": "صفحة واحدة | عدد الصفحات: {count}",
         "page": "صفحة {page}",
         "pageUnknown": "رقم الصفحة غير معروف",
         "fileNumber": "ملف {number}",
@@ -132,7 +132,7 @@
         "openDocument": "فتح المستند",
         "match": "تطابق {percent}%",
         "rank": "درجة الصلة {score}",
-        "showMore": "عرض صفحة إضافية | عرض {count} صفحات إضافية",
+        "showMore": "عرض صفحة إضافية | عرض صفحات إضافية ({count})",
         "showLess": "إخفاء الصفحات الإضافية"
       },
       "empty": {
