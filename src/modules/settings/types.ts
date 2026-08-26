@@ -102,3 +102,29 @@ export interface OverrideCapacityInput {
   reason: string
   newLimit: number
 }
+
+/**
+ * What `POST /v1/settings/storage/override-capacity` answers with.
+ *
+ * The distinction between the two numbers is the whole point of this endpoint
+ * and is easy to lose: `threshold` is a **temporary** value held by
+ * `StorageCapacityService` until `expiresAt`, while `persistedThreshold` is
+ * `storage.capacity_warning_threshold` as stored — which the endpoint
+ * deliberately does not touch, because writing it is super-admin-only through
+ * `PATCH /v1/settings/storage` and this route is open to archivists too.
+ *
+ * Verified live: overriding to 95 answers
+ * `{ capacity_warning_threshold: 95, expires_at: <+24h>, persisted_threshold: 80 }`
+ * and a follow-up `GET /v1/settings/storage` still reports 80. Feeding
+ * `threshold` back into the storage form would therefore show a value the
+ * server does not hold, and one Save away from making the temporary override
+ * permanent — which also clears it, since `update()` calls `clearOverride()`.
+ */
+export interface CapacityOverrideResult {
+  /** The temporary effective threshold, 1-100. */
+  threshold: number
+  /** ISO-8601 instant the override lapses at. */
+  expiresAt: string | null
+  /** `storage.capacity_warning_threshold` as persisted — unchanged by this call. */
+  persistedThreshold: number
+}

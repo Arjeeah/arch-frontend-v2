@@ -31,14 +31,18 @@ const ENUM_OPTIONS: Record<string, readonly string[]> = {
 /**
  * Fields the schema calls plain strings but `GenerateReportRequest` (or the
  * column itself) restricts to a fixed set — rendering them as a select is what
- * keeps the request from bouncing back as a 422.
+ * keeps the request from bouncing back as a 422, or from silently matching
+ * nothing.
  *
  * - `file_status` → `FileStatus`, hard-validated by `Rule::in`.
- * - `status` (users report) → `UserStatus`. verify against live API: the rule
- *   is a bare `string`, so an unexpected value would be accepted and simply
- *   match nothing.
+ * - `status` (users report) → `UserStatus`, whose only cases are `active` and
+ *   `inactive`. Verified: the request rule really is a bare `string`, so an
+ *   unexpected value is *accepted* and then matches no row — a silent empty
+ *   report rather than a 422, which is exactly why this select exists.
  * - `role` (audit logs) → the role snapshot `AuditLogService` writes, which is
- *   a `UserRole` value or the literal `system` for machine-made entries.
+ *   a `UserRole` value or the literal `system` for machine-made entries. Its
+ *   sibling `role` on the *users* report is a real `Rule::in(UserRole)` enum
+ *   and is served by `ENUM_OPTIONS` instead, so `system` never reaches it.
  */
 const STRING_ENUM_BY_KEY: Record<string, readonly string[]> = {
   file_status: ['complete', 'incomplete', 'draft'],
@@ -49,15 +53,19 @@ const STRING_ENUM_BY_KEY: Record<string, readonly string[]> = {
 /**
  * Filter keys whose declared schema type does not match the actual column.
  *
- * `document_type_id` is advertised as `integer` by `ReportType::filterSchema()`,
- * but `document_types.id` is a `uuid` (migration `create_document_types_table`)
- * and `GenerateReportRequest` validates the filter as a plain `string`. Rendered
- * as `<input type="number">` the field cannot hold a UUID at all, which makes
- * the filter unusable — so it is treated as a uuid here.
+ * `document_type_id` is advertised as `integer` by `ReportType::filterSchema()`
+ * — confirmed against a live `GET /v1/reports/types` — but `document_types.id`
+ * is a `uuid` (migration `create_document_types_table`) and
+ * `GenerateReportRequest` validates the filter as a plain `string`. Rendered as
+ * `<input type="number">` the field cannot hold a UUID at all, which makes the
+ * filter unusable — so it is treated as a uuid here.
  *
- * verify against live API: `StudentDocumentsExport::query()` still casts this
- * filter with `(int)`, so the server needs the matching fix before the filter
- * narrows anything. Logged for the integrator in WIRING.md.
+ * The server half is now fixed: `StudentDocumentsExport::query()` matches on
+ * `(string) $filters['document_type_id']` and carries a comment saying not to
+ * coerce it to an int. So this override is the whole remaining gap, and the
+ * filter works end to end. What is still worth fixing upstream is the schema
+ * *label*: `filterSchema()` should advertise `uuid`, at which point this
+ * override can go.
  */
 const FIELD_TYPE_OVERRIDES: Record<string, ReportFilterType> = {
   document_type_id: 'uuid',

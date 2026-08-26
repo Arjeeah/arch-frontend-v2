@@ -15,6 +15,11 @@ import type {
  * Declared here rather than in `src/app/config/api.ts`: that file belongs to the
  * app shell, and this module owns its own endpoint until the integrator chooses
  * to lift it. See WIRING.md.
+ *
+ * Role note, verified live: `PipelinePolicy::search()` grants every role,
+ * including `faculty_staff` — the service confines a faculty-only caller to
+ * their own faculties rather than refusing them. That is why `/search` is the
+ * one route in this module's neighbourhood with no `meta.roles` allowlist.
  */
 const SEARCH_ENDPOINT = '/v1/search'
 
@@ -48,9 +53,24 @@ interface SearchResultResource {
   faculty_name: string | null
   program_name: string | null
   /**
-   * verify against live API: the controller rounds a Postgres numeric, which
-   * PDO can surface as a string. Accepting both and coercing keeps a stringy
-   * score from rendering a zero-width bar.
+   * verify against live API — **not verifiable locally, and here is why.**
+   *
+   * `POST /v1/search` cannot run against the development database at all.
+   * `HybridSearchService` tries pgvector first and falls back to a PostgreSQL
+   * `tsvector` query, and *both* halves are Postgres-only: the fallback SQL
+   * uses `ts_rank(...)` and the `@@` operator, which sqlite rejects outright
+   * (`unrecognized token: "@"`), so the endpoint answers 500 for every role
+   * on the local stack. The request shape below *is* verified against
+   * `SearchRequest` — a 2-char minimum, a 500-char maximum and
+   * `filters.faculty_id` / `program_id` / `student_status` all bounce with the
+   * expected 422 — but the *response* body has never been observed.
+   *
+   * What stays open is only the type of this one field: the controller wraps
+   * the value in `round()`, and a Postgres `numeric` comes back through PDO as
+   * a string often enough that assuming a number is not safe. Accepting both
+   * and coercing keeps a stringy score from rendering a zero-width bar, and
+   * costs nothing if it turns out to be a float. Re-check against a Postgres
+   * deployment before removing the `| string`.
    */
   similarity_score: number | string | null
 }

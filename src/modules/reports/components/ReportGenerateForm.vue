@@ -45,14 +45,22 @@ const formatOptions = computed(() =>
 /**
  * Filters the catalog advertises but the exporter cannot execute.
  *
- * `StudentDocumentsExport::query()` casts `document_type_id` with `(int)`,
- * while `document_types.id` is a `uuid`: `(int)'0f3a…'` is `0`, PostgreSQL has
- * no `uuid = integer` operator, and the queued `GenerateReportJob` throws — the
- * report lands in `failed` with a raw SQL error in `error_message`. Rendering
- * the control would only offer a guaranteed-broken report, so it is withheld
- * until the cast is dropped server-side (WIRING.md → Still outstanding).
+ * Empty today, and kept as the seam rather than deleted: `filter_schema` comes
+ * from the server, so a filter that is advertised and broken can reappear
+ * without a frontend change, and this is where it gets withheld.
+ *
+ * `document_type_id` used to live here. `StudentDocumentsExport::query()` cast
+ * it with `(int)` — `(int)'0f3a…'` is `0`, and no row could ever match — so
+ * offering the control only produced empty or failed reports. The cast is gone
+ * (the query now matches on `(string)` and carries a comment saying not to
+ * coerce it), and the filter is verified working end to end against the live
+ * API: `student_documents` filtered by a real document-type uuid completes with
+ * 36 rows where the unfiltered run has 337. It is offered again, as a uuid text
+ * field — see `FIELD_TYPE_OVERRIDES` in `ReportFilterField`, which is what
+ * keeps the schema's `integer` label from rendering a number input a uuid
+ * cannot be typed into.
  */
-const UNSUPPORTED_FILTER_KEYS: readonly string[] = ['document_type_id']
+const UNSUPPORTED_FILTER_KEYS: readonly string[] = []
 
 /** The filters actually offered — and therefore the only ones ever sent. */
 const activeFilterSchema = computed(() =>

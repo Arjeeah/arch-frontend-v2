@@ -24,20 +24,34 @@ const showIds = ref(false)
  * the screen should not read a truncated import as a clean one.
  */
 const isPartial = computed(() => props.result.documentsQueued < props.result.submittedCount)
+
+/**
+ * The batch landed exactly on the server's per-request file cap, so the count
+ * cannot be verified — the files were imported, but the operator has to be
+ * told the tally may be short. Distinct from `isPartial`, which is a tally the
+ * client can prove is short on its own.
+ */
+const suspectedTruncation = computed(() =>
+  props.result.truncation && !props.result.truncation.confirmed ? props.result.truncation : null,
+)
 </script>
 
 <template>
   <section
     class="rounded-[10px] border p-5"
-    :class="isPartial ? 'border-warning/40 bg-warning/10' : 'border-success/30 bg-success-bg'"
+    :class="
+      isPartial || suspectedTruncation
+        ? 'border-warning/40 bg-warning/10'
+        : 'border-success/30 bg-success-bg'
+    "
     role="status"
     aria-live="polite"
   >
     <div class="flex items-start gap-3">
       <component
-        :is="isPartial ? TriangleAlert : CircleCheck"
+        :is="isPartial || suspectedTruncation ? TriangleAlert : CircleCheck"
         class="mt-0.5 h-5 w-5 shrink-0"
-        :class="isPartial ? 'text-warning' : 'text-success'"
+        :class="isPartial || suspectedTruncation ? 'text-warning' : 'text-success'"
       />
 
       <div class="min-w-0 flex-1">
@@ -59,6 +73,15 @@ const isPartial = computed(() => props.result.documentsQueued < props.result.sub
             t('pipeline.upload.partialWarning', {
               queued: formatCount(result.documentsQueued, locale),
               submitted: formatCount(result.submittedCount, locale),
+            })
+          }}
+        </p>
+
+        <p v-else-if="suspectedTruncation" class="mt-2 font-sans text-xs font-medium text-warning">
+          {{
+            t('pipeline.upload.suspectedTruncationWarning', {
+              queued: formatCount(result.documentsQueued, locale),
+              max: formatCount(suspectedTruncation.maxFileUploads, locale),
             })
           }}
         </p>

@@ -46,6 +46,9 @@
         "successToast": "{count} document queued for processing. | {count} documents queued for processing.",
         "partialToast": "Only {queued} of the {submitted} files sent were accepted. Re-import the rest in smaller batches, and check the server's upload limits.",
         "partialWarning": "The server accepted {queued} of the {submitted} files sent. The rest were dropped before validation — usually PHP's max_file_uploads or post_max_size limit.",
+        "truncatedToast": "Files that reached the server: {received} of {declared} · discarded: {discarded} · limit per request: {max}. Nothing was imported — your selection is still here, so send it in smaller batches.",
+        "suspectedTruncationToast": "The batch hit the server’s per-request limit ({max}), so the count cannot be verified. Imported: {queued}. If you selected more, send the rest in a smaller batch.",
+        "suspectedTruncationWarning": "This batch landed exactly on the server’s per-request limit ({max}), so it may have been cut short. Imported: {queued}.",
         "errorToast": "Could not start the import.",
         "cancelled": "Upload cancelled.",
         "queuedTitle": "{count} document queued | {count} documents queued",
@@ -87,15 +90,12 @@
           "document": "Document",
           "student": "Student",
           "state": "Stage",
-          "pages": "Pages",
-          "confidence": "Confidence",
           "created": "Added",
           "actions": "Actions"
         },
         "toggleDetail": "Toggle details",
         "unnumbered": "No file number",
         "unassigned": "Not linked to a student",
-        "statusUnavailable": "Status unavailable",
         "retry": "Retry",
         "retryUnavailable": "Retry is only available for failed documents, or ones stuck after text extraction.",
         "retryToast": "Document sent back through the pipeline.",
@@ -109,12 +109,15 @@
         "ocrPages": "Pages extracted",
         "embeddedPages": "Pages indexed",
         "refinement": "AI analysis",
+        "confidence": "Extraction confidence",
         "verification": "Human review",
         "verifiedBy": "Verified by {name}",
         "notVerified": "Not reviewed yet",
         "present": "Present",
         "none": "None",
-        "unknownUser": "Unknown user"
+        "unknownUser": "Unknown user",
+        "loading": "Loading details…",
+        "loadFailed": "Could not load the details for this document."
       }
     }
   },
@@ -165,6 +168,9 @@
         "successToast": "لا مستندات في قائمة المعالجة. | أُدرج مستند واحد في قائمة المعالجة. | أُدرج مستندان في قائمة المعالجة. | أُدرجت {count} مستندات في قائمة المعالجة. | أُدرج {count} مستندًا في قائمة المعالجة. | أُدرج {count} مستند في قائمة المعالجة.",
         "partialToast": "لم يُقبل سوى {queued} من أصل {submitted} من الملفات المرسلة. أعد استيراد البقية على دفعات أصغر، وتحقّق من حدود الرفع في الخادم.",
         "partialWarning": "قبل الخادم {queued} من أصل {submitted} من الملفات المرسلة. أُسقطت البقية قبل التحقق — غالبًا بسبب حدّ max_file_uploads أو post_max_size في PHP.",
+        "truncatedToast": "الملفات التي وصلت إلى الخادم: {received} من {declared} · المتجاهَلة: {discarded} · الحد الأقصى للطلب الواحد: {max}. لم يُستورد أي شيء — اختيارك ما زال موجودًا، فأرسله على دفعات أصغر.",
+        "suspectedTruncationToast": "بلغت الدفعة حد الخادم للطلب الواحد ({max})، لذا لا يمكن التحقق من العدد. المستوردة: {queued}. إن كنت اخترت أكثر من ذلك، فأرسل الباقي في دفعة أصغر.",
+        "suspectedTruncationWarning": "بلغت هذه الدفعة تمامًا حد الخادم للطلب الواحد ({max})، وقد تكون اقتُطعت. المستوردة: {queued}.",
         "errorToast": "تعذّر بدء الاستيراد.",
         "cancelled": "تم إلغاء الرفع.",
         "queuedTitle": "لا مستندات في قائمة المعالجة | مستند واحد في قائمة المعالجة | مستندان في قائمة المعالجة | {count} مستندات في قائمة المعالجة | {count} مستندًا في قائمة المعالجة | {count} مستند في قائمة المعالجة",
@@ -206,15 +212,12 @@
           "document": "المستند",
           "student": "الطالب",
           "state": "المرحلة",
-          "pages": "الصفحات",
-          "confidence": "الثقة",
           "created": "أُضيف",
           "actions": "إجراءات"
         },
         "toggleDetail": "عرض التفاصيل",
         "unnumbered": "بدون رقم ملف",
         "unassigned": "غير مرتبط بطالب",
-        "statusUnavailable": "الحالة غير متاحة",
         "retry": "إعادة المحاولة",
         "retryUnavailable": "إعادة المحاولة متاحة فقط للمستندات الفاشلة، أو المتوقّفة بعد استخراج النص.",
         "retryToast": "تمت إعادة إرسال المستند إلى مسار المعالجة.",
@@ -228,12 +231,15 @@
         "ocrPages": "صفحات مستخرجة",
         "embeddedPages": "صفحات مفهرسة",
         "refinement": "التحليل الذكي",
+        "confidence": "ثقة الاستخراج",
         "verification": "المراجعة البشرية",
         "verifiedBy": "راجعه {name}",
         "notVerified": "لم يُراجَع بعد",
         "present": "متوفّر",
         "none": "لا يوجد",
-        "unknownUser": "مستخدم غير معروف"
+        "unknownUser": "مستخدم غير معروف",
+        "loading": "جارٍ تحميل التفاصيل…",
+        "loadFailed": "تعذّر تحميل تفاصيل هذا المستند."
       }
     }
   }

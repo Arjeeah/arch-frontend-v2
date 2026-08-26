@@ -5,7 +5,17 @@ import { ExternalLink, FileQuestion } from 'lucide-vue-next'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import type { ReviewQueueItem } from '../types'
 
-const props = defineProps<{ item: ReviewQueueItem | null }>()
+const props = defineProps<{
+  item: ReviewQueueItem | null
+  /**
+   * Signed, absolute media URL for `item`, resolved by the page through
+   * `reviewApi.documentFileUrl()`. Null while it is still being resolved, when
+   * the row has no file, or when the resolve failed.
+   */
+  fileUrl: string | null
+  resolving?: boolean
+  error?: string | null
+}>()
 
 const { t } = useI18n()
 
@@ -17,7 +27,7 @@ const { t } = useI18n()
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'tif', 'tiff', 'webp', 'gif']
 
 const extension = computed(() => {
-  const source = props.item?.fileName ?? props.item?.fileUrl ?? ''
+  const source = props.item?.fileName ?? props.fileUrl ?? ''
   const match = /\.([a-z0-9]+)(?:[?#].*)?$/i.exec(source)
   return match?.[1]?.toLowerCase() ?? ''
 })
@@ -25,6 +35,14 @@ const extension = computed(() => {
 const isImage = computed(() => IMAGE_EXTENSIONS.includes(extension.value))
 
 const caption = computed(() => props.item?.fileName || props.item?.fileNumber || '')
+
+/** Why the pane is empty, in the order the reasons actually apply. */
+const emptyDescription = computed(() => {
+  if (!props.item) return t('review.preview.selectRow')
+  if (props.error) return props.error
+  if (!props.item.hasFile) return t('review.preview.noFile')
+  return t('review.preview.resolving')
+})
 </script>
 
 <template>
@@ -37,8 +55,8 @@ const caption = computed(() => props.item?.fileName || props.item?.fileNumber ||
         {{ caption || t('review.preview.title') }}
       </h2>
       <a
-        v-if="item?.fileUrl"
-        :href="item.fileUrl"
+        v-if="fileUrl"
+        :href="fileUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="inline-flex shrink-0 items-center gap-1 rounded px-2 py-1 font-sans text-xs text-primary hover:bg-surface"
@@ -50,28 +68,32 @@ const caption = computed(() => props.item?.fileName || props.item?.fileNumber ||
 
     <div class="min-h-[420px] flex-1 bg-surface">
       <!--
-        `file_url` is the Spatie media URL on the API host.
-        // verify against live API: it is assumed to be publicly readable — an
-        iframe/img cannot attach the bearer token, so a signed or
-        auth-protected media route would render an empty pane here.
+        `fileUrl` is a short-lived **signed** URL minted by
+        `StudentDocumentResource` (`SignsMediaUrls`), not the queue row's own
+        `file_url`. Verified against the live API: the media disk is private,
+        the queue resource emits a relative unsigned `/storage/...` path, and
+        fetching that path without a signature answers 403 — so an `<img>`/
+        `<iframe>` pointed at it renders an empty pane. The signed URL carries
+        its own authorisation in the query string, which is what makes a tag
+        that cannot attach a bearer token work at all.
       -->
       <img
-        v-if="item?.fileUrl && isImage"
-        :src="item.fileUrl"
+        v-if="fileUrl && isImage"
+        :src="fileUrl"
         :alt="caption || t('review.preview.title')"
         class="h-full w-full object-contain"
       />
       <iframe
-        v-else-if="item?.fileUrl"
-        :src="item.fileUrl"
+        v-else-if="fileUrl"
+        :src="fileUrl"
         :title="caption || t('review.preview.title')"
         class="h-full min-h-[420px] w-full border-0"
       />
       <AppEmptyState
         v-else
         :icon="FileQuestion"
-        :title="t('review.preview.emptyTitle')"
-        :description="item ? t('review.preview.noFile') : t('review.preview.selectRow')"
+        :title="resolving ? t('review.preview.resolving') : t('review.preview.emptyTitle')"
+        :description="emptyDescription"
       />
     </div>
   </section>

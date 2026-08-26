@@ -114,48 +114,74 @@ const fileStatusOptions = computed(() => [
   ...FILE_STATUSES.map((value) => ({ value, label: t(`pipeline.fileStatus.${value}`) })),
 ])
 
-// --- Per-row pipeline status hydration -------------------------------------
+// --- Expanded-row detail ----------------------------------------------------
 //
-// `/v1/student-documents` does not carry `pipeline_status`, so the state of
-// every visible row is fetched separately. See `pipelineApi.listDocuments`.
+// The list resource carries the pipeline *state* for every row, so the table
+// needs no per-row request. What it does not carry is the tally of extracted
+// pages, the refinement confidence and the verification trail — those come
+// from `GET /v1/pipeline/status/{id}`, fetched only for the row an operator
+// actually opens. One row is expanded at a time, so this is one request per
+// click rather than one per rendered row.
 
-const statuses = ref<Map<string, DocumentPipelineStatus>>(new Map())
-const statusesLoading = ref(false)
-let hydrationToken = 0
+const expandedId = ref<string | null>(null)
+const detail = ref<DocumentPipelineStatus | null>(null)
+const detailLoading = ref(false)
+const detailError = ref<string | null>(null)
+let detailToken = 0
 
-/**
- * `silent` skips the skeletons: a poll tick refreshing states that are already
- * on screen should update them in place, not blink the whole column.
- */
-async function hydrateStatuses(rows: PipelineDocument[], silent = false): Promise<void> {
-  const token = ++hydrationToken
-
-  if (rows.length === 0) {
-    statuses.value = new Map()
-    statusesLoading.value = false
-    return
-  }
-
-  if (!silent) statusesLoading.value = true
+async function loadDetail(id: string): Promise<void> {
+  const token = ++detailToken
+  detailLoading.value = true
+  detailError.value = null
   try {
-    const next = await pipelineApi.documentStatuses(rows.map((row) => row.id))
-    if (token !== hydrationToken) return
-    statuses.value = next
+    const next = await pipelineApi.documentStatus(id)
+    if (token !== detailToken) return
+    detail.value = next
+  } catch (err: unknown) {
+    if (token !== detailToken) return
+    detail.value = null
+    detailError.value = getApiErrorMessage(err, t('pipeline.detail.loadFailed'))
   } finally {
-    if (token === hydrationToken) statusesLoading.value = false
+    if (token === detailToken) detailLoading.value = false
   }
 }
 
+function toggleDetail(id: string): void {
+  if (expandedId.value === id) {
+    detailToken += 1
+    expandedId.value = null
+    detail.value = null
+    detailError.value = null
+    detailLoading.value = false
+    return
+  }
+  expandedId.value = id
+  detail.value = null
+  void loadDetail(id)
+}
+
+// A row that scrolls off the page should not leave a stale panel behind when a
+// different document later lands in the same position.
 watch(
   () => table.rows.value,
-  (rows) => void hydrateStatuses(rows),
+  (rows) => {
+    if (expandedId.value && !rows.some((row) => row.id === expandedId.value)) {
+      detailToken += 1
+      expandedId.value = null
+      detail.value = null
+      detailError.value = null
+      detailLoading.value = false
+    }
+  },
 )
 
 // --- Page-scoped pipeline-state filter --------------------------------------
 //
-// The backend cannot filter documents by pipeline state, so this narrows the
-// rows already loaded. The hint beside the control says so, and the counts
-// above stay archive-wide — the two numbers are answering different questions.
+// `StudentDocumentController::index` does not allow a `pipeline_status` filter
+// — Spatie's query builder answers an unknown key with 400, so the request is
+// never made. This narrows the rows already loaded instead. The hint beside the
+// control says so, and the counts above stay archive-wide: the two numbers are
+// answering different questions.
 
 const stateFilter = ref('')
 
@@ -167,7 +193,7 @@ const stateFilterOptions = computed(() => [
 const visibleRows = computed(() => {
   const selected = stateFilter.value
   if (!isPipelineStatus(selected)) return table.rows.value
-  return table.rows.value.filter((row) => statuses.value.get(row.id)?.status === selected)
+  return table.rows.value.filter((row) => row.pipelineStatus === selected)
 })
 
 const isFilteringPage = computed(() => isPipelineStatus(stateFilter.value))
@@ -182,12 +208,15 @@ async function retry(id: string): Promise<void> {
     await pipelineApi.retry(id)
     toasts.success(t('pipeline.monitor.retryToast'))
 
-    // The document has just been re-dispatched, so both its own state and the
-    // archive-wide tallies are stale the moment the request returns.
-    const [status] = await Promise.allSettled([pipelineApi.documentStatus(id), loadCounts()])
-    if (status.status === 'fulfilled') {
-      statuses.value = new Map(statuses.value).set(id, status.value)
-    }
+    // The document has just been re-dispatched, so its row, the open detail
+    // panel and the archive-wide tallies are all stale the moment the request
+    // returns. Re-reading the page is what refreshes the row's own state now
+    // that it travels on the list resource.
+    await Promise.allSettled([
+      loadCounts(),
+      table.refresh(),
+      expandedId.value === id ? loadDetail(id) : Promise.resolve(),
+    ])
   } catch (err: unknown) {
     toasts.error(getApiErrorMessage(err, t('pipeline.monitor.retryError')))
   } finally {
@@ -198,7 +227,7 @@ async function retry(id: string): Promise<void> {
 // --- Auto-poll ---------------------------------------------------------------
 
 const { isPolling, start, stop } = usePolling(async () => {
-  await Promise.all([loadCounts(), hydrateStatuses(table.rows.value, true)])
+  await Promise.all([loadCounts(), table.refresh()])
 }, POLL_INTERVAL_MS)
 
 watch(hasWorkInFlight, (busy) => (busy ? start() : stop()), { immediate: false })
@@ -348,11 +377,8 @@ onMounted(async () => {
         </template>
       </AppEmptyState>
 
-      <!-- `statusesLoading` is part of the condition on purpose: the state
-           filter reads the hydrated statuses, so before they land every row
-           looks like a non-match and this would flash over a full page. -->
       <AppEmptyState
-        v-else-if="!table.loading.value && !statusesLoading && visibleRows.length === 0"
+        v-else-if="!table.loading.value && visibleRows.length === 0"
         compact
         :title="t('pipeline.monitor.noneInStateTitle')"
         :description="t('pipeline.monitor.noneInStateBody')"
@@ -367,11 +393,14 @@ onMounted(async () => {
       <div v-else class="w-full overflow-x-auto">
         <PipelineDocumentsTable
           :rows="visibleRows"
-          :statuses="statuses"
-          :loading="table.loading.value || (isFilteringPage && statusesLoading)"
-          :statuses-loading="statusesLoading"
+          :loading="table.loading.value"
           :retrying-id="retryingId"
+          :expanded-id="expandedId"
+          :detail="detail"
+          :detail-loading="detailLoading"
+          :detail-error="detailError"
           @retry="retry"
+          @toggle="toggleDetail"
         />
       </div>
 

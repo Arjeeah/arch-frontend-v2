@@ -25,6 +25,16 @@ const props = withDefaults(
 
 const { t, n } = useI18n()
 
+/**
+ * Keyword mode's raw `ts_rank` is the only number on this screen rendered
+ * through `n()`, and `src/app/plugins/i18n.ts` registers no `numberFormats`
+ * block — so without pinning it, `ar` would print Eastern Arabic digits beside
+ * the Latin percentages, file numbers and page counts everything else uses.
+ * Every other formatter in the app pins `latn` for the same reason
+ * (`shared/utils/percent.ts`, `modules/pipeline/format.ts`).
+ */
+const RANK_FORMAT = { maximumFractionDigits: 3, numberingSystem: 'latn' } as const
+
 function clamp(value: number): number {
   return Math.min(1, Math.max(0, value))
 }
@@ -39,7 +49,7 @@ const widthPercent = computed(() => `${(fraction.value * 100).toFixed(1)}%`)
 const label = computed(() =>
   props.mode === 'semantic'
     ? t('search.results.match', { percent: Math.round(clamp(props.score) * 100) })
-    : t('search.results.rank', { score: n(props.score, { maximumFractionDigits: 3 }) }),
+    : t('search.results.rank', { score: n(props.score, RANK_FORMAT) }),
 )
 
 /** Weak matches get a muted bar so a 30% hit does not look like a 90% one. */

@@ -8,7 +8,7 @@ import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
 import { useToasts } from '@/shared/composables/useToasts'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
-import { authStorage } from '@/app/config/authStorage'
+import { readSessionRole } from '@/app/config/sessionRole'
 import ReportGenerateForm from '../components/ReportGenerateForm.vue'
 import ReportJobsTable from '../components/ReportJobsTable.vue'
 import WeeklyDigestCard from '../components/WeeklyDigestCard.vue'
@@ -25,12 +25,20 @@ const downloadingId = ref<string | null>(null)
 const confirmClearOpen = ref(false)
 
 /**
- * `ReportController::weeklyDigest` answers 403 for faculty_staff, so the widget
- * is only mounted for the two roles the gate lets through — asking and showing
- * the error would be noise, not information.
+ * `ReportController::weeklyDigest` answers 403 for faculty_staff (verified
+ * live), so the widget is only mounted for the two roles the gate lets through
+ * — asking and showing the error would be noise, not information.
+ *
+ * Read through `readSessionRole()`, never off a scalar `user.role`: the login
+ * response is a `UserResource`, which serialises Spatie's `getRoleNames()` as
+ * a **`roles` array** and emits no scalar at all — verified live, an archivist
+ * signs in as `roles: ['archivist', 'faculty_staff']`. Reaching for `.role`
+ * read `undefined` for every user, so this card never rendered for anyone. The
+ * roles are also hierarchical, so the array has to be reduced by precedence
+ * rather than by taking its first element.
  */
 const canSeeDigest = computed(() => {
-  const role = authStorage.getUser()?.role
+  const role = readSessionRole()
   return role === 'super_admin' || role === 'archivist'
 })
 
