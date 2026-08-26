@@ -8,7 +8,7 @@ import { relativeTime } from '@/shared/utils/date'
 import { isRetryableStatus } from '../status'
 import { formatConfidence, formatCount, intlLocale } from '../format'
 import type { DocumentPipelineStatus, PipelineDocument } from '../types'
-import PipelineStatusChip from './PipelineStatusChip.vue'
+import AppPipelineStatusChip from '@/shared/components/AppPipelineStatusChip.vue'
 
 const props = defineProps<{
   rows: PipelineDocument[]
@@ -199,7 +199,7 @@ function detailEntries(status: DocumentPipelineStatus): Array<{ label: string; v
 
           <!-- Pipeline state -->
           <td class="px-4 py-3 align-top text-start">
-            <PipelineStatusChip
+            <AppPipelineStatusChip
               v-if="row.status"
               :status="row.status.status"
               :api-label="row.status.statusLabel"

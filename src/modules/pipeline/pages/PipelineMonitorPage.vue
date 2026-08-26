@@ -153,7 +153,7 @@ const stateFilter = ref('')
 
 const stateFilterOptions = computed(() => [
   { value: '', label: t('pipeline.monitor.allStates') },
-  ...PIPELINE_STATUSES.map((value) => ({ value, label: t(`pipeline.status.${value}`) })),
+  ...PIPELINE_STATUSES.map((value) => ({ value, label: t(`common.pipelineStatus.${value}`) })),
 ])
 
 const visibleRows = computed(() => {

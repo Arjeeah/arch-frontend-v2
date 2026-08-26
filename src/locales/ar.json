@@ -209,6 +209,16 @@
     "noData": "لا توجد بيانات",
     "noResults": "لا توجد نتائج",
     "nothingHere": "لا يوجد شيء هنا بعد",
+    "pipelineStatus": {
+      "pending": "قيد الانتظار",
+      "ocr_processing": "جاري استخراج النص",
+      "ocr_completed": "اكتمل استخراج النص",
+      "refining": "جاري التحليل الذكي",
+      "refined": "اكتمل التحليل",
+      "embedding": "جاري إنشاء التضمينات",
+      "completed": "مكتمل",
+      "failed": "فشل"
+    },
     "previousPage": "الصفحة السابقة",
     "retry": "إعادة المحاولة",
     "roles": {
@@ -810,16 +820,6 @@
       "import": "الاستيراد المجمّع",
       "monitor": "مراقبة المعالجة"
     },
-    "status": {
-      "pending": "قيد الانتظار",
-      "ocr_processing": "جاري استخراج النص",
-      "ocr_completed": "اكتمل استخراج النص",
-      "refining": "جاري التحليل الذكي",
-      "refined": "اكتمل التحليل",
-      "embedding": "جاري إنشاء التضمينات",
-      "completed": "مكتمل",
-      "failed": "فشل"
-    },
     "fileStatus": {
       "complete": "مكتمل",
       "incomplete": "غير مكتمل",
@@ -1398,16 +1398,6 @@
       "incomplete": "غير مكتمل",
       "draft": "مسودة"
     },
-    "pipeline": {
-      "pending": "قيد الانتظار",
-      "ocr_processing": "جاري استخراج النص",
-      "ocr_completed": "اكتمل استخراج النص",
-      "refining": "جاري التحليل الذكي",
-      "refined": "اكتمل التحليل",
-      "embedding": "جاري إنشاء التضمينات",
-      "completed": "مكتمل",
-      "failed": "فشل"
-    },
     "columns": {
       "fileNumber": "رقم الملف",
       "student": "الطالب",
@@ -1573,16 +1563,6 @@
       "complete": "مكتمل",
       "incomplete": "غير مكتمل",
       "draft": "مسودة"
-    },
-    "pipeline": {
-      "pending": "قيد الانتظار",
-      "ocr_processing": "جاري استخراج النص",
-      "ocr_completed": "اكتمل استخراج النص",
-      "refining": "جاري التحليل الذكي",
-      "refined": "اكتمل التحليل",
-      "embedding": "جاري إنشاء التضمينات",
-      "completed": "مكتمل",
-      "failed": "فشل"
     },
     "columns": {
       "studentNumber": "رقم القيد",

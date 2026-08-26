@@ -48,20 +48,6 @@ const IN_FLIGHT: readonly PipelineStatus[] = [
   'embedding',
 ]
 
-/** Visual weight of a state, consumed by `PipelineStatusChip`. */
-export type PipelineStatusTone = 'neutral' | 'progress' | 'waiting' | 'success' | 'danger'
-
-const TONES: Record<PipelineStatus, PipelineStatusTone> = {
-  pending: 'neutral',
-  ocr_processing: 'progress',
-  ocr_completed: 'waiting',
-  refining: 'progress',
-  refined: 'waiting',
-  embedding: 'progress',
-  completed: 'success',
-  failed: 'danger',
-}
-
 export function isPipelineStatus(value: unknown): value is PipelineStatus {
   return typeof value === 'string' && (PIPELINE_STATUSES as readonly string[]).includes(value)
 }
@@ -74,8 +60,4 @@ export function isRetryableStatus(status: PipelineStatus): boolean {
 /** Whether the state is expected to change on its own — drives the auto-poll. */
 export function isInFlightStatus(status: PipelineStatus): boolean {
   return IN_FLIGHT.includes(status)
-}
-
-export function toneFor(status: PipelineStatus): PipelineStatusTone {
-  return TONES[status]
 }

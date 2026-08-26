@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { PIPELINE_STATUSES } from '../status'
 import { formatCount } from '../format'
 import type { PipelineStatusCounts } from '../types'
-import PipelineStatusChip from './PipelineStatusChip.vue'
+import AppPipelineStatusChip from '@/shared/components/AppPipelineStatusChip.vue'
 
 defineProps<{
   counts: PipelineStatusCounts
@@ -28,7 +28,7 @@ const { t, locale } = useI18n()
         :key="status"
         class="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface px-3 py-2.5"
       >
-        <PipelineStatusChip :status="status" size="sm" />
+        <AppPipelineStatusChip :status="status" size="sm" />
         <span
           v-if="loading"
           class="h-4 w-6 animate-pulse rounded bg-surface-input"

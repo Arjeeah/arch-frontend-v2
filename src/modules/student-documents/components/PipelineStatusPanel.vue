@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BadgeCheck, TriangleAlert } from 'lucide-vue-next'
 import { relativeTime } from '@/shared/utils/date'
-import PipelineStatusChip from './PipelineStatusChip.vue'
+import AppPipelineStatusChip from '@/shared/components/AppPipelineStatusChip.vue'
 import type { PipelineStatusDetail } from '../types'
 
 const props = defineProps<{
@@ -77,10 +77,10 @@ function confidenceTone(percent: number): string {
         <span v-if="polling" class="font-sans text-xs text-text-muted">
           {{ t('studentDocuments.pipelinePanel.autoRefresh') }}
         </span>
-        <PipelineStatusChip
+        <AppPipelineStatusChip
           v-if="snapshot"
           :status="snapshot.status"
-          :label="snapshot.statusLabel"
+          :api-label="snapshot.statusLabel"
           size="md"
         />
       </div>

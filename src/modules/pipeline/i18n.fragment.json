@@ -1,12 +1,7 @@
 {
   "en": {
-    "pipeline": {
-      "nav": {
-        "group": "Document pipeline",
-        "import": "Bulk import",
-        "monitor": "Pipeline monitor"
-      },
-      "status": {
+    "common": {
+      "pipelineStatus": {
         "pending": "Pending",
         "ocr_processing": "Extracting text",
         "ocr_completed": "Text extracted",
@@ -15,6 +10,13 @@
         "embedding": "Building embeddings",
         "completed": "Completed",
         "failed": "Failed"
+      }
+    },
+    "pipeline": {
+      "nav": {
+        "group": "Document pipeline",
+        "import": "Bulk import",
+        "monitor": "Pipeline monitor"
       },
       "fileStatus": {
         "complete": "Complete",
@@ -117,13 +119,8 @@
     }
   },
   "ar": {
-    "pipeline": {
-      "nav": {
-        "group": "مسار معالجة المستندات",
-        "import": "الاستيراد المجمّع",
-        "monitor": "مراقبة المعالجة"
-      },
-      "status": {
+    "common": {
+      "pipelineStatus": {
         "pending": "قيد الانتظار",
         "ocr_processing": "جاري استخراج النص",
         "ocr_completed": "اكتمل استخراج النص",
@@ -132,6 +129,13 @@
         "embedding": "جاري إنشاء التضمينات",
         "completed": "مكتمل",
         "failed": "فشل"
+      }
+    },
+    "pipeline": {
+      "nav": {
+        "group": "مسار معالجة المستندات",
+        "import": "الاستيراد المجمّع",
+        "monitor": "مراقبة المعالجة"
       },
       "fileStatus": {
         "complete": "مكتمل",

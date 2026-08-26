@@ -209,6 +209,16 @@
     "noData": "No data",
     "noResults": "No results found",
     "nothingHere": "Nothing here yet",
+    "pipelineStatus": {
+      "pending": "Pending",
+      "ocr_processing": "Extracting text",
+      "ocr_completed": "Text extracted",
+      "refining": "AI analysis",
+      "refined": "Analysis complete",
+      "embedding": "Building embeddings",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
     "previousPage": "Previous page",
     "retry": "Try again",
     "roles": {
@@ -810,16 +820,6 @@
       "import": "Bulk import",
       "monitor": "Pipeline monitor"
     },
-    "status": {
-      "pending": "Pending",
-      "ocr_processing": "Extracting text",
-      "ocr_completed": "Text extracted",
-      "refining": "AI analysis",
-      "refined": "Analysis complete",
-      "embedding": "Building embeddings",
-      "completed": "Completed",
-      "failed": "Failed"
-    },
     "fileStatus": {
       "complete": "Complete",
       "incomplete": "Incomplete",
@@ -1398,16 +1398,6 @@
       "incomplete": "Incomplete",
       "draft": "Draft"
     },
-    "pipeline": {
-      "pending": "Queued",
-      "ocr_processing": "Extracting text",
-      "ocr_completed": "Text extracted",
-      "refining": "AI analysis",
-      "refined": "Analysis complete",
-      "embedding": "Building embeddings",
-      "completed": "Complete",
-      "failed": "Failed"
-    },
     "columns": {
       "fileNumber": "File no.",
       "student": "Student",
@@ -1573,16 +1563,6 @@
       "complete": "Complete",
       "incomplete": "Incomplete",
       "draft": "Draft"
-    },
-    "pipeline": {
-      "pending": "Queued",
-      "ocr_processing": "Extracting text",
-      "ocr_completed": "Text extracted",
-      "refining": "AI analysis",
-      "refined": "Analysis complete",
-      "embedding": "Building embeddings",
-      "completed": "Complete",
-      "failed": "Failed"
     },
     "columns": {
       "studentNumber": "Student no.",

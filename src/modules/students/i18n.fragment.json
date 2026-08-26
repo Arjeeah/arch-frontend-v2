@@ -28,16 +28,6 @@
         "incomplete": "Incomplete",
         "draft": "Draft"
       },
-      "pipeline": {
-        "pending": "Queued",
-        "ocr_processing": "Extracting text",
-        "ocr_completed": "Text extracted",
-        "refining": "AI analysis",
-        "refined": "Analysis complete",
-        "embedding": "Building embeddings",
-        "completed": "Complete",
-        "failed": "Failed"
-      },
       "columns": {
         "studentNumber": "Student no.",
         "name": "Name",
@@ -177,16 +167,6 @@
         "complete": "مكتمل",
         "incomplete": "غير مكتمل",
         "draft": "مسودة"
-      },
-      "pipeline": {
-        "pending": "قيد الانتظار",
-        "ocr_processing": "جاري استخراج النص",
-        "ocr_completed": "اكتمل استخراج النص",
-        "refining": "جاري التحليل الذكي",
-        "refined": "اكتمل التحليل",
-        "embedding": "جاري إنشاء التضمينات",
-        "completed": "مكتمل",
-        "failed": "فشل"
       },
       "columns": {
         "studentNumber": "رقم القيد",

@@ -7,7 +7,7 @@ import DataTable from '@/shared/components/DataTable.vue'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import AppButton from '@/shared/components/AppButton.vue'
 import { formatDate } from '@/shared/utils/date'
-import PipelineStatusChip from './PipelineStatusChip.vue'
+import AppPipelineStatusChip from '@/shared/components/AppPipelineStatusChip.vue'
 import { studentLookupsApi } from '../api/studentLookupsApi'
 import type { PipelineSnapshot, StudentDocumentSummary } from '../types'
 
@@ -186,10 +186,11 @@ const requirementRows = computed(() =>
             {{ t(`students.fileStatus.${row.document.fileStatus}`) }}
           </td>
           <td class="px-3 py-3">
-            <PipelineStatusChip
+            <AppPipelineStatusChip
               v-if="row.snapshot"
               :status="row.snapshot.status"
-              :label="row.snapshot.statusLabel"
+              :api-label="row.snapshot.statusLabel"
+              size="sm"
             />
             <span v-else class="font-sans text-xs text-text-muted">
               {{ snapshotsLoading ? t('students.states.loading') : '—' }}
