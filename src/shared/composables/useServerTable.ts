@@ -53,9 +53,9 @@ function readMeta(meta: ServerTableMeta, snake: 'last_page' | 'current_page'): n
  * for the client-side `usePagination` pattern once a list grows past one page.
  *
  * ```ts
- * const table = useServerTable((params) => usersApi.list(params), {
+ * const table = useServerTable((params) => studentsApi.list(params), {
  *   perPage: 15,
- *   errorFallback: t('users.errors.listFailed'),
+ *   errorFallback: t('students.errors.listFailed'),
  * })
  * watch(debouncedSearch, (q) => table.setFilters({ search: q }))
  * ```

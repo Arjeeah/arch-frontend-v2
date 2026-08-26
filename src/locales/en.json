@@ -2,6 +2,52 @@
   "app": {
     "title": "ARCH"
   },
+  "audit": {
+    "title": "Audit logs & Timeline",
+    "export": {
+      "label": "Export audit log",
+      "success": "The audit log export has started downloading.",
+      "error": "Could not export the audit log"
+    },
+    "stats": {
+      "operationsToday": "Operations today",
+      "totalDocuments": "Total documents",
+      "borrowingsToday": "Borrowings today",
+      "securityAlerts": "Security alerts",
+      "securityAlertsHint": "Failed sign-ins in the last 24 hours",
+      "error": "Could not load the audit stats"
+    },
+    "timeline": {
+      "title": "Recent timeline",
+      "empty": "No recent activity.",
+      "error": "Could not load the timeline"
+    },
+    "logs": {
+      "title": "Audit logs history",
+      "emptyTitle": "No audit entries yet",
+      "emptyDescription": "Activity is recorded here as people use the system.",
+      "noMatchesTitle": "No matching entries",
+      "noMatchesDescription": "No audit entry matches the current filters.",
+      "error": "Could not load audit logs"
+    },
+    "columns": {
+      "timestamp": "Timestamp",
+      "user": "User",
+      "role": "Role",
+      "action": "Action",
+      "targetEntity": "Target entity",
+      "referenceId": "Reference ID"
+    },
+    "filters": {
+      "allRoles": "All roles",
+      "allActions": "All actions",
+      "referenceIdPlaceholder": "Search by reference ID"
+    },
+    "sort": {
+      "newest": "Newest first",
+      "oldest": "Oldest first"
+    }
+  },
   "borrowing": {
     "title": "Borrowing",
     "subtitle": "Manage borrowing records",
@@ -119,6 +165,24 @@
     }
   },
   "common": {
+    "auditActions": {
+      "student_file_checkout": "File checked out",
+      "student_file_returned": "File returned",
+      "document_scanned": "Document scanned",
+      "document_ocr_processed": "OCR completed",
+      "cabinet_capacity_updated": "Cabinet capacity updated",
+      "borrowing_requested": "Borrowing requested",
+      "borrowing_extension_requested": "Extension requested",
+      "high_school_cert_uploaded": "Certificate uploaded",
+      "duplicate_file_removed_soft_delete": "Duplicate file removed",
+      "excel_import_completed": "Excel import completed",
+      "view_reports": "Reports viewed",
+      "view_student_files": "Student files viewed",
+      "login": "Signed in",
+      "failed_login": "Failed sign-in",
+      "report_generated": "Report generated",
+      "report_downloaded": "Report downloaded"
+    },
     "cancel": "Cancel",
     "clearSelection": "Clear selection",
     "confirm": "Confirm",
@@ -146,6 +210,13 @@
     "nothingHere": "Nothing here yet",
     "previousPage": "Previous page",
     "retry": "Try again",
+    "roles": {
+      "super_admin": "Super Admin",
+      "archivist": "Archivist",
+      "faculty_staff": "Faculty Staff",
+      "system": "System",
+      "unknown": "Unknown"
+    },
     "searchPlaceholder": "Search…",
     "searching": "Searching…",
     "select": "Select",
@@ -245,24 +316,6 @@
       "time": "When",
       "empty": "No activity yet",
       "emptyHint": "Actions on files and borrowings will show up here."
-    },
-    "auditActions": {
-      "student_file_checkout": "File checked out",
-      "student_file_returned": "File returned",
-      "document_scanned": "Document scanned",
-      "document_ocr_processed": "OCR completed",
-      "cabinet_capacity_updated": "Cabinet capacity updated",
-      "borrowing_requested": "Borrowing requested",
-      "borrowing_extension_requested": "Extension requested",
-      "high_school_cert_uploaded": "Certificate uploaded",
-      "duplicate_file_removed_soft_delete": "Duplicate file removed",
-      "excel_import_completed": "Excel import completed",
-      "view_reports": "Reports viewed",
-      "view_student_files": "Student files viewed",
-      "login": "Signed in",
-      "failed_login": "Failed sign-in",
-      "report_generated": "Report generated",
-      "report_downloaded": "Report downloaded"
     },
     "roles": {
       "super_admin": "Super Admin",

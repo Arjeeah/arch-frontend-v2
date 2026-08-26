@@ -1,121 +1,123 @@
 import { http } from '@/app/plugins/axios'
+import type { ServerTableResponse } from '@/shared/composables/useServerTable'
 import type { AuditLog, AuditStat, TimelineEntry } from '../types'
 
 /**
- * Wire shapes for the audit endpoints.
+ * Wire shapes for the audit endpoints, read off the backend rather than
+ * guessed: `app/Http/Resources/AuditLogResource.php` and
+ * `AuditLogController::{index,stats,timeline,export}`.
  *
- * The backend is Laravel and speaks snake_case, exactly like every other
- * endpoint in this app (`users`, `faculties`, `borrowings`). Before this file
- * had these types the store assigned raw responses straight onto camelCase
- * models, so `userName`, `targetEntity`, `referenceId` and friends were all
- * `undefined` and the page rendered blanks behind its `?? '-'` fallbacks.
- *
- * verify against live API: field names below are the snake_case spelling of
- * the model properties the page renders. Adjust here — not in the components —
- * if the backend names something differently.
+ * The previous version of this file invented `user_name`, `user_role`,
+ * `operations_change`, `users_logged_in` and `total_users` — none of which the
+ * API has ever sent — and read `stats` off the envelope instead of out of it.
+ * Every stat card and both name columns rendered blank as a result.
+ */
+
+/**
+ * `AuditLogController::stats()` returns `ApiResponse::success($stats)`, i.e.
+ * `{ data: {...} }`. `security_alerts_count` is added for super_admin only.
  */
 interface AuditStatResource {
-  total_operations_today: number
-  operations_change: string
-  users_logged_in: number
-  total_users: number
+  total_operations_today?: number
+  total_documents?: number
+  total_borrowings_today?: number
+  security_alerts_count?: number
 }
 
-interface TimelineEntryResource {
-  id: number
-  action: string
-  user_name: string
-  user_role: string
-  timestamp: string
-}
-
+/**
+ * `AuditLogResource`. `user` is a nested object (eager-loaded `user:id,name`),
+ * and the role snapshot is the flat `role` key — it can also be `system` or
+ * `unknown` for entries no signed-in user made. Both keys are omitted entirely
+ * for a faculty-staff viewer.
+ */
 interface AuditLogResource {
   id: number
-  timestamp: string
-  user_name: string
-  user_role: string
+  timestamp: string | null
   action: string
-  target_entity: string
-  reference_id: string
+  action_label?: string | null
+  target_entity?: string | null
+  reference_id?: string | null
+  user?: { id: string; name: string | null } | null
+  role?: string | null
 }
 
-/** `stats` is returned bare; the list endpoints wrap rows in `data`. */
-interface TimelineResponse {
-  data?: TimelineEntryResource[]
+interface StatsResponse {
+  data?: AuditStatResource
 }
 
 interface AuditLogListResponse {
   data: AuditLogResource[]
-  meta?: { last_page?: number }
+  meta?: { current_page?: number; last_page?: number; total?: number }
 }
 
-export interface AuditLogQuery {
-  search?: string
+/**
+ * Exactly the keys `IndexAuditLogRequest` allows. Anything else is either
+ * ignored (`validated()` drops it) or, for `role`, a 422 — which is what
+ * `search`, `order` and an empty-string `role` used to trigger on every load.
+ *
+ * Every value must be `undefined` rather than `''` when unset: Laravel's
+ * global `ConvertEmptyStringsToNull` turns `''` into `null`, and `sometimes`
+ * only skips an *absent* key, so `role=''` fails the `string` rule.
+ */
+export interface AuditLogQuery extends Record<string, unknown> {
   role?: string
+  action?: string
+  user_id?: string
+  reference_id?: string
+  date_from?: string
+  date_to?: string
+  /** The only sort the endpoint supports: `created_at` asc or desc. */
+  sort?: 'asc' | 'desc'
   page?: number
-  order?: string
-}
-
-/** Rows fetched for one page of the log table, plus the page count. */
-export interface AuditLogPage {
-  logs: AuditLog[]
-  totalPages: number
+  per_page?: number
 }
 
 function statFromResource(resource: AuditStatResource): AuditStat {
   return {
-    totalOperationsToday: resource.total_operations_today,
-    operationsChange: resource.operations_change,
-    usersLoggedIn: resource.users_logged_in,
-    totalUsers: resource.total_users,
-  }
-}
-
-function timelineEntryFromResource(resource: TimelineEntryResource): TimelineEntry {
-  return {
-    id: resource.id,
-    action: resource.action,
-    userName: resource.user_name,
-    userRole: resource.user_role,
-    timestamp: resource.timestamp,
+    totalOperationsToday: resource.total_operations_today ?? null,
+    totalDocuments: resource.total_documents ?? null,
+    totalBorrowingsToday: resource.total_borrowings_today ?? null,
+    securityAlertsCount: resource.security_alerts_count ?? null,
   }
 }
 
 function logFromResource(resource: AuditLogResource): AuditLog {
   return {
     id: resource.id,
-    timestamp: resource.timestamp,
-    userName: resource.user_name,
-    userRole: resource.user_role,
+    timestamp: resource.timestamp ?? null,
+    userName: resource.user?.name ?? null,
+    userRole: resource.role ?? null,
     action: resource.action,
-    targetEntity: resource.target_entity,
-    referenceId: resource.reference_id,
+    actionLabel: resource.action_label ?? null,
+    targetEntity: resource.target_entity ?? null,
+    referenceId: resource.reference_id ?? null,
   }
 }
 
 export const auditApi = {
   getStats: async (): Promise<AuditStat> => {
-    const { data } = await http.get<AuditStatResource>('/v1/audit-logs/stats')
-    return statFromResource(data)
+    const { data } = await http.get<StatsResponse>('/v1/audit-logs/stats')
+    return statFromResource(data.data ?? {})
   },
 
-  getTimeline: async (): Promise<TimelineEntry[]> => {
-    // The endpoint has been seen both wrapped in `data` and returned bare, so
-    // accept either rather than silently rendering an empty timeline.
-    const { data } = await http.get<TimelineResponse | TimelineEntryResource[]>(
-      '/v1/audit-logs/timeline',
-    )
-    const rows = Array.isArray(data) ? data : (data.data ?? [])
-    return rows.map(timelineEntryFromResource)
+  /**
+   * `AuditLogPolicy::viewTimeline` is super_admin only — call it behind a role
+   * check, or an archivist takes a 403 on every visit.
+   */
+  getTimeline: async (limit = 20): Promise<TimelineEntry[]> => {
+    const { data } = await http.get<AuditLogListResponse>('/v1/audit-logs/timeline', {
+      params: { limit },
+    })
+    return (data.data ?? []).map(logFromResource)
   },
 
-  getLogs: async (params: AuditLogQuery): Promise<AuditLogPage> => {
+  /** Shaped for `useServerTable`: `{ data, meta }` straight through. */
+  getLogs: async (params: AuditLogQuery): Promise<ServerTableResponse<AuditLog>> => {
     const { data } = await http.get<AuditLogListResponse>('/v1/audit-logs', { params })
-    return {
-      logs: data.data.map(logFromResource),
-      totalPages: data.meta?.last_page ?? 1,
-    }
+    return { data: (data.data ?? []).map(logFromResource), meta: data.meta ?? {} }
   },
 
-  exportReport: () => http.get<Blob>('/v1/audit-logs/export', { responseType: 'blob' }),
+  /** Streamed CSV; the export endpoint takes the same filters as the list. */
+  exportReport: (params: AuditLogQuery = {}) =>
+    http.get<Blob>('/v1/audit-logs/export', { params, responseType: 'blob' }),
 }

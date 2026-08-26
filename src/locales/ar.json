@@ -2,6 +2,52 @@
   "app": {
     "title": "ARCH"
   },
+  "audit": {
+    "title": "سجلات التدقيق والنشاط",
+    "export": {
+      "label": "تصدير سجل التدقيق",
+      "success": "بدأ تنزيل ملف سجل التدقيق.",
+      "error": "تعذّر تصدير سجل التدقيق"
+    },
+    "stats": {
+      "operationsToday": "العمليات اليوم",
+      "totalDocuments": "إجمالي المستندات",
+      "borrowingsToday": "الإعارات اليوم",
+      "securityAlerts": "التنبيهات الأمنية",
+      "securityAlertsHint": "محاولات دخول فاشلة خلال آخر 24 ساعة",
+      "error": "تعذّر تحميل إحصاءات التدقيق"
+    },
+    "timeline": {
+      "title": "النشاط الأخير",
+      "empty": "لا يوجد نشاط حديث.",
+      "error": "تعذّر تحميل سجل النشاط"
+    },
+    "logs": {
+      "title": "سجل عمليات التدقيق",
+      "emptyTitle": "لا توجد سجلات بعد",
+      "emptyDescription": "تُسجَّل هنا كل عملية يقوم بها المستخدمون في النظام.",
+      "noMatchesTitle": "لا توجد سجلات مطابقة",
+      "noMatchesDescription": "لا يوجد سجل يطابق عوامل التصفية الحالية.",
+      "error": "تعذّر تحميل سجلات التدقيق"
+    },
+    "columns": {
+      "timestamp": "الوقت",
+      "user": "المستخدم",
+      "role": "الدور",
+      "action": "الإجراء",
+      "targetEntity": "الكيان المستهدف",
+      "referenceId": "الرقم المرجعي"
+    },
+    "filters": {
+      "allRoles": "كل الأدوار",
+      "allActions": "كل الإجراءات",
+      "referenceIdPlaceholder": "ابحث بالرقم المرجعي"
+    },
+    "sort": {
+      "newest": "الأحدث أولاً",
+      "oldest": "الأقدم أولاً"
+    }
+  },
   "borrowing": {
     "title": "الإعارة",
     "subtitle": "إدارة سجلات الإعارة",
@@ -119,6 +165,24 @@
     }
   },
   "common": {
+    "auditActions": {
+      "student_file_checkout": "تم سحب ملف",
+      "student_file_returned": "تم إرجاع ملف",
+      "document_scanned": "تم مسح مستند",
+      "document_ocr_processed": "اكتملت المعالجة الضوئية",
+      "cabinet_capacity_updated": "تم تحديث سعة خزانة",
+      "borrowing_requested": "طلب إعارة",
+      "borrowing_extension_requested": "طلب تمديد إعارة",
+      "high_school_cert_uploaded": "تم رفع شهادة الثانوية",
+      "duplicate_file_removed_soft_delete": "تم حذف ملف مكرر",
+      "excel_import_completed": "اكتمل الاستيراد من Excel",
+      "view_reports": "عرض التقارير",
+      "view_student_files": "عرض ملفات الطلبة",
+      "login": "تسجيل دخول",
+      "failed_login": "محاولة دخول فاشلة",
+      "report_generated": "تم إنشاء تقرير",
+      "report_downloaded": "تم تنزيل تقرير"
+    },
     "cancel": "إلغاء",
     "clearSelection": "مسح الاختيار",
     "confirm": "تأكيد",
@@ -146,6 +210,13 @@
     "nothingHere": "لا يوجد شيء هنا بعد",
     "previousPage": "الصفحة السابقة",
     "retry": "إعادة المحاولة",
+    "roles": {
+      "super_admin": "مدير النظام",
+      "archivist": "أمين الأرشيف",
+      "faculty_staff": "موظف كلية",
+      "system": "النظام",
+      "unknown": "غير معروف"
+    },
     "searchPlaceholder": "بحث…",
     "searching": "جارٍ البحث…",
     "select": "اختر",
@@ -245,24 +316,6 @@
       "time": "الوقت",
       "empty": "لا يوجد نشاط بعد",
       "emptyHint": "ستظهر هنا العمليات على الملفات والإعارات."
-    },
-    "auditActions": {
-      "student_file_checkout": "تم سحب ملف",
-      "student_file_returned": "تم إرجاع ملف",
-      "document_scanned": "تم مسح مستند",
-      "document_ocr_processed": "اكتملت المعالجة الضوئية",
-      "cabinet_capacity_updated": "تم تحديث سعة خزانة",
-      "borrowing_requested": "طلب إعارة",
-      "borrowing_extension_requested": "طلب تمديد إعارة",
-      "high_school_cert_uploaded": "تم رفع شهادة الثانوية",
-      "duplicate_file_removed_soft_delete": "تم حذف ملف مكرر",
-      "excel_import_completed": "اكتمل الاستيراد من Excel",
-      "view_reports": "عرض التقارير",
-      "view_student_files": "عرض ملفات الطلبة",
-      "login": "تسجيل دخول",
-      "failed_login": "محاولة دخول فاشلة",
-      "report_generated": "تم إنشاء تقرير",
-      "report_downloaded": "تم تنزيل تقرير"
     },
     "roles": {
       "super_admin": "مدير النظام",

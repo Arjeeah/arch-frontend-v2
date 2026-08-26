@@ -58,7 +58,7 @@ function humanize(action: string): string {
  * humanised slug for an action the fragment has not caught up with.
  */
 function actionLabel(row: ActivityRow): string {
-  const key = `dashboard.auditActions.${row.action}`
+  const key = `common.auditActions.${row.action}`
   if (te(key)) return t(key)
   return row.actionLabel ?? humanize(row.action)
 }

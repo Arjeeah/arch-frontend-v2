@@ -31,6 +31,26 @@ export function formatDate(value: string | null | undefined, locale?: string): s
   })
 }
 
+/**
+ * Date **and** time, e.g. "Dec 1, 2025, 14:32" — for logs, where the day alone
+ * is not enough to tell two entries apart.
+ *
+ * Same contract as `formatDate`: a dash for empty values, the raw string when
+ * it is not parseable, and the active UI locale unless one is passed.
+ */
+export function formatDateTime(value: string | null | undefined, locale?: string): string {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString(locale ?? uiLocale(), {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 /** Converts an API date/datetime string to the `yyyy-mm-dd` an `<input type="date">` expects. */
 export function toDateInputValue(value: string | null | undefined): string {
   if (!value) return ''

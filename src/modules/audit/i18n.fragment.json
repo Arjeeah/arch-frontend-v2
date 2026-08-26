@@ -1,0 +1,152 @@
+{
+  "en": {
+    "audit": {
+      "title": "Audit logs & Timeline",
+      "export": {
+        "label": "Export audit log",
+        "success": "The audit log export has started downloading.",
+        "error": "Could not export the audit log"
+      },
+      "stats": {
+        "operationsToday": "Operations today",
+        "totalDocuments": "Total documents",
+        "borrowingsToday": "Borrowings today",
+        "securityAlerts": "Security alerts",
+        "securityAlertsHint": "Failed sign-ins in the last 24 hours",
+        "error": "Could not load the audit stats"
+      },
+      "timeline": {
+        "title": "Recent timeline",
+        "empty": "No recent activity.",
+        "error": "Could not load the timeline"
+      },
+      "logs": {
+        "title": "Audit logs history",
+        "emptyTitle": "No audit entries yet",
+        "emptyDescription": "Activity is recorded here as people use the system.",
+        "noMatchesTitle": "No matching entries",
+        "noMatchesDescription": "No audit entry matches the current filters.",
+        "error": "Could not load audit logs"
+      },
+      "columns": {
+        "timestamp": "Timestamp",
+        "user": "User",
+        "role": "Role",
+        "action": "Action",
+        "targetEntity": "Target entity",
+        "referenceId": "Reference ID"
+      },
+      "filters": {
+        "allRoles": "All roles",
+        "allActions": "All actions",
+        "referenceIdPlaceholder": "Search by reference ID"
+      },
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first"
+      }
+    },
+    "common": {
+      "auditActions": {
+        "student_file_checkout": "File checked out",
+        "student_file_returned": "File returned",
+        "document_scanned": "Document scanned",
+        "document_ocr_processed": "OCR completed",
+        "cabinet_capacity_updated": "Cabinet capacity updated",
+        "borrowing_requested": "Borrowing requested",
+        "borrowing_extension_requested": "Extension requested",
+        "high_school_cert_uploaded": "Certificate uploaded",
+        "duplicate_file_removed_soft_delete": "Duplicate file removed",
+        "excel_import_completed": "Excel import completed",
+        "view_reports": "Reports viewed",
+        "view_student_files": "Student files viewed",
+        "login": "Signed in",
+        "failed_login": "Failed sign-in",
+        "report_generated": "Report generated",
+        "report_downloaded": "Report downloaded"
+      },
+      "roles": {
+        "super_admin": "Super Admin",
+        "archivist": "Archivist",
+        "faculty_staff": "Faculty Staff",
+        "system": "System",
+        "unknown": "Unknown"
+      }
+    }
+  },
+  "ar": {
+    "audit": {
+      "title": "سجلات التدقيق والنشاط",
+      "export": {
+        "label": "تصدير سجل التدقيق",
+        "success": "بدأ تنزيل ملف سجل التدقيق.",
+        "error": "تعذّر تصدير سجل التدقيق"
+      },
+      "stats": {
+        "operationsToday": "العمليات اليوم",
+        "totalDocuments": "إجمالي المستندات",
+        "borrowingsToday": "الإعارات اليوم",
+        "securityAlerts": "التنبيهات الأمنية",
+        "securityAlertsHint": "محاولات دخول فاشلة خلال آخر 24 ساعة",
+        "error": "تعذّر تحميل إحصاءات التدقيق"
+      },
+      "timeline": {
+        "title": "النشاط الأخير",
+        "empty": "لا يوجد نشاط حديث.",
+        "error": "تعذّر تحميل سجل النشاط"
+      },
+      "logs": {
+        "title": "سجل عمليات التدقيق",
+        "emptyTitle": "لا توجد سجلات بعد",
+        "emptyDescription": "تُسجَّل هنا كل عملية يقوم بها المستخدمون في النظام.",
+        "noMatchesTitle": "لا توجد سجلات مطابقة",
+        "noMatchesDescription": "لا يوجد سجل يطابق عوامل التصفية الحالية.",
+        "error": "تعذّر تحميل سجلات التدقيق"
+      },
+      "columns": {
+        "timestamp": "الوقت",
+        "user": "المستخدم",
+        "role": "الدور",
+        "action": "الإجراء",
+        "targetEntity": "الكيان المستهدف",
+        "referenceId": "الرقم المرجعي"
+      },
+      "filters": {
+        "allRoles": "كل الأدوار",
+        "allActions": "كل الإجراءات",
+        "referenceIdPlaceholder": "ابحث بالرقم المرجعي"
+      },
+      "sort": {
+        "newest": "الأحدث أولاً",
+        "oldest": "الأقدم أولاً"
+      }
+    },
+    "common": {
+      "auditActions": {
+        "student_file_checkout": "تم سحب ملف",
+        "student_file_returned": "تم إرجاع ملف",
+        "document_scanned": "تم مسح مستند",
+        "document_ocr_processed": "اكتملت المعالجة الضوئية",
+        "cabinet_capacity_updated": "تم تحديث سعة خزانة",
+        "borrowing_requested": "طلب إعارة",
+        "borrowing_extension_requested": "طلب تمديد إعارة",
+        "high_school_cert_uploaded": "تم رفع شهادة الثانوية",
+        "duplicate_file_removed_soft_delete": "تم حذف ملف مكرر",
+        "excel_import_completed": "اكتمل الاستيراد من Excel",
+        "view_reports": "عرض التقارير",
+        "view_student_files": "عرض ملفات الطلبة",
+        "login": "تسجيل دخول",
+        "failed_login": "محاولة دخول فاشلة",
+        "report_generated": "تم إنشاء تقرير",
+        "report_downloaded": "تم تنزيل تقرير"
+      },
+      "roles": {
+        "super_admin": "مدير النظام",
+        "archivist": "أمين الأرشيف",
+        "faculty_staff": "موظف كلية",
+        "system": "النظام",
+        "unknown": "غير معروف"
+      }
+    }
+  }
+}
