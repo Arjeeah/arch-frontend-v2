@@ -146,6 +146,23 @@ degrades to English rather than disappearing — add the key here when one lands
      server-side call wants `->diffInDays($dueDate, true)` (or the operands
      swapped) if anyone touches it.
 
+7. **Two English strings on the faculty dashboard come from the server and
+   cannot be translated here.** Both are in `FacultyStaffDashboardService`, and
+   both need a backend change rather than a frontend one:
+   - every row's `faculty_name` is `$…->faculty->name_en`, hard-coded to the
+     English column. The faculty appears in Arabic on the storage chart (which
+     gets `name_en` _and_ `name_ar`) but in English in the borrow tables. The
+     endpoint should send both, as `getFacultyStorageDistribution()` does.
+   - `document_title` falls back to the literal `'Unknown Document'` when a
+     document has no type. The frontend cannot key off that without
+     string-matching a server sentinel, so it renders as-is.
+
+8. **Bidi, for anyone reusing these values.** The API's pre-formatted sizes
+   (`used_formatted`, `"1.3 TB"`) are a number, a space, then Latin letters —
+   the exact shape UAX#9 splits in an RTL line, which renders them "TB 1.3".
+   `utils/format.ts` exports `isolate()` for this; wrap any such server-rendered
+   value before putting it in an Arabic sentence, a chart axis or a tooltip.
+
 ## Deliberate omissions
 
 - **No files-per-month chart.** Nothing in the backend aggregates documents (or
