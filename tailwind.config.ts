@@ -39,7 +39,14 @@ export default {
           text: '#259800',
         },
         warning: '#FBBC05',
-        danger: '#D7263D',
+        danger: {
+          DEFAULT: '#D7263D',
+          // Opaque surface + accessible foreground, mirroring `success`.
+          // Toasts sit over the dark header, so an alpha background left the
+          // text unreadable — every status surface needs a solid colour.
+          bg: '#FDECEE',
+          text: '#A31221',
+        },
         inactive: {
           bg: '#EDEDED',
           text: '#717171',
