@@ -1,30 +1,41 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Search, BookOpen, AlertCircle, Clock, CheckCircle } from 'lucide-vue-next'
 import AppStatCard from '@/shared/components/AppStatCard.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
-import { usePagination } from '@/composables/usePagination'
+import AppEmptyState from '@/shared/components/AppEmptyState.vue'
+import AppErrorState from '@/shared/components/AppErrorState.vue'
+import { useServerTable } from '@/shared/composables/useServerTable'
+import { useToasts } from '@/shared/composables/useToasts'
+import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { daysUntil } from '@/shared/utils/date'
 import { useBorrowingStore } from '../stores/useBorrowingStore'
+import { borrowingApi } from '../api/borrowingApi'
 import BorrowingTable from '../components/BorrowingTable.vue'
 import CreateBorrowingDialog from '../components/CreateBorrowingDialog.vue'
 import { BORROWING_STATUSES } from '../types'
-import type { Borrowing, BorrowingInput } from '../types'
+import type { Borrowing } from '../types'
+import { currentActor } from '../utils/currentActor'
 
+const { t } = useI18n()
+const toasts = useToasts()
 const store = useBorrowingStore()
+const actor = currentActor()
 
-onMounted(() => {
-  store.fetchAll()
-})
+const { rows, loading, error, page, totalPages, isEmpty, setFilters, refresh } =
+  useServerTable<Borrowing>((params) => borrowingApi.list(params), { perPage: 10 })
 
 /**
- * There is no borrowings stats endpoint, so the four cards are derived from
- * the loaded records.
+ * There is no borrowings stats endpoint, so these four cards are derived
+ * from whatever page is currently loaded — an approximation, same as before
+ * this module moved off client-side pagination. Fetching every page just to
+ * total them would defeat the point of server pagination.
  */
 const stats = computed(() => {
-  const items = store.items
+  const items = rows.value
   const isOverdue = (item: Borrowing) => {
     if (item.status === 'overdue') return true
     const days = daysUntil(item.dueDate)
@@ -49,30 +60,33 @@ const stats = computed(() => {
   }
 })
 
-// Filters
-const search = ref('')
+// Status filter maps to the backend's `filter[status]`.
 const statusFilter = ref('')
-
-const filtered = computed(() => {
-  const q = search.value.toLowerCase()
-  return store.items.filter((item) => {
-    const matchSearch =
-      !q ||
-      (item.document?.title ?? '').toLowerCase().includes(q) ||
-      (item.borrower?.name ?? '').toLowerCase().includes(q) ||
-      item.purpose.toLowerCase().includes(q)
-    const matchStatus = !statusFilter.value || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  })
+watch(statusFilter, () => {
+  setFilters(statusFilter.value ? { filter: { status: statusFilter.value } } : { filter: {} })
 })
-
-const { currentPage, totalPages, paginated, resetPage } = usePagination(filtered, 10)
-watch([search, statusFilter], resetPage)
 
 const statusOptions = BORROWING_STATUSES.map((status) => ({
   value: status,
-  label: status.charAt(0).toUpperCase() + status.slice(1),
+  label: t(`borrowing.status.${status}`),
 }))
+
+/**
+ * Borrowings has no free-text filter on the backend (no `AllowedFilter::partial`
+ * on `BorrowingController::index`), so this only ever narrows the page that's
+ * already loaded — it cannot reach across pages the way the status filter does.
+ */
+const search = ref('')
+const visibleRows = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return rows.value
+  return rows.value.filter(
+    (item) =>
+      (item.document?.title ?? '').toLowerCase().includes(q) ||
+      (item.borrower?.name ?? '').toLowerCase().includes(q) ||
+      item.notes.toLowerCase().includes(q),
+  )
+})
 
 // Create / edit dialog
 const dialogOpen = ref(false)
@@ -87,52 +101,59 @@ function openEdit(item: Borrowing) {
   dialogOpen.value = true
 }
 
-async function handleSave(data: BorrowingInput) {
+async function handleSave(data: { studentDocumentId?: string; notes: string }) {
   try {
     if (editingItem.value) {
-      // The borrowed document is fixed once the request exists.
-      await store.update(editingItem.value.id, { purpose: data.purpose, dueDate: data.dueDate })
+      await store.update(editingItem.value.id, { notes: data.notes })
+      toasts.success(t('borrowing.toast.updated'))
     } else {
-      await store.create(data)
+      if (!data.studentDocumentId) return
+      await store.create({ studentDocumentId: data.studentDocumentId, notes: data.notes })
+      toasts.success(t('borrowing.toast.created'))
     }
     dialogOpen.value = false
-  } catch {
-    // store exposes the message via store.error
+    await refresh()
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, t('borrowing.toast.saveFailed')))
   }
 }
 
 // Workflow transitions that need confirmation because they cannot be undone
 type PendingKind = 'reject' | 'return' | 'delete'
 const pendingAction = ref<{ kind: PendingKind; item: Borrowing } | null>(null)
+const rejectReason = ref('')
+
+function openPending(kind: PendingKind, item: Borrowing) {
+  pendingAction.value = { kind, item }
+  rejectReason.value = ''
+}
 
 // Kept resolvable even with no action pending so the dialog can stay mounted
 // and play its open/close transition.
 const confirmDialog = computed(() => {
   const action = pendingAction.value
-  const label = action
-    ? (action.item.document?.title ?? `request #${action.item.id}`)
-    : 'this record'
+  const label = action ? (action.item.document?.title ?? `#${action.item.id}`) : ''
   const presets: Record<
     PendingKind,
     { title: string; confirmLabel: string; confirmClass: string; message: string }
   > = {
     reject: {
-      title: 'Reject Request',
-      confirmLabel: 'Reject',
+      title: t('borrowing.confirm.reject.title'),
+      confirmLabel: t('borrowing.confirm.reject.confirm'),
       confirmClass: 'bg-danger text-white hover:opacity-80',
-      message: `Reject the borrowing request for ${label}? This cannot be undone.`,
+      message: t('borrowing.confirm.reject.message', { label }),
     },
     return: {
-      title: 'Mark as Returned',
-      confirmLabel: 'Mark Returned',
+      title: t('borrowing.confirm.return.title'),
+      confirmLabel: t('borrowing.confirm.return.confirm'),
       confirmClass: 'bg-primary text-white hover:opacity-80',
-      message: `Record ${label} as returned? This cannot be undone.`,
+      message: t('borrowing.confirm.return.message', { label }),
     },
     delete: {
-      title: 'Delete Borrowing',
-      confirmLabel: 'Delete',
+      title: t('borrowing.confirm.delete.title'),
+      confirmLabel: t('borrowing.confirm.delete.confirm'),
       confirmClass: 'bg-danger text-white hover:opacity-80',
-      message: `Delete the borrowing record for ${label}? This action cannot be undone.`,
+      message: t('borrowing.confirm.delete.message', { label }),
     },
   }
   return presets[action?.kind ?? 'delete']
@@ -141,13 +162,27 @@ const confirmDialog = computed(() => {
 async function confirmPending() {
   const action = pendingAction.value
   if (!action) return
+
+  if (action.kind === 'reject' && !rejectReason.value.trim()) {
+    toasts.error(t('borrowing.toast.rejectReasonRequired'))
+    return
+  }
+
   try {
-    if (action.kind === 'reject') await store.reject(action.item.id)
-    else if (action.kind === 'return') await store.markReturned(action.item.id)
-    else await store.remove(action.item.id)
+    if (action.kind === 'reject') {
+      await store.reject(action.item.id, rejectReason.value.trim())
+      toasts.success(t('borrowing.toast.rejected'))
+    } else if (action.kind === 'return') {
+      await store.markReturned(action.item.id)
+      toasts.success(t('borrowing.toast.returned'))
+    } else {
+      await store.remove(action.item.id)
+      toasts.success(t('borrowing.toast.deleted'))
+    }
     pendingAction.value = null
-  } catch {
-    // store exposes the message via store.error
+    await refresh()
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, t('borrowing.toast.actionFailed')))
   }
 }
 
@@ -155,15 +190,19 @@ async function confirmPending() {
 async function handleApprove(item: Borrowing) {
   try {
     await store.approve(item.id)
-  } catch {
-    // store exposes the message via store.error
+    toasts.success(t('borrowing.toast.approved'))
+    await refresh()
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, t('borrowing.toast.actionFailed')))
   }
 }
 async function handleMarkBorrowed(item: Borrowing) {
   try {
     await store.markBorrowed(item.id)
-  } catch {
-    // store exposes the message via store.error
+    toasts.success(t('borrowing.toast.markedBorrowed'))
+    await refresh()
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, t('borrowing.toast.actionFailed')))
   }
 }
 </script>
@@ -173,14 +212,17 @@ async function handleMarkBorrowed(item: Borrowing) {
     <!-- Header -->
     <div class="flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-display font-semibold text-text-primary">Borrowing</h1>
-        <p class="text-sm text-text-secondary font-sans mt-0.5">Manage borrowing records</p>
+        <h1 class="text-2xl font-display font-semibold text-text-primary">
+          {{ t('borrowing.title') }}
+        </h1>
+        <p class="text-sm text-text-secondary font-sans mt-0.5">{{ t('borrowing.subtitle') }}</p>
       </div>
       <button
+        v-if="actor.canRequest"
         class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-display font-medium hover:bg-primary-mid transition-colors"
         @click="openCreate"
       >
-        Add Borrowing
+        {{ t('borrowing.addBorrowing') }}
       </button>
     </div>
 
@@ -189,70 +231,80 @@ async function handleMarkBorrowed(item: Borrowing) {
       <AppStatCard
         :icon="BookOpen"
         :value="stats.active"
-        label="Active Borrowings"
-        sub-label="Currently borrowed items"
+        :label="t('borrowing.stats.active.label')"
+        :sub-label="t('borrowing.stats.active.subLabel')"
       />
       <AppStatCard
         :icon="AlertCircle"
         :value="stats.overdue"
-        label="Overdue Items"
-        sub-label="Items past their due date"
+        :label="t('borrowing.stats.overdue.label')"
+        :sub-label="t('borrowing.stats.overdue.subLabel')"
       />
       <AppStatCard
         :icon="Clock"
         :value="stats.dueSoon"
-        label="Due Soon"
-        sub-label="Items due within the next 7 days"
+        :label="t('borrowing.stats.dueSoon.label')"
+        :sub-label="t('borrowing.stats.dueSoon.subLabel')"
       />
       <AppStatCard
         :icon="CheckCircle"
         :value="stats.returnedThisWeek"
-        label="Returned This Week"
-        sub-label="Items returned in the past week"
+        :label="t('borrowing.stats.returnedThisWeek.label')"
+        :sub-label="t('borrowing.stats.returnedThisWeek.subLabel')"
       />
     </div>
 
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
       <div class="relative flex-1 min-w-[200px]">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
         <input
           v-model="search"
           type="text"
-          placeholder="Search"
-          class="w-full h-[42px] pl-9 pr-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
+          :placeholder="t('borrowing.searchPlaceholder')"
+          class="w-full h-[42px] ps-9 pe-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
           style="border-width: 1.3px"
         />
       </div>
-      <AppSelect v-model="statusFilter" :options="statusOptions" placeholder="All Status" />
+      <AppSelect
+        v-model="statusFilter"
+        :options="statusOptions"
+        :placeholder="t('borrowing.allStatus')"
+      />
     </div>
 
-    <!-- Load error -->
-    <div
-      v-if="store.error && !dialogOpen"
-      class="p-3 bg-danger/10 border border-danger/20 rounded-lg"
-    >
-      <p class="text-sm font-sans text-danger">{{ store.error }}</p>
-    </div>
+    <!-- Error -->
+    <AppErrorState v-if="error" :description="error" @retry="refresh" />
 
-    <!-- Table -->
-    <BorrowingTable
-      :items="paginated"
-      :loading="store.loading"
-      @edit="openEdit"
-      @delete="pendingAction = { kind: 'delete', item: $event }"
-      @approve="handleApprove"
-      @reject="pendingAction = { kind: 'reject', item: $event }"
-      @mark-borrowed="handleMarkBorrowed"
-      @mark-returned="pendingAction = { kind: 'return', item: $event }"
-    />
+    <template v-else>
+      <!-- Table -->
+      <BorrowingTable
+        :items="visibleRows"
+        :loading="loading"
+        :can-manage-workflow="actor.canManageWorkflow"
+        :can-delete-any="actor.canDeleteAny"
+        :current-user-id="actor.id"
+        @edit="openEdit"
+        @delete="openPending('delete', $event)"
+        @approve="handleApprove"
+        @reject="openPending('reject', $event)"
+        @mark-borrowed="handleMarkBorrowed"
+        @mark-returned="openPending('return', $event)"
+      />
 
-    <!-- Pagination -->
-    <AppPagination
-      v-if="!store.loading && totalPages > 1"
-      v-model:currentPage="currentPage"
-      :total-pages="totalPages"
-    />
+      <AppEmptyState
+        v-if="isEmpty"
+        :title="t('borrowing.empty.title')"
+        :description="t('borrowing.empty.description')"
+      />
+
+      <!-- Pagination -->
+      <AppPagination
+        v-if="!loading && totalPages > 1"
+        v-model:currentPage="page"
+        :total-pages="totalPages"
+      />
+    </template>
   </div>
 
   <!-- Create / Edit dialog -->
@@ -275,5 +327,17 @@ async function handleMarkBorrowed(item: Borrowing) {
     @confirm="confirmPending"
   >
     <p class="text-sm text-text-secondary font-sans">{{ confirmDialog.message }}</p>
+
+    <div v-if="pendingAction?.kind === 'reject'" class="mt-3">
+      <label class="block text-sm font-sans text-text-primary mb-1">{{
+        t('borrowing.confirm.reject.reasonLabel')
+      }}</label>
+      <textarea
+        v-model="rejectReason"
+        rows="2"
+        :placeholder="t('borrowing.confirm.reject.reasonPlaceholder')"
+        class="w-full bg-surface-card border border-border-input rounded-[9px] px-4 py-2 font-sans text-sm text-text-primary placeholder:text-text-placeholder focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+      />
+    </div>
   </AppConfirmDialog>
 </template>

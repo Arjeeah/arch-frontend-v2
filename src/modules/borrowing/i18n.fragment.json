@@ -1,0 +1,204 @@
+{
+  "en": {
+    "borrowing": {
+      "title": "Borrowing",
+      "subtitle": "Manage borrowing records",
+      "addBorrowing": "Add Borrowing",
+      "searchPlaceholder": "Search this page…",
+      "allStatus": "All Status",
+      "empty": {
+        "title": "No borrowing records",
+        "description": "No borrowing records match the current filters."
+      },
+      "stats": {
+        "active": { "label": "Active Borrowings", "subLabel": "Currently borrowed items" },
+        "overdue": { "label": "Overdue Items", "subLabel": "Items past their due date" },
+        "dueSoon": { "label": "Due Soon", "subLabel": "Items due within the next 7 days" },
+        "returnedThisWeek": {
+          "label": "Returned This Week",
+          "subLabel": "Items returned in the past week"
+        }
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "borrowed": "Borrowed",
+        "returned": "Returned",
+        "overdue": "Overdue"
+      },
+      "table": {
+        "document": "Document",
+        "borrower": "Borrower",
+        "notes": "Notes",
+        "dueDate": "Due Date",
+        "borrowedAt": "Borrowed At",
+        "returnedAt": "Returned At",
+        "status": "Status",
+        "actions": "Actions",
+        "rejectionReasonPrefix": "Reason:"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "markBorrowed": "Mark Borrowed",
+        "markReturned": "Return",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "confirm": {
+        "reject": {
+          "title": "Reject Request",
+          "confirm": "Reject",
+          "message": "Reject the borrowing request for {label}?",
+          "reasonLabel": "Rejection reason",
+          "reasonPlaceholder": "Explain why this request is being rejected"
+        },
+        "return": {
+          "title": "Mark as Returned",
+          "confirm": "Mark Returned",
+          "message": "Record {label} as returned? This cannot be undone."
+        },
+        "delete": {
+          "title": "Delete Borrowing",
+          "confirm": "Delete",
+          "message": "Delete the borrowing record for {label}? This action cannot be undone."
+        }
+      },
+      "toast": {
+        "created": "Borrowing request submitted",
+        "updated": "Borrowing request updated",
+        "deleted": "Borrowing request cancelled",
+        "approved": "Borrowing request approved",
+        "rejected": "Borrowing request rejected",
+        "markedBorrowed": "Marked as picked up",
+        "returned": "Marked as returned",
+        "saveFailed": "Failed to save borrowing request",
+        "actionFailed": "Action failed",
+        "rejectReasonRequired": "A rejection reason is required"
+      },
+      "dialog": {
+        "createTitle": "Create Borrowing",
+        "editTitle": "Edit Borrowing",
+        "createSubtitle": "Search for the archived document to request.",
+        "editSubtitle": "Only the notes can be changed once a request exists.",
+        "documentLabel": "Document",
+        "documentPlaceholder": "Search by file number…",
+        "documentMinChars": "Type at least {n} characters",
+        "documentEmpty": "No matching documents",
+        "documentSearchError": "Could not search documents",
+        "documentLocked": "The borrowed document cannot be changed after the request is created.",
+        "notesLabel": "Notes",
+        "notesPlaceholder": "Optional notes for this request",
+        "dueDateHint": "The due date is set automatically when an archivist approves the request.",
+        "cancel": "Cancel",
+        "save": "Save Borrowing",
+        "update": "Update Borrowing",
+        "errors": {
+          "documentRequired": "Select a document to borrow"
+        }
+      }
+    }
+  },
+  "ar": {
+    "borrowing": {
+      "title": "الإعارة",
+      "subtitle": "إدارة سجلات الإعارة",
+      "addBorrowing": "إضافة إعارة",
+      "searchPlaceholder": "بحث في هذه الصفحة…",
+      "allStatus": "جميع الحالات",
+      "empty": {
+        "title": "لا توجد سجلات إعارة",
+        "description": "لا توجد سجلات إعارة مطابقة للمرشحات الحالية."
+      },
+      "stats": {
+        "active": { "label": "الإعارات النشطة", "subLabel": "العناصر المُعارة حاليًا" },
+        "overdue": { "label": "العناصر المتأخرة", "subLabel": "عناصر تجاوزت موعد استحقاقها" },
+        "dueSoon": { "label": "مستحقة قريبًا", "subLabel": "عناصر مستحقة خلال 7 أيام" },
+        "returnedThisWeek": {
+          "label": "أُعيدت هذا الأسبوع",
+          "subLabel": "عناصر أُعيدت خلال الأسبوع الماضي"
+        }
+      },
+      "status": {
+        "pending": "قيد الانتظار",
+        "approved": "موافَق عليه",
+        "rejected": "مرفوض",
+        "borrowed": "مُعار",
+        "returned": "مُعاد",
+        "overdue": "متأخر"
+      },
+      "table": {
+        "document": "الوثيقة",
+        "borrower": "المستعير",
+        "notes": "ملاحظات",
+        "dueDate": "تاريخ الاستحقاق",
+        "borrowedAt": "تاريخ الإعارة",
+        "returnedAt": "تاريخ الإعادة",
+        "status": "الحالة",
+        "actions": "الإجراءات",
+        "rejectionReasonPrefix": "السبب:"
+      },
+      "actions": {
+        "approve": "موافقة",
+        "reject": "رفض",
+        "markBorrowed": "تأكيد التسليم",
+        "markReturned": "إعادة",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "confirm": {
+        "reject": {
+          "title": "رفض الطلب",
+          "confirm": "رفض",
+          "message": "هل تريد رفض طلب إعارة {label}؟",
+          "reasonLabel": "سبب الرفض",
+          "reasonPlaceholder": "اشرح سبب رفض هذا الطلب"
+        },
+        "return": {
+          "title": "تسجيل الإعادة",
+          "confirm": "تسجيل الإعادة",
+          "message": "هل تريد تسجيل {label} كمُعاد؟ لا يمكن التراجع عن هذا الإجراء."
+        },
+        "delete": {
+          "title": "حذف الإعارة",
+          "confirm": "حذف",
+          "message": "هل تريد حذف سجل إعارة {label}؟ لا يمكن التراجع عن هذا الإجراء."
+        }
+      },
+      "toast": {
+        "created": "تم إرسال طلب الإعارة",
+        "updated": "تم تحديث طلب الإعارة",
+        "deleted": "تم إلغاء طلب الإعارة",
+        "approved": "تمت الموافقة على طلب الإعارة",
+        "rejected": "تم رفض طلب الإعارة",
+        "markedBorrowed": "تم تسجيل الاستلام",
+        "returned": "تم تسجيل الإعادة",
+        "saveFailed": "تعذر حفظ طلب الإعارة",
+        "actionFailed": "فشل الإجراء",
+        "rejectReasonRequired": "سبب الرفض مطلوب"
+      },
+      "dialog": {
+        "createTitle": "إنشاء إعارة",
+        "editTitle": "تعديل إعارة",
+        "createSubtitle": "ابحث عن الوثيقة المؤرشفة المطلوب إعارتها.",
+        "editSubtitle": "يمكن تعديل الملاحظات فقط بعد إنشاء الطلب.",
+        "documentLabel": "الوثيقة",
+        "documentPlaceholder": "ابحث برقم الملف…",
+        "documentMinChars": "اكتب {n} أحرف على الأقل",
+        "documentEmpty": "لا توجد وثائق مطابقة",
+        "documentSearchError": "تعذر البحث عن الوثائق",
+        "documentLocked": "لا يمكن تغيير الوثيقة المُعارة بعد إنشاء الطلب.",
+        "notesLabel": "ملاحظات",
+        "notesPlaceholder": "ملاحظات اختيارية لهذا الطلب",
+        "dueDateHint": "يتم تحديد تاريخ الاستحقاق تلقائيًا عند موافقة أمين الأرشيف على الطلب.",
+        "cancel": "إلغاء",
+        "save": "حفظ الإعارة",
+        "update": "تحديث الإعارة",
+        "errors": {
+          "documentRequired": "اختر وثيقة للإعارة"
+        }
+      }
+    }
+  }
+}

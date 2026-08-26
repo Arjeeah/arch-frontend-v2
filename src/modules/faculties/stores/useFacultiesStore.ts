@@ -4,30 +4,20 @@ import { getApiErrorMessage } from '@/shared/utils/apiError'
 import type { Faculty, FacultyInput } from '../types'
 import { facultiesApi } from '../api/facultiesApi'
 
+/**
+ * Single-record faculty mutations. The paginated list itself lives in
+ * `useServerTable` inside `FacultyListPage` — this store only owns
+ * create/update/delete.
+ */
 export const useFacultiesStore = defineStore('faculties', () => {
-  const items = ref<Faculty[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchAll() {
+  async function create(input: FacultyInput): Promise<Faculty> {
     loading.value = true
     error.value = null
     try {
-      items.value = await facultiesApi.list()
-    } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to load faculties')
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function create(input: FacultyInput) {
-    loading.value = true
-    error.value = null
-    try {
-      const created = await facultiesApi.create(input)
-      items.value.unshift(created)
-      return created
+      return await facultiesApi.create(input)
     } catch (err) {
       error.value = getApiErrorMessage(err, 'Failed to create faculty')
       throw err
@@ -36,16 +26,11 @@ export const useFacultiesStore = defineStore('faculties', () => {
     }
   }
 
-  async function update(id: number, input: Partial<FacultyInput>) {
+  async function update(id: number, input: Partial<FacultyInput>): Promise<Faculty> {
     loading.value = true
     error.value = null
     try {
-      const updated = await facultiesApi.update(id, input)
-      const index = items.value.findIndex((f) => f.id === id)
-      if (index !== -1) {
-        items.value[index] = updated
-      }
-      return updated
+      return await facultiesApi.update(id, input)
     } catch (err) {
       error.value = getApiErrorMessage(err, 'Failed to update faculty')
       throw err
@@ -54,15 +39,11 @@ export const useFacultiesStore = defineStore('faculties', () => {
     }
   }
 
-  async function remove(id: number) {
+  async function remove(id: number): Promise<void> {
     loading.value = true
     error.value = null
     try {
       await facultiesApi.delete(id)
-      const index = items.value.findIndex((f) => f.id === id)
-      if (index !== -1) {
-        items.value.splice(index, 1)
-      }
     } catch (err) {
       error.value = getApiErrorMessage(err, 'Failed to delete faculty')
       throw err
@@ -71,5 +52,5 @@ export const useFacultiesStore = defineStore('faculties', () => {
     }
   }
 
-  return { items, loading, error, fetchAll, create, update, remove }
+  return { loading, error, create, update, remove }
 })

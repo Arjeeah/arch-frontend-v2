@@ -4,36 +4,21 @@ import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { usersApi } from '../api/usersApi'
 import type { User, UserInput } from '../types'
 
+/**
+ * Single-record user operations. The paginated list itself lives in
+ * `useServerTable` inside `UserListPage` — this store only owns mutations
+ * (create/update/delete) and the one-off fetch a deep link to `/users/:id`
+ * needs.
+ */
 export const useUsersStore = defineStore('users', () => {
-  const users = ref<User[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchUsers() {
+  async function fetchUser(id: string): Promise<User> {
     loading.value = true
     error.value = null
     try {
-      users.value = await usersApi.list()
-    } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to load users')
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * Loads a single user by id and upserts it into `users`. The list endpoint
-   * is paginated, so a deep link cannot rely on the user being in page one.
-   */
-  async function fetchUser(id: number) {
-    loading.value = true
-    error.value = null
-    try {
-      const user = await usersApi.show(id)
-      const idx = users.value.findIndex((u) => u.id === id)
-      if (idx === -1) users.value.push(user)
-      else users.value[idx] = user
-      return user
+      return await usersApi.show(id)
     } catch (err) {
       error.value = getApiErrorMessage(err, 'Failed to load user')
       throw err
@@ -42,13 +27,11 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
-  async function createUser(input: UserInput) {
+  async function createUser(input: UserInput): Promise<User> {
     loading.value = true
     error.value = null
     try {
-      const created = await usersApi.create(input)
-      users.value.unshift(created)
-      return created
+      return await usersApi.create(input)
     } catch (err) {
       error.value = getApiErrorMessage(err, 'Failed to create user')
       throw err
@@ -57,16 +40,11 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
-  async function updateUser(id: number, input: Partial<UserInput>) {
+  async function updateUser(id: string, input: Partial<UserInput>): Promise<User> {
     loading.value = true
     error.value = null
     try {
-      const updated = await usersApi.update(id, input)
-      const idx = users.value.findIndex((u) => u.id === id)
-      if (idx !== -1) {
-        users.value[idx] = updated
-      }
-      return updated
+      return await usersApi.update(id, input)
     } catch (err) {
       error.value = getApiErrorMessage(err, 'Failed to update user')
       throw err
@@ -75,12 +53,11 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
-  async function deleteUser(id: number) {
+  async function deleteUser(id: string): Promise<void> {
     loading.value = true
     error.value = null
     try {
       await usersApi.delete(id)
-      users.value = users.value.filter((u) => u.id !== id)
     } catch (err) {
       error.value = getApiErrorMessage(err, 'Failed to delete user')
       throw err
@@ -89,5 +66,5 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
-  return { users, loading, error, fetchUsers, fetchUser, createUser, updateUser, deleteUser }
+  return { loading, error, fetchUser, createUser, updateUser, deleteUser }
 })

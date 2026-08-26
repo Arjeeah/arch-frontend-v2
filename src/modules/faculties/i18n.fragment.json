@@ -1,0 +1,124 @@
+{
+  "en": {
+    "faculties": {
+      "title": "Faculties",
+      "subtitle": "Manage faculties and their programs",
+      "addFaculty": "Add Faculty",
+      "searchPlaceholder": "Search",
+      "allStatus": "All Status",
+      "empty": {
+        "title": "No faculties found",
+        "description": "No faculties match the current filters."
+      },
+      "toast": {
+        "created": "Faculty created successfully",
+        "updated": "Faculty updated successfully",
+        "deleted": "Faculty deleted successfully",
+        "saveFailed": "Failed to save faculty",
+        "deleteFailed": "Failed to delete faculty"
+      },
+      "deleteDialog": {
+        "title": "Delete Faculty",
+        "confirm": "Delete",
+        "message": "Are you sure you want to delete {name}? This action cannot be undone."
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "code": "Code",
+        "nameAr": "Name (AR)",
+        "nameEn": "Name (EN)",
+        "programs": "Programs",
+        "status": "Status",
+        "actions": "Actions",
+        "editAction": "Edit",
+        "deleteAction": "Delete"
+      },
+      "dialog": {
+        "createTitle": "Create Faculty",
+        "editTitle": "Edit Faculty",
+        "createSubtitle": "Add a new faculty to the system.",
+        "editSubtitle": "Update faculty details.",
+        "codeLabel": "Code",
+        "codePlaceholder": "Enter Code",
+        "nameArLabel": "Name AR",
+        "nameArPlaceholder": "e.g. تقنية المعلومات",
+        "nameEnLabel": "Name EN",
+        "nameEnPlaceholder": "e.g. Information Technology",
+        "statusLabel": "Status",
+        "statusHelp": "Set faculty status as active or inactive",
+        "cancel": "Cancel",
+        "save": "Save Faculty",
+        "update": "Update Faculty",
+        "errors": {
+          "codeRequired": "Code is required",
+          "nameArRequired": "Name AR is required",
+          "nameEnRequired": "Name EN is required"
+        }
+      }
+    }
+  },
+  "ar": {
+    "faculties": {
+      "title": "الكليات",
+      "subtitle": "إدارة الكليات وبرامجها",
+      "addFaculty": "إضافة كلية",
+      "searchPlaceholder": "بحث",
+      "allStatus": "جميع الحالات",
+      "empty": {
+        "title": "لا توجد كليات",
+        "description": "لا توجد كليات مطابقة للمرشحات الحالية."
+      },
+      "toast": {
+        "created": "تم إنشاء الكلية بنجاح",
+        "updated": "تم تحديث الكلية بنجاح",
+        "deleted": "تم حذف الكلية بنجاح",
+        "saveFailed": "تعذر حفظ الكلية",
+        "deleteFailed": "تعذر حذف الكلية"
+      },
+      "deleteDialog": {
+        "title": "حذف الكلية",
+        "confirm": "حذف",
+        "message": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء."
+      },
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "table": {
+        "code": "الرمز",
+        "nameAr": "الاسم (عربي)",
+        "nameEn": "الاسم (إنجليزي)",
+        "programs": "البرامج",
+        "status": "الحالة",
+        "actions": "الإجراءات",
+        "editAction": "تعديل",
+        "deleteAction": "حذف"
+      },
+      "dialog": {
+        "createTitle": "إنشاء كلية",
+        "editTitle": "تعديل كلية",
+        "createSubtitle": "أضف كلية جديدة إلى النظام.",
+        "editSubtitle": "تحديث بيانات الكلية.",
+        "codeLabel": "الرمز",
+        "codePlaceholder": "أدخل الرمز",
+        "nameArLabel": "الاسم بالعربية",
+        "nameArPlaceholder": "مثال: تقنية المعلومات",
+        "nameEnLabel": "الاسم بالإنجليزية",
+        "nameEnPlaceholder": "مثال: Information Technology",
+        "statusLabel": "الحالة",
+        "statusHelp": "تعيين حالة الكلية كنشطة أو غير نشطة",
+        "cancel": "إلغاء",
+        "save": "حفظ الكلية",
+        "update": "تحديث الكلية",
+        "errors": {
+          "codeRequired": "الرمز مطلوب",
+          "nameArRequired": "الاسم بالعربية مطلوب",
+          "nameEnRequired": "الاسم بالإنجليزية مطلوب"
+        }
+      }
+    }
+  }
+}

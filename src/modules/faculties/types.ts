@@ -10,7 +10,13 @@ export interface Faculty {
   nameAR: string
   nameEN: string
   status: FacultyStatus
-  /** Number of programs attached to this faculty, derived from the API's `programs` relation. */
+  /**
+   * Number of programs attached to this faculty.
+   *
+   * verify against live API: `FacultyResource` never serialises a `programs`
+   * relation, so there is nothing to derive this from today — always `0`
+   * until the backend adds a count. See `facultiesApi.ts`.
+   */
   programsCount: number
 }
 

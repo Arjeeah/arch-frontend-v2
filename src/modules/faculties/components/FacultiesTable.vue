@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { SquarePen, Ban } from 'lucide-vue-next'
 import type { Faculty } from '../types'
 
@@ -11,6 +12,8 @@ const emit = defineEmits<{
   edit: [item: Faculty]
   delete: [item: Faculty]
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -20,22 +23,34 @@ const emit = defineEmits<{
       class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px] min-w-[800px]"
     >
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Code</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('faculties.table.code')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Name (AR)</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('faculties.table.nameAr')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Name (EN)</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('faculties.table.nameEn')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[100px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Programs</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('faculties.table.programs')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('faculties.table.status')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Actions</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('faculties.table.actions')
+        }}</span>
       </div>
     </div>
 
@@ -105,7 +120,11 @@ const emit = defineEmits<{
                 : 'bg-inactive-bg text-inactive-text'
             "
           >
-            {{ item.status }}
+            {{
+              item.status === 'Active'
+                ? t('faculties.status.active')
+                : t('faculties.status.inactive')
+            }}
           </span>
         </div>
 
@@ -113,27 +132,19 @@ const emit = defineEmits<{
         <div class="flex justify-center items-center px-[13px] gap-[15px] w-[90px] shrink-0">
           <button
             class="text-[#4285F4] hover:opacity-70 transition-opacity"
-            title="Edit"
+            :title="t('faculties.table.editAction')"
             @click="emit('edit', item)"
           >
             <SquarePen class="w-6 h-6" />
           </button>
           <button
             class="text-danger hover:opacity-70 transition-opacity"
-            title="Delete"
+            :title="t('faculties.table.deleteAction')"
             @click="emit('delete', item)"
           >
             <Ban class="w-6 h-6" />
           </button>
         </div>
-      </div>
-
-      <!-- Empty state -->
-      <div
-        v-if="!items.length"
-        class="flex justify-center items-center bg-white border border-border rounded-[4px] py-12"
-      >
-        <span class="text-sm text-text-muted font-sans">No records found.</span>
       </div>
     </template>
   </div>
