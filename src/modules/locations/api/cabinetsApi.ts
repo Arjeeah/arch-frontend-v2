@@ -9,7 +9,14 @@ import type { Cabinet, CabinetInput, LocationStatus } from '../types'
 /** `/v1/location/cabinets` — see Admin/Location/CabinetController.php. */
 const BASE_PATH = '/v1/location/cabinets'
 
-/** A cabinet exactly as `CabinetResource` sends it (note the capitalised `Room` key). */
+/**
+ * A cabinet exactly as `CabinetResource` sends it.
+ *
+ * The capitalised `Room` key is real, not a typo — confirmed against the live
+ * API on both index and store responses. `CabinetResource` emits
+ * `'Room' => $this->room->name`, a display name, and never exposes `room_id`,
+ * so the parent id genuinely is unavailable from a cabinet payload.
+ */
 interface CabinetResource {
   id: string
   Room: string
@@ -105,7 +112,12 @@ export const cabinetsApi = {
     return fromResource(data.data)
   },
 
-  /** Never sends `room_id` — the backend 422s an update that tries to change it. */
+  /**
+   * Never sends `room_id` — confirmed live, `CabinetController::update`
+   * answers 422 "Changing room_id is not supported via update() without move
+   * logic." when the id differs from the cabinet's current room. (Re-sending
+   * the SAME id is accepted, but there is nothing to gain by sending it.)
+   */
   update: async (id: string, input: Partial<CabinetInput>): Promise<Cabinet> => {
     const { data } = await http.put<CabinetItemResponse>(`${BASE_PATH}/${id}`, toPayload(input))
     return fromResource(data.data)
