@@ -35,7 +35,12 @@ const columns = computed(() => [
   { key: 'actions', label: t('imports.table.actions'), align: 'center' as const },
 ])
 
-const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
+// `numberingSystem` is pinned for the same reason every other formatter in this
+// app pins it: the rest of the UI renders Western digits under `ar`, and CLDR's
+// default for `ar` has moved between releases.
+const numberFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { numberingSystem: 'latn' }),
+)
 
 function entityLabel(job: ImportJob): string {
   return job.entity ? t(`imports.entities.${job.entity}`) : t('imports.table.unknownEntity')

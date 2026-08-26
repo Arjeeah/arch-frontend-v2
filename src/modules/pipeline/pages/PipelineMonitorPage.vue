@@ -38,7 +38,15 @@ import PipelineDocumentsTable from '../components/PipelineDocumentsTable.vue'
 /** Kept in step with the route the integrator adds — see WIRING.md. */
 const UPLOAD_PATH = '/pipeline/import'
 
-/** How often the monitor re-reads state while documents are still moving. */
+/**
+ * How often the monitor re-reads state while documents are still moving.
+ *
+ * The seconds value reaches `pipeline.monitor.live` as plain interpolation, not
+ * as a plural choice — the badge is the only place it is rendered and 10 is a
+ * constant, so the Arabic copy is written for exactly this number (CLDR *few*,
+ * i.e. 3–10 → "ثوانٍ"). Change this and the Arabic string needs revisiting, or
+ * `pipeline.monitor.live` needs the six-form treatment described in CLAUDE.md.
+ */
 const POLL_INTERVAL_MS = 10_000
 
 const { t, locale } = useI18n()
@@ -376,7 +384,13 @@ onMounted(async () => {
           :total-pages="table.totalPages.value"
         />
         <p class="font-sans text-xs text-text-secondary">
-          {{ t('pipeline.monitor.totalRows', { total: formatCount(table.total.value, locale) }) }}
+          {{
+            t(
+              'pipeline.monitor.totalRows',
+              { total: formatCount(table.total.value, locale) },
+              table.total.value,
+            )
+          }}
         </p>
       </div>
     </section>

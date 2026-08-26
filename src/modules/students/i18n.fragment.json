@@ -6,7 +6,7 @@
     "students": {
       "title": "Students",
       "subtitle": "The student register and the paper files behind it",
-      "resultCount": "{count} students",
+      "resultCount": "{count} student | {count} students",
       "draftNotice": "This record was created by the AI from a scanned file. Check the details, then confirm it.",
       "emptyTitle": "No students yet",
       "emptyDescription": "Students appear here once they are added by hand or created from a scanned file.",
@@ -92,7 +92,7 @@
       },
       "errors": {
         "required": "This field is required",
-        "maxLength": "Use at most {max} characters",
+        "maxLength": "Use at most {max} character | Use at most {max} characters",
         "email": "Enter a valid email address",
         "yearRange": "Enter a year between 1900 and 2100",
         "graduationBeforeEnrollment": "Graduation cannot be before enrollment",
@@ -146,7 +146,7 @@
     "students": {
       "title": "الطلاب",
       "subtitle": "سجل الطلاب والملفات الورقية المرتبطة بهم",
-      "resultCount": "{count} طالب",
+      "resultCount": "لا طلاب | طالب واحد | طالبان | {count} طلاب | {count} طالبًا | {count} طالب",
       "draftNotice": "أنشأ الذكاء الاصطناعي هذا السجل من ملف ممسوح ضوئيًا. راجع البيانات ثم اعتمدها.",
       "emptyTitle": "لا يوجد طلاب بعد",
       "emptyDescription": "يظهر الطلاب هنا بعد إضافتهم يدويًا أو إنشائهم من ملف ممسوح ضوئيًا.",
@@ -232,7 +232,7 @@
       },
       "errors": {
         "required": "هذا الحقل مطلوب",
-        "maxLength": "استخدم {max} حرفًا كحد أقصى",
+        "maxLength": "لا تستخدم أي حرف | استخدم حرفًا واحدًا كحد أقصى | استخدم حرفين كحد أقصى | استخدم {max} أحرف كحد أقصى | استخدم {max} حرفًا كحد أقصى | استخدم {max} حرف كحد أقصى",
         "email": "أدخل بريدًا إلكترونيًا صالحًا",
         "yearRange": "أدخل سنة بين 1900 و2100",
         "graduationBeforeEnrollment": "لا يمكن أن تسبق سنة التخرج سنة القيد",
@@ -260,7 +260,7 @@
       },
       "documents": {
         "title": "المستندات",
-        "count": "{count} مستند",
+        "count": "لا مستندات | مستند واحد | مستندان | {count} مستندات | {count} مستندًا | {count} مستند",
         "upload": "رفع مستند",
         "required": "المستندات المطلوبة",
         "pipelineUnavailable": "حالة المعالجة غير متاحة حاليًا — لا يؤثر ذلك على المستندات نفسها.",

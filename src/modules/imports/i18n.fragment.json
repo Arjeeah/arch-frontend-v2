@@ -48,7 +48,7 @@
       },
       "jobs": {
         "title": "Import history",
-        "polling": "Updating {count} job(s)…",
+        "polling": "Updating {count} job… | Updating {count} jobs…",
         "localNote": "This history is tracked in your browser — the API has no endpoint that lists past import jobs."
       },
       "empty": {
@@ -142,12 +142,12 @@
         "progress": "الصفوف المعالجة",
         "started": "وقت البدء",
         "actions": "إجراءات",
-        "counts": "{processed} صفًا · {success} ناجح · {failed} فاشل",
+        "counts": "الصفوف: {processed} · ناجح: {success} · فاشل: {failed}",
         "unknownEntity": "غير معروف"
       },
       "jobs": {
         "title": "سجل الاستيراد",
-        "polling": "يجري تحديث {count} من العمليات…",
+        "polling": "لا عمليات قيد التحديث… | جارٍ تحديث عملية واحدة… | جارٍ تحديث عمليتين… | جارٍ تحديث {count} عمليات… | جارٍ تحديث {count} عمليةً… | جارٍ تحديث {count} عملية…",
         "localNote": "يُتابَع هذا السجل من هذا المتصفح وحده، إذ لا توفّر الواجهة البرمجية قائمة بعمليات الاستيراد السابقة."
       },
       "empty": {

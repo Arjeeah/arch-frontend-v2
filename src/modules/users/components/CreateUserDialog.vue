@@ -88,11 +88,9 @@ function submit() {
   emit('save', payload)
 }
 
-const roleOptions = computed(() =>
-  ROLES.map((r) => ({ value: r.value, label: roleLabelT(r.value) })),
-)
+const roleOptions = computed(() => ROLES.map((role) => ({ value: role, label: roleLabelT(role) })))
 
-/** `roleLabel()` from `types.ts` returns an English fallback label; route it through i18n instead. */
+/** `ROLES` carries wire slugs only — the visible label comes from `common.roles.*`. */
 function roleLabelT(role: UserRole): string {
   return t(`common.roles.${role}`)
 }

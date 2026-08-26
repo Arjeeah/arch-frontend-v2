@@ -68,19 +68,18 @@ replaced wholesale.
 Three keys carry a `|` in both locales and are **vue-i18n plural forms**, not
 literal text: `search.form.tooShort`, `search.results.matchingPages` and
 `search.results.showMore`. Their call sites pass a named `count`, which vue-i18n
-reads as the plural index. Do not "clean up" the pipes, and keep the forms in
-that order (singular first) — Arabic relies on it for the dual ("حرفين").
+reads as the plural index. Do not "clean up" the pipes.
 
-One constraint shapes the Arabic wording of those keys, and it is worth knowing
-before anyone "improves" it. vue-i18n is created without per-locale
-`pluralRules`, so the default rule gives exactly **two** buckets — `1` and `≥2`.
-Arabic needs six (1, 2, 3–10, 11–99, 100, 101+): a numeral takes a plural noun
-from 3 to 10 ("٥ صفحات") but a singular one from 11 up ("١١ صفحة"). No single
-`≥2` form can satisfy both, so the Arabic `≥2` forms are phrased to keep the
-numeral from governing a noun at all — `عدد الصفحات: {count}` and
-`عرض صفحات إضافية ({count})`, which read correctly for every count. If a future
-change adds Arabic `pluralRules` in `src/app/plugins/i18n.ts` (outside this
-stream's territory), these can become ordinary counted forms.
+> **Superseded — the paragraph that stood here is no longer true.** It said
+> vue-i18n was created without per-locale `pluralRules`, that the default rule
+> therefore gave exactly two buckets, and that the Arabic `≥2` forms were
+> deliberately phrased to keep the numeral from governing a noun
+> (`عدد الصفحات: {count}`). That workaround has been removed. `src/app/plugins/i18n.ts`
+> now registers a CLDR six-category rule for `ar`, and all three keys are ordinary
+> counted forms. The order is **`zero | one | two | few | many | other`** — six
+> forms in `ar`, two in `en` — and anything short of six in `ar` silently falls
+> back to the English-shaped default rule. See the i18n section of `CLAUDE.md`
+> before editing a counted message in either locale.
 
 ## Notes
 

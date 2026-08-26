@@ -469,7 +469,7 @@ const positionLabel = computed(() => {
         <span
           class="rounded-full bg-surface px-3 py-1.5 font-sans text-xs font-medium text-text-secondary tabular-nums"
         >
-          {{ t('review.header.pending', { count: pendingLabel }) }}
+          {{ t('review.header.pending', { count: pendingLabel }, total) }}
         </span>
         <AppSelect
           v-model="confidenceFilter"

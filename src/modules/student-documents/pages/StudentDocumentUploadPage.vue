@@ -121,7 +121,7 @@ function validate(): boolean {
     errors.file = t('studentDocuments.errors.fileRequired')
   // Mirrors `StoreStudentDocumentRequest`: `notes` is `max:1000`.
   if (form.notes.trim().length > 1000)
-    errors.notes = t('studentDocuments.errors.notesTooLong', { max: 1000 })
+    errors.notes = t('studentDocuments.errors.notesTooLong', { max: 1000 }, 1000)
 
   return Object.keys(errors).length === 0
 }

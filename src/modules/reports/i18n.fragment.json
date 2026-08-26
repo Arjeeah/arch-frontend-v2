@@ -79,7 +79,7 @@
       },
       "jobs": {
         "title": "Report queue",
-        "polling": "Updating {count} job(s)…",
+        "polling": "Updating {count} job… | Updating {count} jobs…",
         "retentionNote": "Generated files are kept for 7 days. This queue is tracked in your browser — the API has no endpoint that lists past report jobs."
       },
       "empty": {
@@ -214,7 +214,7 @@
       },
       "jobs": {
         "title": "طلبات التقارير",
-        "polling": "يجري تحديث {count} من الطلبات…",
+        "polling": "لا طلبات قيد التحديث… | جارٍ تحديث طلب واحد… | جارٍ تحديث طلبين… | جارٍ تحديث {count} طلبات… | جارٍ تحديث {count} طلبًا… | جارٍ تحديث {count} طلب…",
         "retentionNote": "تُحفظ الملفات المُنشأة سبعة أيام. تُتابَع هذه القائمة من هذا المتصفح وحده، إذ لا توفّر الواجهة البرمجية قائمة بالطلبات السابقة."
       },
       "empty": {

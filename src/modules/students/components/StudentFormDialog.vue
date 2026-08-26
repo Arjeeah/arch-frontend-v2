@@ -197,19 +197,20 @@ function validate(): boolean {
 
   if (!form.studentNumber.trim()) errors.studentNumber = t('students.errors.required')
   else if (form.studentNumber.trim().length > 50)
-    errors.studentNumber = t('students.errors.maxLength', { max: 50 })
+    errors.studentNumber = t('students.errors.maxLength', { max: 50 }, 50)
 
   if (!form.name.trim()) errors.name = t('students.errors.required')
-  else if (form.name.trim().length > 255) errors.name = t('students.errors.maxLength', { max: 255 })
+  else if (form.name.trim().length > 255)
+    errors.name = t('students.errors.maxLength', { max: 255 }, 255)
 
   if (!form.nationality.trim()) errors.nationality = t('students.errors.required')
   else if (form.nationality.trim().length > 100)
-    errors.nationality = t('students.errors.maxLength', { max: 100 })
+    errors.nationality = t('students.errors.maxLength', { max: 100 }, 100)
 
   if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
     errors.email = t('students.errors.email')
 
-  if (form.phone.trim().length > 20) errors.phone = t('students.errors.maxLength', { max: 20 })
+  if (form.phone.trim().length > 20) errors.phone = t('students.errors.maxLength', { max: 20 }, 20)
 
   if (!form.facultyId) errors.facultyId = t('students.errors.required')
   if (!form.programId) errors.programId = t('students.errors.required')

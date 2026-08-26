@@ -16,9 +16,11 @@
  * table makes the figures harder, not easier, to scan.
  *
  * Exported because the same rule has to reach the shared formatters this module
- * calls — `relativeTime()` takes a locale tag, and passing a bare `ar` would put
- * Eastern Arabic digits in the "Added" column next to Latin page counts and
- * percentages in the very same row.
+ * calls — `relativeTime()` takes a locale tag, and the "Added" column has to
+ * agree with the Latin page counts and percentages in the very same row.
+ * `shared/utils/date.ts` pins `latn` itself now as a backstop for the call sites
+ * that have no module-local helper, so passing this through is belt-and-braces
+ * rather than the only thing standing between the table and mixed numerals.
  */
 export function intlLocale(locale: string): string {
   return locale === 'ar' ? 'ar-u-nu-latn' : locale

@@ -141,10 +141,13 @@ The eight `pipeline.status.*` Arabic values are copied verbatim from
      If the backend rejects `.tif` in practice, drop `image/tiff` from that constant.
 
 9. **Known debt, deliberately not fixed here:**
-   - **No plural agreement in either locale.** Strings like `pipeline.upload.selectionSummary`
-     read "1 files selected". Correct handling needs vue-i18n plural messages plus a custom
-     Arabic pluralization rule registered on the i18n instance — `src/app/plugins/i18n.ts`,
-     outside this stream's territory. Worth a shared pass once one locale file owns it.
+   - ~~**No plural agreement in either locale.**~~ **Resolved.** `src/app/plugins/i18n.ts`
+     now registers a CLDR six-category pluralization rule for `ar`, and the counted
+     `pipeline.upload.*` messages are real plural forms —
+     `zero | one | two | few | many | other` in `ar`, `singular | plural` in `en`. The call
+     sites pass the raw number as `t()`'s third argument, because the displayed value is a
+     thousands-separated string that vue-i18n will not read as a plural index. See the i18n
+     section of `CLAUDE.md` before touching one.
    - **`ocr_completed` is excluded from the auto-poll's in-flight set** (`status.ts`). It is a
      transient state in a healthy run but also the state the backend calls retryable, i.e.
      stuck. Excluding it means the poll settles instead of running forever against a stuck
