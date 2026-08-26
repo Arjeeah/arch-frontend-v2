@@ -65,7 +65,7 @@
         "atLeastOne": "Add at least one condition, or clear the checkbox above.",
         "incomplete": "Every condition needs both a field and a value.",
         "emptyList": "A list condition needs at least one value between the commas.",
-        "tooltip": "{count} condition(s) configured"
+        "tooltip": "{count} condition configured | {count} conditions configured"
       },
       "deleteDialog": {
         "title": "Delete Document Type",
@@ -147,7 +147,7 @@
         "atLeastOne": "أضف شرطًا واحدًا على الأقل، أو ألغِ تحديد الخيار أعلاه.",
         "incomplete": "كل شرط يحتاج إلى حقل وقيمة معًا.",
         "emptyList": "شرط القائمة يحتاج إلى قيمة واحدة على الأقل بين الفواصل.",
-        "tooltip": "تم إعداد {count} شرط"
+        "tooltip": "لا شروط مُعدَّة | شرط واحد مُعدّ | شرطان مُعدّان | {count} شروط مُعدّة | {count} شرطًا مُعدًّا | {count} شرط مُعدّ"
       },
       "deleteDialog": {
         "title": "حذف نوع المستند",

@@ -143,7 +143,7 @@
       "editSubtitle": "Only the notes can be changed once a request exists.",
       "documentLabel": "Document",
       "documentPlaceholder": "Search by file number…",
-      "documentMinChars": "Type at least {n} characters",
+      "documentMinChars": "Type at least {n} character | Type at least {n} characters",
       "documentEmpty": "No matching documents",
       "documentSearchError": "Could not search documents",
       "documentLocked": "The borrowed document cannot be changed after the request is created.",
@@ -231,7 +231,7 @@
     "searchPlaceholder": "Search…",
     "searching": "Searching…",
     "select": "Select",
-    "typeAtLeast": "Type at least {n} characters"
+    "typeAtLeast": "Type at least {n} character | Type at least {n} characters"
   },
   "dashboard": {
     "title": "System Dashboard",
@@ -421,7 +421,7 @@
       "atLeastOne": "Add at least one condition, or clear the checkbox above.",
       "incomplete": "Every condition needs both a field and a value.",
       "emptyList": "A list condition needs at least one value between the commas.",
-      "tooltip": "{count} condition(s) configured"
+      "tooltip": "{count} condition configured | {count} conditions configured"
     },
     "deleteDialog": {
       "title": "Delete Document Type",
@@ -550,7 +550,7 @@
     },
     "jobs": {
       "title": "Import history",
-      "polling": "Updating {count} job(s)…",
+      "polling": "Updating {count} job… | Updating {count} jobs…",
       "localNote": "This history is tracked in your browser — the API has no endpoint that lists past import jobs."
     },
     "empty": {
@@ -841,7 +841,7 @@
       },
       "securityAlert": {
         "title": "Security alert: repeated failed logins",
-        "body": "{count} failed login attempts for {email} in the last 15 minutes."
+        "body": "{count} failed login attempt for {email} in the last 15 minutes. | {count} failed login attempts for {email} in the last 15 minutes."
       },
       "storageCapacityWarning": {
         "title": "Storage capacity warning",
@@ -874,18 +874,18 @@
       "ruleCount": "Up to {max} files in one batch",
       "rejected": "Rejected {count} of the dropped files — the reasons are listed under the drop zone.",
       "uploading": "Uploading…",
-      "selectionSummary": "{count} files selected · {size}",
+      "selectionSummary": "{count} file selected · {size} | {count} files selected · {size}",
       "clear": "Clear selection",
       "cancel": "Cancel upload",
       "submit": "Start import",
       "clearConfirmTitle": "Clear the selection?",
-      "clearConfirmBody": "This removes {count} files from the list. Nothing is deleted from the archive.",
-      "successToast": "{count} documents queued for processing.",
+      "clearConfirmBody": "This removes {count} file from the list. Nothing is deleted from the archive. | This removes {count} files from the list. Nothing is deleted from the archive.",
+      "successToast": "{count} document queued for processing. | {count} documents queued for processing.",
       "partialToast": "Only {queued} of the {submitted} files sent were accepted. Re-import the rest in smaller batches, and check the server's upload limits.",
       "partialWarning": "The server accepted {queued} of the {submitted} files sent. The rest were dropped before validation — usually PHP's max_file_uploads or post_max_size limit.",
       "errorToast": "Could not start the import.",
       "cancelled": "Upload cancelled.",
-      "queuedTitle": "{count} documents queued",
+      "queuedTitle": "{count} document queued | {count} documents queued",
       "queuedBody": "Processing has started in the background. Follow its progress on the monitor.",
       "showIds": "Show document ids",
       "hideIds": "Hide document ids",
@@ -1102,7 +1102,7 @@
     },
     "jobs": {
       "title": "Report queue",
-      "polling": "Updating {count} job(s)…",
+      "polling": "Updating {count} job… | Updating {count} jobs…",
       "retentionNote": "Generated files are kept for 7 days. This queue is tracked in your browser — the API has no endpoint that lists past report jobs."
     },
     "empty": {
@@ -1279,7 +1279,7 @@
       "status": "Student status",
       "allStatuses": "All statuses",
       "limit": "Results per search",
-      "limitOption": "{count} results",
+      "limitOption": "{count} result | {count} results",
       "loading": "Loading…",
       "reset": "Reset filters",
       "loadFailed": "The faculty and program lists could not be loaded — you can still search without them.",
@@ -1417,7 +1417,7 @@
   "studentDocuments": {
     "title": "Student documents",
     "subtitle": "Scanned files and where each one has got to in the extraction pipeline",
-    "resultCount": "{count} documents",
+    "resultCount": "{count} document | {count} documents",
     "untitled": "Unnumbered file",
     "noFile": "No scan attached",
     "noStudent": "Not linked to a student yet",
@@ -1574,7 +1574,7 @@
   "students": {
     "title": "Students",
     "subtitle": "The student register and the paper files behind it",
-    "resultCount": "{count} students",
+    "resultCount": "{count} student | {count} students",
     "draftNotice": "This record was created by the AI from a scanned file. Check the details, then confirm it.",
     "emptyTitle": "No students yet",
     "emptyDescription": "Students appear here once they are added by hand or created from a scanned file.",

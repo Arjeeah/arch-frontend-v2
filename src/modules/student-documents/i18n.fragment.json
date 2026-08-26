@@ -6,7 +6,7 @@
     "studentDocuments": {
       "title": "Student documents",
       "subtitle": "Scanned files and where each one has got to in the extraction pipeline",
-      "resultCount": "{count} documents",
+      "resultCount": "{count} document | {count} documents",
       "untitled": "Unnumbered file",
       "noFile": "No scan attached",
       "noStudent": "Not linked to a student yet",
@@ -168,7 +168,7 @@
     "studentDocuments": {
       "title": "مستندات الطلاب",
       "subtitle": "الملفات الممسوحة ضوئيًا ومرحلة كل ملف في سلسلة المعالجة",
-      "resultCount": "{count} مستند",
+      "resultCount": "لا مستندات | مستند واحد | مستندان | {count} مستندات | {count} مستندًا | {count} مستند",
       "untitled": "ملف بلا رقم",
       "noFile": "لا يوجد ملف مرفق",
       "noStudent": "غير مرتبط بطالب بعد",
@@ -274,7 +274,7 @@
       },
       "segments": {
         "title": "المستندات المكتشفة داخل الملف",
-        "count": "{count} مستند مكتشف",
+        "count": "لا مستندات مكتشفة | مستند واحد مكتشف | مستندان مكتشفان | {count} مستندات مكتشفة | {count} مستندًا مكتشفًا | {count} مستند مكتشف",
         "unmatched": "لا يوجد نوع مطابق",
         "unavailable": "تفصيل المستندات الداخلية غير متاح لهذا الملف.",
         "emptyTitle": "لم يتم اكتشاف مستندات داخلية",

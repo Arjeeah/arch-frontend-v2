@@ -1,4 +1,4 @@
-import { createI18n } from 'vue-i18n'
+import { createI18n, type PluralizationRule } from 'vue-i18n'
 import en from '@/locales/en.json'
 import ar from '@/locales/ar.json'
 
@@ -31,6 +31,39 @@ function applyDocumentLocale(locale: AppLocale): void {
   document.documentElement.dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
 }
 
+/**
+ * CLDR's six Arabic plural categories, in the order every pluralized message
+ * in `ar.json` lists its forms: `zero | one | two | few | many | other`.
+ *
+ * vue-i18n ships one built-in rule shaped for English-like languages — two or
+ * three buckets keyed off `choice === 0 | 1 | 2+` — which is what every
+ * Arabic message in this app was silently using before this rule existed.
+ * That is why "2" rendered through the generic "many" bucket instead of the
+ * dual form: Arabic needs six categories, not three, and the boundary between
+ * "few" and "many" is `n % 100`, not `n` itself (e.g. 103 is "few" — three of
+ * something — the same as 3 is).
+ *
+ * https://cldr.unicode.org/index/cldr-spec/plural-rules — locale `ar`.
+ */
+const arabicPluralRule: PluralizationRule = (choice, choicesLength, orgRule) => {
+  // A message that was never converted to the 6-form syntax (still 1-3
+  // forms, e.g. a future key nobody has expanded yet) has nothing to gain
+  // from CLDR categories — `orgRule` is vue-i18n's own built-in rule, so
+  // deferring to it reproduces exactly what that message would render as
+  // under any other locale, instead of guessing at a 6-category index it
+  // can't reach.
+  if (choicesLength < 6) return orgRule ? orgRule(choice, choicesLength) : choice ? 1 : 0
+
+  const n = Math.abs(choice)
+  const mod100 = n % 100
+  if (n === 0) return 0 // zero
+  if (n === 1) return 1 // one
+  if (n === 2) return 2 // two
+  if (mod100 >= 3 && mod100 <= 10) return 3 // few:  3–10, 103–110, …
+  if (mod100 >= 11 && mod100 <= 99) return 4 // many: 11–99, 111–199, …
+  return 5 // other: 100, 101, 102, 200, 201, 202, …
+}
+
 const initialLocale = readStoredLocale()
 
 export const i18n = createI18n({
@@ -38,6 +71,7 @@ export const i18n = createI18n({
   locale: initialLocale,
   fallbackLocale: DEFAULT_LOCALE,
   messages: { en, ar },
+  pluralRules: { ar: arabicPluralRule },
 })
 
 // Boot: the stored choice has to reach the document before the first paint.

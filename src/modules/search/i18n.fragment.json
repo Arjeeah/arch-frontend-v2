@@ -24,7 +24,7 @@
         "status": "Student status",
         "allStatuses": "All statuses",
         "limit": "Results per search",
-        "limitOption": "{count} results",
+        "limitOption": "{count} result | {count} results",
         "loading": "Loading…",
         "reset": "Reset filters",
         "loadFailed": "The faculty and program lists could not be loaded — you can still search without them.",
@@ -87,7 +87,7 @@
         "submit": "بحث",
         "clear": "مسح",
         "hint": "اضغط Enter للبحث. المستندات باللغة العربية، لذلك تُكتب العبارة من اليمين إلى اليسار.",
-        "tooShort": "أدخل حرفًا واحدًا على الأقل | أدخل حرفين على الأقل",
+        "tooShort": "أدخل حرفًا على الأقل | أدخل حرفًا واحدًا على الأقل | أدخل حرفين على الأقل | أدخل {count} أحرف على الأقل | أدخل {count} حرفًا على الأقل | أدخل {count} حرف على الأقل",
         "tooLong": "يجب ألا تتجاوز عبارة البحث {max} حرف"
       },
       "filters": {
@@ -99,7 +99,7 @@
         "status": "حالة الطالب",
         "allStatuses": "كل الحالات",
         "limit": "عدد النتائج",
-        "limitOption": "{count} نتيجة",
+        "limitOption": "بدون نتائج | نتيجة واحدة | نتيجتان | {count} نتائج | {count} نتيجةً | {count} نتيجة",
         "loading": "جارٍ التحميل…",
         "reset": "إعادة ضبط التصفية",
         "loadFailed": "تعذّر تحميل قائمتي الكليات والبرامج — ما زال بإمكانك البحث بدونهما.",
@@ -123,7 +123,7 @@
       },
       "results": {
         "summary": "الصفحات المطابقة: {results} · المستندات: {documents}",
-        "matchingPages": "صفحة واحدة | عدد الصفحات: {count}",
+        "matchingPages": "لا صفحات | صفحة واحدة | صفحتان | {count} صفحات | {count} صفحةً | {count} صفحة",
         "page": "صفحة {page}",
         "pageUnknown": "رقم الصفحة غير معروف",
         "fileNumber": "ملف {number}",
@@ -132,7 +132,7 @@
         "openDocument": "فتح المستند",
         "match": "تطابق {percent}%",
         "rank": "درجة الصلة {score}",
-        "showMore": "عرض صفحة إضافية | عرض صفحات إضافية ({count})",
+        "showMore": "لا صفحات إضافية | عرض صفحة إضافية واحدة | عرض صفحتين إضافيتين | عرض {count} صفحات إضافية | عرض {count} صفحةً إضافية | عرض {count} صفحة إضافية",
         "showLess": "إخفاء الصفحات الإضافية"
       },
       "empty": {

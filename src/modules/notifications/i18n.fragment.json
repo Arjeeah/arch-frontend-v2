@@ -64,7 +64,7 @@
         },
         "securityAlert": {
           "title": "Security alert: repeated failed logins",
-          "body": "{count} failed login attempts for {email} in the last 15 minutes."
+          "body": "{count} failed login attempt for {email} in the last 15 minutes. | {count} failed login attempts for {email} in the last 15 minutes."
         },
         "storageCapacityWarning": {
           "title": "Storage capacity warning",
@@ -138,7 +138,7 @@
         },
         "securityAlert": {
           "title": "تنبيه أمني: محاولات دخول فاشلة متكررة",
-          "body": "{count} محاولة دخول فاشلة للبريد {email} خلال آخر 15 دقيقة."
+          "body": "لا محاولات دخول فاشلة للبريد {email} خلال آخر 15 دقيقة. | محاولة دخول فاشلة واحدة للبريد {email} خلال آخر 15 دقيقة. | محاولتا دخول فاشلتان للبريد {email} خلال آخر 15 دقيقة. | {count} محاولات دخول فاشلة للبريد {email} خلال آخر 15 دقيقة. | {count} محاولة دخول فاشلة للبريد {email} خلال آخر 15 دقيقة. | {count} محاولة دخول فاشلة للبريد {email} خلال آخر 15 دقيقة."
         },
         "storageCapacityWarning": {
           "title": "تحذير سعة التخزين",

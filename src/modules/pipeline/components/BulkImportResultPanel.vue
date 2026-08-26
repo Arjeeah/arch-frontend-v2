@@ -43,7 +43,11 @@ const isPartial = computed(() => props.result.documentsQueued < props.result.sub
       <div class="min-w-0 flex-1">
         <h2 class="font-display text-sm font-semibold text-text-primary">
           {{
-            t('pipeline.upload.queuedTitle', { count: formatCount(result.documentsQueued, locale) })
+            t(
+              'pipeline.upload.queuedTitle',
+              { count: formatCount(result.documentsQueued, locale) },
+              result.documentsQueued,
+            )
           }}
         </h2>
         <p class="mt-1 font-sans text-xs text-text-secondary">

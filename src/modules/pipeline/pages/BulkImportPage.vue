@@ -99,9 +99,16 @@ async function submit(): Promise<void> {
       )
     } else {
       toasts.success(
-        t('pipeline.upload.successToast', {
-          count: formatCount(queued.documentsQueued, locale.value),
-        }),
+        // The named `count` is the thousands-separated display string; the
+        // trailing argument is the real number vue-i18n needs to pick the
+        // right plural form (`t(key, named, pluralChoice)`) — a formatted
+        // string in `named.count` isn't recognised as a number and always
+        // resolves to the same form regardless of value.
+        t(
+          'pipeline.upload.successToast',
+          { count: formatCount(queued.documentsQueued, locale.value) },
+          queued.documentsQueued,
+        ),
       )
     }
   } catch (err: unknown) {
@@ -206,10 +213,11 @@ function clearSelection(): void {
       >
         <p class="font-sans text-xs text-text-secondary">
           {{
-            t('pipeline.upload.selectionSummary', {
-              count: formatCount(files.length, locale),
-              size: formatBytes(totalBytes, locale),
-            })
+            t(
+              'pipeline.upload.selectionSummary',
+              { count: formatCount(files.length, locale), size: formatBytes(totalBytes, locale) },
+              files.length,
+            )
           }}
         </p>
 
@@ -244,7 +252,13 @@ function clearSelection(): void {
     <AppConfirmDialog
       :open="confirmClear"
       :title="t('pipeline.upload.clearConfirmTitle')"
-      :message="t('pipeline.upload.clearConfirmBody', { count: formatCount(files.length, locale) })"
+      :message="
+        t(
+          'pipeline.upload.clearConfirmBody',
+          { count: formatCount(files.length, locale) },
+          files.length,
+        )
+      "
       :confirm-label="t('pipeline.upload.clear')"
       confirm-class="bg-danger text-white hover:opacity-80"
       @close="confirmClear = false"
