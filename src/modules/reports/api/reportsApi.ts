@@ -153,7 +153,10 @@ function jobFromResource(resource: ReportJobResource): ReportJob {
     type: resource.type,
     format: resource.format,
     status: toJobStatus(resource.status),
-    rowCount: resource.row_count ?? null,
+    rowCount:
+      resource.row_count === null || resource.row_count === undefined
+        ? null
+        : toNumber(resource.row_count),
     fileName: resource.file_name ?? null,
     createdAt: resource.created_at ?? null,
     startedAt: resource.started_at ?? null,
@@ -164,12 +167,29 @@ function jobFromResource(resource: ReportJobResource): ReportJob {
   }
 }
 
+/**
+ * Coerces a wire number and refuses to hand `NaN` to `Intl.NumberFormat`, which
+ * renders a KPI card as the literal "NaN".
+ */
+function toNumber(value: unknown, fallback = 0): number {
+  const parsed = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+/**
+ * `ReportsService::weeklyDigestMetrics()` returns three `count()` integers plus
+ * `round(StorageCapacityService::percentUsed(), 1)` — and `percentUsed()` is
+ * `(used / total) * 100`, so it is **already on the 0–100 scale**, not a 0–1
+ * fraction. `WeeklyDigestCard` divides by 100 for `Intl`'s percent style, which
+ * is the only correct pairing: changing either half alone renders 42.5% as
+ * 4,250% or as 0.4%.
+ */
 function digestFromResource(resource: WeeklyDigestResource): WeeklyDigest {
   return {
-    overdueFilesCount: resource.overdue_files_count,
-    dueIn7DaysCount: resource.due_in_7_days_count,
-    weeklyBorrowingCount: resource.weekly_borrowing_count,
-    storageUsagePercent: resource.storage_usage_percent,
+    overdueFilesCount: toNumber(resource.overdue_files_count),
+    dueIn7DaysCount: toNumber(resource.due_in_7_days_count),
+    weeklyBorrowingCount: toNumber(resource.weekly_borrowing_count),
+    storageUsagePercent: toNumber(resource.storage_usage_percent),
   }
 }
 

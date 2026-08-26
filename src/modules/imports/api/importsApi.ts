@@ -61,6 +61,17 @@ function toJobStatus(raw: string): ImportJobStatus {
 }
 
 /**
+ * The three counters drive arithmetic (the progress bar is `success/processed`)
+ * and `Intl.NumberFormat`, so they are coerced rather than trusted: a driver
+ * that hands `unsignedInteger` columns back as strings would otherwise sneak a
+ * string into a field typed `number`, and a missing key would render "NaN".
+ */
+function toCount(value: unknown): number {
+  const parsed = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
+}
+
+/**
  * `entity` / `fileName` are not on the wire — the caller supplies what it
  * knows from the upload it just made, and the history list keeps them.
  */
@@ -71,9 +82,9 @@ function jobFromStatusResource(
   return {
     id: resource.job_id,
     status: toJobStatus(resource.status),
-    processedCount: resource.processed_count ?? 0,
-    successCount: resource.success_count ?? 0,
-    errorCount: resource.error_count ?? 0,
+    processedCount: toCount(resource.processed_count),
+    successCount: toCount(resource.success_count),
+    errorCount: toCount(resource.error_count),
     startedAt: resource.started_at ?? null,
     completedAt: resource.completed_at ?? null,
     entity: known.entity,
