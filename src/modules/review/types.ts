@@ -5,7 +5,7 @@
  * human answer) the model evaluation is built on.
  */
 
-/** The five identity fields the reviewer can correct, plus the free-form bag. */
+/** The six identity fields the reviewer can correct, plus the free-form bag. */
 export interface RefinementIdentity {
   studentNumber: string
   studentName: string

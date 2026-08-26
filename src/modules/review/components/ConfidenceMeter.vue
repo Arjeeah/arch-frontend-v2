@@ -48,10 +48,25 @@ const chipClass = computed(() => {
 
 const formatted = computed(() => {
   if (clamped.value === null) return t('review.confidence.unknown')
+  // `numberingSystem` pinned for the same reason as on the page: everything
+  // else on this screen renders Western digits, and CLDR's default for `ar`
+  // has moved between releases.
   return new Intl.NumberFormat(locale.value, {
     maximumFractionDigits: 0,
+    numberingSystem: 'latn',
   }).format(clamped.value)
 })
+
+/**
+ * Arabic writes the percent sign as `٪`, and both the tooltip and the queue
+ * filter labels already use it — so the number itself has to come from the
+ * same message rather than a hardcoded Latin `%`.
+ */
+const display = computed(() =>
+  clamped.value === null
+    ? formatted.value
+    : t('review.confidence.percent', { value: formatted.value }),
+)
 </script>
 
 <template>
@@ -61,7 +76,7 @@ const formatted = computed(() => {
     :class="chipClass"
     :title="t('review.confidence.title', { value: formatted })"
   >
-    {{ clamped === null ? formatted : `${formatted}%` }}
+    {{ display }}
   </span>
 
   <div v-else class="flex flex-col gap-1">
@@ -70,7 +85,7 @@ const formatted = computed(() => {
         {{ label || t('review.confidence.label') }}
       </span>
       <span class="font-display text-sm font-semibold tabular-nums text-text-primary">
-        {{ clamped === null ? formatted : `${formatted}%` }}
+        {{ display }}
       </span>
     </div>
     <div

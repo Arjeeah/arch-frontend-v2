@@ -15,6 +15,7 @@
       "confidence": {
         "label": "Extraction confidence",
         "unknown": "No score",
+        "percent": "{value}%",
         "title": "Extraction confidence: {value}%"
       },
       "preview": {
@@ -44,6 +45,7 @@
         "notExtracted": "Not extracted",
         "datePlaceholder": "YYYY-MM-DD",
         "loadingOptions": "Loading…",
+        "optionsUnavailable": "List unavailable — Refresh to retry",
         "noCollege": "No college selected",
         "noDocumentType": "No document type selected",
         "unlistedOption": "{value} — not on record",
@@ -116,6 +118,7 @@
       "confidence": {
         "label": "درجة ثقة الاستخراج",
         "unknown": "بدون درجة",
+        "percent": "{value}٪",
         "title": "درجة ثقة الاستخراج: {value}٪"
       },
       "preview": {
@@ -145,6 +148,7 @@
         "notExtracted": "لم يُستخرج",
         "datePlaceholder": "YYYY-MM-DD",
         "loadingOptions": "جارٍ التحميل…",
+        "optionsUnavailable": "تعذّر تحميل القائمة — اضغط تحديث لإعادة المحاولة",
         "noCollege": "لم تُحدَّد الكلية",
         "noDocumentType": "لم يُحدَّد نوع المستند",
         "unlistedOption": "{value} — غير مسجّل لدينا",

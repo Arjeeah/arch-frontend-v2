@@ -19,8 +19,10 @@ const props = withDefaults(
     aiSnapshot: RefinementSnapshot | null
     disabled?: boolean
     lookupsLoading?: boolean
+    /** The college / document-type lookups failed — say so in the placeholder. */
+    lookupsFailed?: boolean
   }>(),
-  { disabled: false, lookupsLoading: false },
+  { disabled: false, lookupsLoading: false, lookupsFailed: false },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: RefinementIdentity] }>()
@@ -71,6 +73,17 @@ interface FieldSpec {
 }
 
 /**
+ * A select whose list never arrived is a dead control, not an empty one — the
+ * placeholder has to say which, or the operator reads "No college selected"
+ * and assumes the record simply has none.
+ */
+function selectPlaceholder(emptyLabel: string): string {
+  if (props.lookupsLoading) return t('review.form.loadingOptions')
+  if (props.lookupsFailed) return t('review.form.optionsUnavailable')
+  return emptyLabel
+}
+
+/**
  * `enrollmentDate` is deliberately a text input, not `type="date"`: the
  * extractor returns whatever it read off the scan, and a date input silently
  * blanks anything it cannot parse — erasing the very mistake being reviewed.
@@ -82,9 +95,7 @@ const fieldSpecs = computed<FieldSpec[]>(() =>
         field,
         kind: 'select',
         options: withExtractedValue(props.faculties, props.modelValue.college),
-        placeholder: props.lookupsLoading
-          ? t('review.form.loadingOptions')
-          : t('review.form.noCollege'),
+        placeholder: selectPlaceholder(t('review.form.noCollege')),
       }
     }
     if (field === 'documentType') {
@@ -92,9 +103,7 @@ const fieldSpecs = computed<FieldSpec[]>(() =>
         field,
         kind: 'select',
         options: withExtractedValue(props.documentTypes, props.modelValue.documentType),
-        placeholder: props.lookupsLoading
-          ? t('review.form.loadingOptions')
-          : t('review.form.noDocumentType'),
+        placeholder: selectPlaceholder(t('review.form.noDocumentType')),
       }
     }
     return {
@@ -111,7 +120,15 @@ const fieldSpecs = computed<FieldSpec[]>(() =>
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <!--
+    A `fieldset` rather than a `div`: `AppSelect` takes no `disabled` prop and
+    forwards nothing to its native `<select>`, so the college and document-type
+    fields would otherwise stay live while a save is in flight — and an edit
+    made in that window is overwritten by the server's answer on success.
+    `fieldset[disabled]` disables every descendant control natively, which
+    covers them without reaching into `shared/`.
+  -->
+  <fieldset :disabled="disabled" class="flex min-w-0 flex-col gap-4">
     <FormField
       v-for="spec in fieldSpecs"
       :key="spec.field"
@@ -155,5 +172,5 @@ const fieldSpecs = computed<FieldSpec[]>(() =>
         @update:model-value="updateAdditional"
       />
     </div>
-  </div>
+  </fieldset>
 </template>

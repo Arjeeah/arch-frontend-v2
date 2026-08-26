@@ -89,6 +89,21 @@ const form = ref<RefinementIdentity>(emptyIdentity())
 const loadedSnapshot = ref('')
 const saving = ref(false)
 
+/**
+ * Unsaved corrections, held per row.
+ *
+ * Selecting another row, paging, changing the filter and Refresh all rebuild
+ * `rows`, and the form reloads from whatever the server last said. Without a
+ * buffer, one misclick in the rail silently deletes a half-finished
+ * correction — on the screen whose entire output *is* those corrections, and
+ * with no undo. Drafts are dropped the moment the row is written or the
+ * operator explicitly resets it, so nothing stale can be resurrected.
+ *
+ * Deliberately a plain Map: it is only ever read imperatively from
+ * `loadForm`, and `isDirty` already derives from `form` + `loadedSnapshot`.
+ */
+const drafts = new Map<string, RefinementIdentity>()
+
 /** The best data we have for a row: the human answer if there is one, else the AI's. */
 function identityOf(item: ReviewQueueItem | null): RefinementIdentity {
   const source = item?.verifiedData ?? item?.structuredData
@@ -106,13 +121,29 @@ function identityOf(item: ReviewQueueItem | null): RefinementIdentity {
 
 function loadForm(item: ReviewQueueItem | null): void {
   const identity = identityOf(item)
-  form.value = identity
+  // Always the server's answer, whether or not a draft is restored on top of
+  // it — this is what "dirty" and the correction diff are measured against.
   loadedSnapshot.value = JSON.stringify(identity)
+  const draft = item ? drafts.get(item.documentId) : undefined
+  form.value = draft ?? identity
 }
 
 watch(selected, (item) => loadForm(item), { immediate: true })
 
 const isDirty = computed(() => JSON.stringify(form.value) !== loadedSnapshot.value)
+
+/**
+ * Keep the draft for the row currently on screen in step with the buffer.
+ * Every edit path replaces `form.value` wholesale, so a shallow watch is
+ * enough. Registered after the `selected` watcher above so that a row switch
+ * reloads the form first and this then records against the new row.
+ */
+watch(form, (value) => {
+  const documentId = selectedId.value
+  if (!documentId) return
+  if (JSON.stringify(value) === loadedSnapshot.value) drafts.delete(documentId)
+  else drafts.set(documentId, value)
+})
 
 /**
  * What to send to `PATCH /v1/refinements/{id}`.
@@ -171,6 +202,9 @@ const isSettled = computed(
 )
 
 function resetForm(): void {
+  // Drop the draft first — `loadForm` would otherwise restore what we are
+  // being asked to throw away.
+  if (selectedId.value) drafts.delete(selectedId.value)
   loadForm(selected.value)
 }
 
@@ -194,6 +228,9 @@ async function saveCorrections(then: 'stay' | 'advance' = 'stay'): Promise<void>
   saving.value = true
   try {
     const result = await reviewApi.saveCorrections(item.refinementId, payload)
+    // Written: the draft has to go before `patchRow`'s reactivity reaches the
+    // `selected` watcher, or `loadForm` restores it and the row reads unsaved.
+    drafts.delete(item.documentId)
     patchRow(item.documentId, {
       verifiedData: result.verifiedData,
       verifiedBy: result.verifiedBy,
@@ -216,6 +253,9 @@ async function verifyAsIs(then: 'stay' | 'advance' = 'stay'): Promise<void> {
   saving.value = true
   try {
     const result = await reviewApi.verify(item.refinementId)
+    // Verifying as-is is the operator choosing the AI's answer over their own,
+    // so the draft is spent — and must not survive into `loadForm` below.
+    drafts.delete(item.documentId)
     // The endpoint copies `structured_data` into `verified_data` verbatim.
     patchRow(item.documentId, {
       verifiedData: item.structuredData,
@@ -272,6 +312,7 @@ function confirmVerifyAsIs(): void {
 const faculties = ref<LookupOption[]>([])
 const documentTypes = ref<LookupOption[]>([])
 const lookupsLoading = ref(false)
+const lookupsFailed = ref(false)
 
 async function loadLookups(): Promise<void> {
   lookupsLoading.value = true
@@ -282,7 +323,9 @@ async function loadLookups(): Promise<void> {
     ])
     faculties.value = facultyOptions
     documentTypes.value = typeOptions
+    lookupsFailed.value = false
   } catch (err: unknown) {
+    lookupsFailed.value = true
     toasts.error(getApiErrorMessage(err, t('review.errors.lookups')))
   } finally {
     lookupsLoading.value = false
@@ -291,6 +334,19 @@ async function loadLookups(): Promise<void> {
 
 // Faculty labels follow the interface language, so the lookup is re-read on switch.
 watch(locale, () => void loadLookups())
+
+/**
+ * Refresh has to cover the lookups, not just the queue.
+ *
+ * College and document type are *selects*: if their lists failed to load, the
+ * operator cannot set either field at all — only the value the extractor
+ * happened to produce is on offer. The lookups are otherwise fetched once on
+ * mount, so without this the screen stays half-usable for the whole session.
+ */
+function refreshAll(): void {
+  void refresh()
+  if (lookupsFailed.value) void loadLookups()
+}
 
 /* ---------------------------------------------------------------- *
  * Filter
@@ -360,7 +416,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
  * Display helpers
  * ---------------------------------------------------------------- */
 
-const pendingLabel = computed(() => new Intl.NumberFormat(locale.value).format(total.value))
+/**
+ * `numberingSystem: 'latn'` is pinned deliberately. The rest of this screen
+ * renders numbers straight into the message (`header.position`, the pagination
+ * control, the student number itself), which is always Western digits — and
+ * CLDR's default numbering system for `ar` has moved between releases. Letting
+ * it float means one ICU version renders "١٥ بانتظار المراجعة" beside "3 من 15".
+ */
+const numberFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { numberingSystem: 'latn' }),
+)
+
+const pendingLabel = computed(() => numberFormat.value.format(total.value))
 
 const positionLabel = computed(() => {
   if (selectedIndex.value < 0 || rows.value.length === 0) return ''
@@ -395,7 +462,7 @@ const positionLabel = computed(() => {
           :options="confidenceOptions"
           :placeholder="t('review.filter.all')"
         />
-        <AppButton variant="ghost" size="md" :disabled="loading" @click="refresh">
+        <AppButton variant="ghost" size="md" :disabled="loading" @click="refreshAll">
           <RefreshCw class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
           {{ t('review.actions.refresh') }}
         </AppButton>
@@ -408,7 +475,7 @@ const positionLabel = computed(() => {
       :title="t('review.errors.loadTitle')"
       :description="error"
       :retry-label="t('review.actions.retry')"
-      @retry="refresh"
+      @retry="refreshAll"
     />
 
     <!-- Queue drained -->
@@ -419,7 +486,7 @@ const positionLabel = computed(() => {
       :description="t('review.empty.description')"
     >
       <template #action>
-        <AppButton variant="primary" size="sm" @click="refresh">
+        <AppButton variant="primary" size="sm" @click="refreshAll">
           <RefreshCw class="h-4 w-4" />
           {{ t('review.actions.refresh') }}
         </AppButton>
@@ -519,6 +586,7 @@ const positionLabel = computed(() => {
             :ai-snapshot="selected.structuredData"
             :disabled="saving"
             :lookups-loading="lookupsLoading"
+            :lookups-failed="lookupsFailed"
           />
           <AppEmptyState
             v-else

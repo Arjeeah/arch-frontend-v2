@@ -59,7 +59,7 @@ them — upload → monitor → review is the operator's actual order of work.
 ## i18n
 
 Merge `src/modules/review/i18n.fragment.json` into `src/locales/en.json` and
-`src/locales/ar.json`. Single top-level key per locale: `review`. 69 leaf keys in
+`src/locales/ar.json`. Single top-level key per locale: `review`. 71 leaf keys in
 each language, en/ar at exact parity, no collisions with existing namespaces.
 
 Three entries are vue-i18n **plural** messages (`a | b | c`) — keep the pipes
@@ -92,8 +92,10 @@ intact through the merge: `review.actions.saveCorrections`,
    - `AppConfirmDialog` hardcodes an English **"Cancel"** on its cancel button, so
      the discard dialog reads half-Arabic in the `ar` locale.
    - `AppSelect` accepts no `disabled` and forwards no `id`/`aria-label` to its
-     native `<select>` (stray attrs land on the wrapper `div`). Consequence here:
-     the college and document-type selects stay editable while a save is in
-     flight, and their `FormField` label has nothing to point `for` at.
+     native `<select>` (stray attrs land on the wrapper `div`). This module works
+     around the first half by wrapping its fields in a `<fieldset :disabled>`,
+     which disables descendant controls natively; the second half has no local
+     workaround, so the college and document-type `FormField` labels have nothing
+     to point `for` at, and the queue's confidence filter has no label at all.
    - `AppSelect`'s chevron is positioned with a physical `right-3`, so it sits on
      the wrong side under `dir="rtl"`.
