@@ -33,7 +33,12 @@ const columns = computed(() => [
   { key: 'actions', label: t('reports.table.actions'), align: 'center' as const },
 ])
 
-const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
+// `numberingSystem` is pinned for the same reason every other formatter in this
+// app pins it: the rest of the UI renders Western digits under `ar`, and CLDR's
+// default for `ar` has moved between releases.
+const numberFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { numberingSystem: 'latn' }),
+)
 
 /** Falls back to the raw key for a type this build does not know about. */
 function typeLabel(type: string): string {

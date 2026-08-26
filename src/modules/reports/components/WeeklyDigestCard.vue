@@ -16,10 +16,20 @@ const emit = defineEmits<{ retry: [] }>()
 
 const { t, locale } = useI18n()
 
-const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
+// `numberingSystem` is pinned for the same reason every other formatter in this
+// app pins it: the rest of the UI renders Western digits under `ar`, and CLDR's
+// default for `ar` has moved between releases.
+const numberFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { numberingSystem: 'latn' }),
+)
 
 const percentFormat = computed(
-  () => new Intl.NumberFormat(locale.value, { style: 'percent', maximumFractionDigits: 1 }),
+  () =>
+    new Intl.NumberFormat(locale.value, {
+      style: 'percent',
+      maximumFractionDigits: 1,
+      numberingSystem: 'latn',
+    }),
 )
 
 const cards = computed(() => {

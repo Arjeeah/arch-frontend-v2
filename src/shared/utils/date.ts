@@ -15,6 +15,24 @@ function uiLocale(): string {
 }
 
 /**
+ * Pins a locale tag to the Latin numbering system (`-u-nu-latn`).
+ *
+ * Every other formatter in this app pins its numbering system explicitly —
+ * `shared/utils/percent.ts`, `modules/pipeline/format.ts`, `modules/dashboard/
+ * utils/format.ts` — because the UI renders Western digits under `ar` and
+ * CLDR's default for `ar` has moved between releases. `Intl.RelativeTimeFormat`
+ * takes the setting through the locale tag rather than the options bag, which
+ * is why this is a string rewrite and not `{ numberingSystem: 'latn' }`.
+ *
+ * Idempotent: a caller that already passes `ar-u-nu-latn` (the pipeline and
+ * dashboard tables do, via their own `intlLocale()`) is left alone.
+ */
+function latnLocale(locale: string): string {
+  if (!locale.startsWith('ar')) return locale
+  return locale.includes('-nu-') ? locale : `${locale}-u-nu-latn`
+}
+
+/**
  * Formats an ISO date/datetime string from the API for display, e.g. "Dec 1, 2025".
  * Returns a dash for empty values and the raw string if it is not parseable.
  *
@@ -24,7 +42,7 @@ export function formatDate(value: string | null | undefined, locale?: string): s
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString(locale ?? uiLocale(), {
+  return date.toLocaleDateString(latnLocale(locale ?? uiLocale()), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -42,7 +60,7 @@ export function formatDateTime(value: string | null | undefined, locale?: string
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleString(locale ?? uiLocale(), {
+  return date.toLocaleString(latnLocale(locale ?? uiLocale()), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -84,7 +102,9 @@ export function relativeTime(value: string | null | undefined, locale?: string):
   if (Number.isNaN(date.getTime())) return value
 
   const diffSeconds = Math.round((date.getTime() - Date.now()) / 1000)
-  const formatter = new Intl.RelativeTimeFormat(locale ?? uiLocale(), { numeric: 'auto' })
+  const formatter = new Intl.RelativeTimeFormat(latnLocale(locale ?? uiLocale()), {
+    numeric: 'auto',
+  })
 
   for (const [unit, secondsInUnit] of RELATIVE_UNITS) {
     if (Math.abs(diffSeconds) >= secondsInUnit || unit === 'second') {
