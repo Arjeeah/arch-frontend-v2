@@ -75,15 +75,23 @@ function logout() {
           </button>
         </div>
 
-        <!-- Notification bell -->
-        <div
-          class="relative w-8 h-8 bg-white border border-border rounded-lg flex items-center justify-center"
-          :title="t('header.notifications')"
-        >
-          <Bell class="w-4 h-4 text-text-primary" />
-          <!-- Red dot -->
-          <span class="absolute top-1 end-1 w-2 h-2 bg-danger rounded-full border border-white" />
-        </div>
+        <!--
+          Notification bell. The live one lives in the `notifications` module,
+          which this component may not import (`shared` ✗→ `module`, enforced by
+          eslint-plugin-boundaries). `DashboardLayout` is in `src/app/`, which
+          may, so it fills this slot with `NotificationsBell`. The static bell
+          below stays as the fallback for any other host of `AppHeader`.
+        -->
+        <slot name="notifications">
+          <div
+            class="relative w-8 h-8 bg-white border border-border rounded-lg flex items-center justify-center"
+            :title="t('header.notifications')"
+          >
+            <Bell class="w-4 h-4 text-text-primary" />
+            <!-- Red dot -->
+            <span class="absolute top-1 end-1 w-2 h-2 bg-danger rounded-full border border-white" />
+          </div>
+        </slot>
 
         <!-- Profile -->
         <div class="relative">

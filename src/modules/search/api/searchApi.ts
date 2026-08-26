@@ -30,12 +30,19 @@ const MAX_LOOKUP_PAGES = 20
 
 /** `App\Http\Resources\Pipeline\SearchResultResource`. */
 interface SearchResultResource {
-  content_id: number
-  student_document_id: number
+  /**
+   * `document_contents.id`, `student_documents.id` and `students.id` are all
+   * `uuid` primary keys (see `create_document_contents_table`,
+   * `create_student_documents_table`, `create_students_table`) — strings on the
+   * wire, never integers. Coercing them with `Number()` yields `NaN`, which
+   * would silently null out every student link on the results page.
+   */
+  content_id: string
+  student_document_id: string
   content: string | null
   page_number: number | null
   file_number: string | null
-  student_id: number | null
+  student_id: string | null
   student_name: string | null
   student_number: string | null
   faculty_name: string | null
@@ -106,7 +113,8 @@ function resultFromResource(resource: SearchResultResource): SearchResult {
     content: resource.content ?? '',
     pageNumber: toNumberOrNull(resource.page_number),
     fileNumber: resource.file_number,
-    studentId: toNumberOrNull(resource.student_id),
+    // Passed through, not coerced — see the note on `SearchResultResource`.
+    studentId: resource.student_id,
     studentName: resource.student_name,
     studentNumber: resource.student_number,
     facultyName: resource.faculty_name,

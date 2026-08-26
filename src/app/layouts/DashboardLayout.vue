@@ -2,6 +2,9 @@
 import AppSidebar from '@/shared/components/AppSidebar.vue'
 import AppHeader from '@/shared/components/AppHeader.vue'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
+// `src/app/` is the one layer allowed to import a module (see CLAUDE.md), which
+// is why the bell is mounted from here rather than inside `AppHeader`.
+import { NotificationsBell } from '@/modules/notifications'
 import { isSupportedLocale, setLocale } from '@/app/plugins/i18n'
 import { useRouter } from 'vue-router'
 
@@ -31,7 +34,11 @@ function handleLocaleChange(locale: string) {
         :user-name="authStore.userName ?? undefined"
         @logout="handleLogout"
         @locale-change="handleLocaleChange"
-      />
+      >
+        <template #notifications>
+          <NotificationsBell />
+        </template>
+      </AppHeader>
 
       <!-- Page content (only this scrolls) -->
       <main class="flex-1 p-6 overflow-y-auto">

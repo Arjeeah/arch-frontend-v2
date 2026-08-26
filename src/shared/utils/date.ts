@@ -1,12 +1,34 @@
 /**
+ * The UI locale, read off `<html lang>`.
+ *
+ * `setLocale()` in `src/app/plugins/i18n.ts` sets that attribute on every
+ * switch, and this module may not import `src/app/` (boundaries rule), so the
+ * DOM is the shared channel. Falls back to `en` outside a browser or before the
+ * plugin has run. Keeping it a lookup rather than a parameter means every
+ * existing `formatDate(x)` call site follows the language with no edit — there
+ * are dozens across ten modules, and a date rendered `en-US` under an Arabic UI
+ * was reported by half of them.
+ */
+function uiLocale(): string {
+  if (typeof document === 'undefined') return 'en'
+  return document.documentElement.lang || 'en'
+}
+
+/**
  * Formats an ISO date/datetime string from the API for display, e.g. "Dec 1, 2025".
  * Returns a dash for empty values and the raw string if it is not parseable.
+ *
+ * Formats in the active UI locale unless one is passed explicitly.
  */
-export function formatDate(value: string | null | undefined): string {
+export function formatDate(value: string | null | undefined, locale?: string): string {
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return date.toLocaleDateString(locale ?? uiLocale(), {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 /** Converts an API date/datetime string to the `yyyy-mm-dd` an `<input type="date">` expects. */
@@ -36,13 +58,13 @@ const RELATIVE_UNITS: ReadonlyArray<[Intl.RelativeTimeFormatUnit, number]> = [
  * Returns a dash for empty values and the raw string if it is not parseable,
  * matching `formatDate` above.
  */
-export function relativeTime(value: string | null | undefined, locale = 'en'): string {
+export function relativeTime(value: string | null | undefined, locale?: string): string {
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
 
   const diffSeconds = Math.round((date.getTime() - Date.now()) / 1000)
-  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+  const formatter = new Intl.RelativeTimeFormat(locale ?? uiLocale(), { numeric: 'auto' })
 
   for (const [unit, secondsInUnit] of RELATIVE_UNITS) {
     if (Math.abs(diffSeconds) >= secondsInUnit || unit === 'second') {

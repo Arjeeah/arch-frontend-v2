@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { CloudUpload, FileText, Trash2 } from 'lucide-vue-next'
 
 const props = withDefaults(
@@ -31,10 +32,10 @@ const props = withDefaults(
     multiple: true,
     disabled: false,
     progress: undefined,
-    label: 'Drag files here',
+    label: undefined,
     hint: '',
-    browseLabel: 'browse',
-    removeLabel: 'Remove file',
+    browseLabel: undefined,
+    removeLabel: undefined,
   },
 )
 
@@ -43,6 +44,18 @@ const emit = defineEmits<{
   /** Fired with the human-readable reasons whenever files are rejected. */
   error: [messages: string[]]
 }>()
+
+const { t } = useI18n()
+
+/**
+ * Labels and rejection reasons default to translated strings. They used to be
+ * English literals baked into the component, which every module inherited: a
+ * page could translate its own copy around the picker but not the picker's own
+ * text or the reasons it emitted through `error`.
+ */
+const dropLabel = computed(() => props.label ?? t('common.fileDropLabel'))
+const browseText = computed(() => props.browseLabel ?? t('common.fileBrowse'))
+const removeText = computed(() => props.removeLabel ?? t('common.fileRemove'))
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const dragDepth = ref(0)
@@ -54,8 +67,8 @@ const hintText = computed(() => {
   if (props.hint) return props.hint
   const parts: string[] = []
   if (props.accept) parts.push(props.accept.split(',').join(', '))
-  if (props.maxSizeMb !== undefined) parts.push(`up to ${props.maxSizeMb} MB each`)
-  if (props.maxFiles !== undefined) parts.push(`max ${props.maxFiles} files`)
+  if (props.maxSizeMb !== undefined) parts.push(t('common.fileHintSize', { max: props.maxSizeMb }))
+  if (props.maxFiles !== undefined) parts.push(t('common.fileHintCount', { max: props.maxFiles }))
   return parts.join(' · ')
 })
 
@@ -100,19 +113,19 @@ function addFiles(incoming: File[]): void {
 
   for (const file of incoming) {
     if (seen.has(fileKey(file))) {
-      rejected.push(`${file.name} is already selected`)
+      rejected.push(t('common.fileAlreadySelected', { name: file.name }))
       continue
     }
     if (!matchesAccept(file)) {
-      rejected.push(`${file.name} is not an accepted file type`)
+      rejected.push(t('common.fileTypeRejected', { name: file.name }))
       continue
     }
     if (props.maxSizeMb !== undefined && file.size > props.maxSizeMb * 1024 * 1024) {
-      rejected.push(`${file.name} is larger than ${props.maxSizeMb} MB`)
+      rejected.push(t('common.fileTooLarge', { name: file.name, max: props.maxSizeMb }))
       continue
     }
     if (props.maxFiles !== undefined && accepted.length >= props.maxFiles) {
-      rejected.push(`${file.name} exceeds the limit of ${props.maxFiles} files`)
+      rejected.push(t('common.fileCountExceeded', { name: file.name, max: props.maxFiles }))
       continue
     }
     accepted.push(file)
@@ -179,8 +192,8 @@ function removeFile(index: number): void {
     >
       <CloudUpload class="h-8 w-8 text-text-muted" />
       <p class="text-sm text-text-primary">
-        {{ label }}
-        <span class="text-primary underline">{{ browseLabel }}</span>
+        {{ dropLabel }}
+        <span class="text-primary underline">{{ browseText }}</span>
       </p>
       <p v-if="hintText" class="text-xs text-text-secondary">{{ hintText }}</p>
       <input
@@ -228,7 +241,7 @@ function removeFile(index: number): void {
         <button
           type="button"
           class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-text-secondary transition-colors hover:bg-surface hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
-          :aria-label="`${removeLabel}: ${file.name}`"
+          :aria-label="`${removeText}: ${file.name}`"
           :disabled="disabled"
           @click="removeFile(index)"
         >

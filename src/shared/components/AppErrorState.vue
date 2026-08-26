@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RefreshCw, TriangleAlert } from 'lucide-vue-next'
 import type { Component } from 'vue'
 import AppButton from '@/shared/components/AppButton.vue'
 
-withDefaults(
+/**
+ * `title` and `retryLabel` fall back to translated defaults rather than the
+ * English literals they used to carry — most callers pass their own, but the
+ * defaults leaked English into the Arabic UI wherever one did not.
+ */
+const props = withDefaults(
   defineProps<{
     title?: string
     description?: string
@@ -15,14 +22,19 @@ withDefaults(
     compact?: boolean
   }>(),
   {
-    title: 'Something went wrong',
+    title: undefined,
     description: '',
     icon: undefined,
-    retryLabel: 'Try again',
+    retryLabel: undefined,
     retryable: true,
     compact: false,
   },
 )
+
+const { t } = useI18n()
+
+const headline = computed(() => props.title ?? t('common.errorTitle'))
+const retryText = computed(() => props.retryLabel ?? t('common.retry'))
 
 const emit = defineEmits<{ retry: [] }>()
 </script>
@@ -42,14 +54,14 @@ const emit = defineEmits<{ retry: [] }>()
       class="font-display font-medium text-text-primary"
       :class="compact ? 'text-sm' : 'text-base'"
     >
-      {{ title }}
+      {{ headline }}
     </p>
     <p v-if="description" class="max-w-sm text-sm text-text-secondary">{{ description }}</p>
     <div v-if="$slots.action || retryable" class="mt-1">
       <slot name="action">
         <AppButton variant="primary" size="sm" @click="emit('retry')">
           <RefreshCw class="h-4 w-4" />
-          {{ retryLabel }}
+          {{ retryText }}
         </AppButton>
       </slot>
     </div>

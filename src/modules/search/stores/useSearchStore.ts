@@ -24,7 +24,7 @@ import {
  * changing server-side.
  */
 function groupResults(results: SearchResult[]): SearchResultGroup[] {
-  const groups = new Map<number, SearchResultGroup>()
+  const groups = new Map<string, SearchResultGroup>()
 
   for (const result of results) {
     const existing = groups.get(result.studentDocumentId)

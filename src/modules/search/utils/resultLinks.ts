@@ -8,7 +8,7 @@
  */
 
 /** Student detail — used whenever the hit resolved to a student. */
-export function studentPath(studentId: number): string {
+export function studentPath(studentId: string): string {
   return `/students/${studentId}`
 }
 
@@ -16,6 +16,6 @@ export function studentPath(studentId: number): string {
  * Document detail — the destination for a hit whose document is not attached to
  * a student yet (`student_id` is null on documents the pipeline has not linked).
  */
-export function documentPath(studentDocumentId: number): string {
+export function documentPath(studentDocumentId: string): string {
   return `/student-documents/${studentDocumentId}`
 }

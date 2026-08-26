@@ -25,15 +25,19 @@ export type StudentStatus = (typeof STUDENT_STATUSES)[number]
 
 /** One matching page of one document. */
 export interface SearchResult {
-  /** `document_contents.id` — unique per page, the row key. */
-  contentId: number
-  studentDocumentId: number
+  /** `document_contents.id` — unique per page, the row key. A UUID. */
+  contentId: string
+  /** `student_documents.id` — a UUID (`StudentDocument` uses `HasUuids`). */
+  studentDocumentId: string
   /** Matching text, already truncated to 200 chars by the backend. */
   content: string
   pageNumber: number | null
   fileNumber: string | null
-  /** Null when the document is not attached to a student yet. */
-  studentId: number | null
+  /**
+   * `students.id` — a UUID. Null when the document is not attached to a
+   * student yet.
+   */
+  studentId: string | null
   studentName: string | null
   studentNumber: string | null
   /** Arabic faculty name (`faculties.name_ar`). */
@@ -84,9 +88,9 @@ export interface SearchQueryInput {
  * file from burying every other result.
  */
 export interface SearchResultGroup {
-  studentDocumentId: number
+  studentDocumentId: string
   fileNumber: string | null
-  studentId: number | null
+  studentId: string | null
   studentName: string | null
   studentNumber: string | null
   facultyName: string | null
