@@ -23,7 +23,8 @@
         "openInNewTab": "Open",
         "emptyTitle": "Nothing to preview",
         "noFile": "This document has no stored file.",
-        "selectRow": "Pick a document from the queue to start reviewing."
+        "selectRow": "Pick a document from the queue to start reviewing.",
+        "resolving": "Opening the scan…"
       },
       "fields": {
         "studentNumber": "Student number",
@@ -94,7 +95,8 @@
         "loadTitle": "Could not load the review queue",
         "save": "Could not save the corrections",
         "verify": "Could not verify this document",
-        "lookups": "Could not load the faculty and document-type lists"
+        "lookups": "Could not load the faculty and document-type lists",
+        "preview": "Could not open the scanned file"
       },
       "toasts": {
         "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
@@ -127,7 +129,8 @@
         "openInNewTab": "فتح",
         "emptyTitle": "لا يوجد ما يُعرض",
         "noFile": "لا يوجد ملف محفوظ لهذا المستند.",
-        "selectRow": "اختر مستندًا من قائمة الانتظار لبدء المراجعة."
+        "selectRow": "اختر مستندًا من قائمة الانتظار لبدء المراجعة.",
+        "resolving": "جارٍ فتح الملف الممسوح…"
       },
       "fields": {
         "studentNumber": "رقم القيد",
@@ -198,7 +201,8 @@
         "loadTitle": "تعذّر تحميل قائمة المراجعة",
         "save": "تعذّر حفظ التصحيحات",
         "verify": "تعذّر تأكيد هذا المستند",
-        "lookups": "تعذّر تحميل قائمتي الكليات وأنواع المستندات"
+        "lookups": "تعذّر تحميل قائمتي الكليات وأنواع المستندات",
+        "preview": "تعذّر فتح الملف الممسوح"
       },
       "toasts": {
         "saved": "لا شيء للحفظ | حُفظ تصحيح واحد | حُفظ تصحيحان | حُفظت {count} تصحيحات | حُفظ {count} تصحيحًا | حُفظ {count} تصحيح",

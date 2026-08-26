@@ -87,15 +87,12 @@
           "document": "Document",
           "student": "Student",
           "state": "Stage",
-          "pages": "Pages",
-          "confidence": "Confidence",
           "created": "Added",
           "actions": "Actions"
         },
         "toggleDetail": "Toggle details",
         "unnumbered": "No file number",
         "unassigned": "Not linked to a student",
-        "statusUnavailable": "Status unavailable",
         "retry": "Retry",
         "retryUnavailable": "Retry is only available for failed documents, or ones stuck after text extraction.",
         "retryToast": "Document sent back through the pipeline.",
@@ -109,12 +106,15 @@
         "ocrPages": "Pages extracted",
         "embeddedPages": "Pages indexed",
         "refinement": "AI analysis",
+        "confidence": "Extraction confidence",
         "verification": "Human review",
         "verifiedBy": "Verified by {name}",
         "notVerified": "Not reviewed yet",
         "present": "Present",
         "none": "None",
-        "unknownUser": "Unknown user"
+        "unknownUser": "Unknown user",
+        "loading": "Loading details…",
+        "loadFailed": "Could not load the details for this document."
       }
     }
   },
@@ -206,15 +206,12 @@
           "document": "المستند",
           "student": "الطالب",
           "state": "المرحلة",
-          "pages": "الصفحات",
-          "confidence": "الثقة",
           "created": "أُضيف",
           "actions": "إجراءات"
         },
         "toggleDetail": "عرض التفاصيل",
         "unnumbered": "بدون رقم ملف",
         "unassigned": "غير مرتبط بطالب",
-        "statusUnavailable": "الحالة غير متاحة",
         "retry": "إعادة المحاولة",
         "retryUnavailable": "إعادة المحاولة متاحة فقط للمستندات الفاشلة، أو المتوقّفة بعد استخراج النص.",
         "retryToast": "تمت إعادة إرسال المستند إلى مسار المعالجة.",
@@ -228,12 +225,15 @@
         "ocrPages": "صفحات مستخرجة",
         "embeddedPages": "صفحات مفهرسة",
         "refinement": "التحليل الذكي",
+        "confidence": "ثقة الاستخراج",
         "verification": "المراجعة البشرية",
         "verifiedBy": "راجعه {name}",
         "notVerified": "لم يُراجَع بعد",
         "present": "متوفّر",
         "none": "لا يوجد",
-        "unknownUser": "مستخدم غير معروف"
+        "unknownUser": "مستخدم غير معروف",
+        "loading": "جارٍ تحميل التفاصيل…",
+        "loadFailed": "تعذّر تحميل تفاصيل هذا المستند."
       }
     }
   }

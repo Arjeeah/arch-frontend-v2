@@ -20,6 +20,7 @@ const ENDPOINTS = {
   verifyRefinement: (id: string) => `/v1/refinements/${id}/verify`,
   faculties: '/v1/academic/faculties',
   documentTypes: '/v1/document-types',
+  studentDocument: (id: string) => `/v1/student-documents/${id}`,
 } as const
 
 /* ------------------------------------------------------------------ *
@@ -43,23 +44,37 @@ interface RefinementDataResource {
 interface ReviewQueueItemResource {
   document_id: string
   /**
-   * NOT sent by `ReviewQueueResource` today — confirmed against the source, not
+   * NOT sent by `ReviewQueueResource` — confirmed against a live response, not
    * assumed. `PATCH /v1/refinements/{refinement}` and its verify sibling bind
    * `DocumentRefinement` by `document_refinements.id`, and no endpoint in the
    * API emits that id: the queue resource exposes only `document_id`
    * (`student_documents.id`).
    *
    * The mapper used to substitute `document_id` here, which guaranteed a 404 on
-   * every save and every verify. It maps to `null` instead, and the page
-   * disables both write actions with an explanation rather than issuing a
-   * request that cannot succeed. Adding `'refinement_id' => $refinement?->id`
-   * to the resource is a one-line backend change and lights the screen up with
-   * no further edit here. Tracked in WIRING.md → Still outstanding.
+   * every save and every verify — verified live: PATCHing a `student_documents`
+   * uuid at `/v1/refinements/{id}` answers 404. It maps to `null` instead, and
+   * the page disables both write actions with an explanation rather than
+   * issuing a request that cannot succeed. Adding
+   * `'refinement_id' => $refinement?->id` to the resource is a one-line backend
+   * change and lights the screen up with no further edit here. Tracked in
+   * WIRING.md → Still outstanding.
    */
   refinement_id?: string | null
   file_number?: string | null
   file_name?: string | null
-  /** `getFirstMediaUrl()` returns `''`, not null, when there is no file. */
+  /**
+   * Unusable as an `<img src>` — do not map it onto anything the UI renders.
+   *
+   * `ReviewQueueResource` calls the bare `getFirstMediaUrl('document')`, which
+   * on the private media disk yields a **relative, unsigned** path
+   * (`/storage/1/scan.png`), and `''` when there is no file at all. Verified
+   * live: that path resolves against the *frontend* origin, and fetching it on
+   * the API origin without a signature answers 403. The sibling
+   * `StudentDocumentResource` uses the `SignsMediaUrls` trait and returns an
+   * absolute short-lived signed URL, so the preview resolves its src through
+   * `documentFileUrl()` below. All this field is good for is telling a row with
+   * a file apart from one without.
+   */
   file_url?: string | null
   pipeline_status: string
   pipeline_status_label: string
@@ -125,6 +140,14 @@ interface DocumentTypeListResponse {
   data: DocumentTypeResource[]
 }
 
+/**
+ * The one field this module reads off `StudentDocumentResource` — an absolute,
+ * signed, short-lived media URL, or `null` when the document has no file.
+ */
+interface StudentDocumentFileResponse {
+  data?: { file_url?: string | null } | null
+}
+
 /* ------------------------------------------------------------------ *
  * Mappers — wire -> UI model and back.
  * ------------------------------------------------------------------ */
@@ -158,8 +181,6 @@ function snapshotFromResource(resource: RefinementDataResource | null | undefine
 
 /** snake_case wire row -> camelCase UI model. */
 function fromResource(resource: ReviewQueueItemResource): ReviewQueueItem {
-  const fileUrl = toText(resource.file_url)
-
   return {
     documentId: resource.document_id,
     // No fallback to `document_id`: see the note above — it addressed the
@@ -167,7 +188,7 @@ function fromResource(resource: ReviewQueueItemResource): ReviewQueueItem {
     refinementId: resource.refinement_id ?? null,
     fileNumber: resource.file_number ?? null,
     fileName: resource.file_name ?? null,
-    fileUrl: fileUrl === '' ? null : fileUrl,
+    hasFile: toText(resource.file_url) !== '',
     pipelineStatus: resource.pipeline_status,
     pipelineStatusLabel: resource.pipeline_status_label,
     confidenceScore: toNumber(resource.confidence_score),
@@ -231,10 +252,14 @@ export const reviewApi = {
   /**
    * One page of the review queue, worst confidence first.
    *
-   * // verify against live API: the controller calls `->paginate()` with no
-   * argument, so `per_page` is ignored and the server always returns 15 rows.
-   * Pagination still tracks correctly because `useServerTable` trusts the
-   * server's `meta` over its own `perPage`.
+   * Verified live: the controller calls `->paginate()` with no argument, so
+   * `per_page` is ignored and the server always answers with 15 rows and
+   * `meta.per_page: 15`. Pagination still tracks correctly because
+   * `useServerTable` trusts the server's `meta` over its own `perPage`.
+   *
+   * Also verified: `below_confidence=` (an empty string) passes the
+   * controller's `$request->has()` check, casts to `0.0` and returns **zero**
+   * rows — which is exactly what `cleanParams` above exists to prevent.
    */
   queue: async (params: ServerTableParams): Promise<ServerTableResponse<ReviewQueueItem>> => {
     const { data } = await http.get<ReviewQueueListResponse>(ENDPOINTS.reviewQueue, {
@@ -244,6 +269,23 @@ export const reviewApi = {
       data: (data.data ?? []).map(fromResource),
       meta: data.meta ?? {},
     }
+  },
+
+  /**
+   * A short-lived **signed** URL for one document's scan, for the preview pane.
+   *
+   * The review queue's own `file_url` cannot be rendered (see the note on
+   * `ReviewQueueItemResource.file_url`), so the preview resolves the selected
+   * row through `GET /v1/student-documents/{id}`, whose resource signs the URL
+   * with `SignsMediaUrls`. One request per row an operator actually opens.
+   * Returns `null` when the document has no stored file.
+   */
+  documentFileUrl: async (documentId: string): Promise<string | null> => {
+    const { data } = await http.get<StudentDocumentFileResponse>(
+      ENDPOINTS.studentDocument(documentId),
+    )
+    const url = toText(data.data?.file_url)
+    return url === '' ? null : url
   },
 
   /** Accept the extraction with corrections. Sends **camelCase** — see `toPayload`. */
@@ -277,9 +319,10 @@ export const reviewApi = {
    * The stored `college` is the faculty *name*, not an id, so the option value
    * is the Arabic name — the language the extractor is prompted to answer in.
    *
-   * // verify against live API: `FacultyController::index` hard-codes
-   * `->paginate(10)` and ignores `per_page`, so the remaining pages are pulled
-   * explicitly (capped, since this is a lookup and not a browse).
+   * Verified live: `FacultyController::index` hard-codes `->paginate(10)` and
+   * ignores `per_page` (a request with `per_page=100` still reports
+   * `meta.per_page: 10`), so the remaining pages are pulled explicitly —
+   * capped, since this is a lookup and not a browse.
    */
   listFaculties: async (locale: string): Promise<LookupOption[]> => {
     const MAX_PAGES = 5

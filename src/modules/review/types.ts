@@ -39,8 +39,15 @@ export interface ReviewQueueItem {
   refinementId: string | null
   fileNumber: string | null
   fileName: string | null
-  /** Absolute media URL, or `null` when the document has no stored file. */
-  fileUrl: string | null
+  /**
+   * Whether the document has a stored scan at all.
+   *
+   * Deliberately a flag rather than a URL: the queue resource's own `file_url`
+   * is a relative, unsigned path that no `<img>` or `<iframe>` can load (see
+   * `api/reviewApi.ts`). A renderable URL is resolved per selected row through
+   * `reviewApi.documentFileUrl()`.
+   */
+  hasFile: boolean
   pipelineStatus: string
   /** Arabic label straight from the backend enum — display it as-is. */
   pipelineStatusLabel: string

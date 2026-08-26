@@ -924,15 +924,12 @@
         "document": "Document",
         "student": "Student",
         "state": "Stage",
-        "pages": "Pages",
-        "confidence": "Confidence",
         "created": "Added",
         "actions": "Actions"
       },
       "toggleDetail": "Toggle details",
       "unnumbered": "No file number",
       "unassigned": "Not linked to a student",
-      "statusUnavailable": "Status unavailable",
       "retry": "Retry",
       "retryUnavailable": "Retry is only available for failed documents, or ones stuck after text extraction.",
       "retryToast": "Document sent back through the pipeline.",
@@ -946,12 +943,15 @@
       "ocrPages": "Pages extracted",
       "embeddedPages": "Pages indexed",
       "refinement": "AI analysis",
+      "confidence": "Extraction confidence",
       "verification": "Human review",
       "verifiedBy": "Verified by {name}",
       "notVerified": "Not reviewed yet",
       "present": "Present",
       "none": "None",
-      "unknownUser": "Unknown user"
+      "unknownUser": "Unknown user",
+      "loading": "Loading details…",
+      "loadFailed": "Could not load the details for this document."
     }
   },
   "programs": {
@@ -1179,7 +1179,8 @@
       "openInNewTab": "Open",
       "emptyTitle": "Nothing to preview",
       "noFile": "This document has no stored file.",
-      "selectRow": "Pick a document from the queue to start reviewing."
+      "selectRow": "Pick a document from the queue to start reviewing.",
+      "resolving": "Opening the scan…"
     },
     "fields": {
       "studentNumber": "Student number",
@@ -1250,7 +1251,8 @@
       "loadTitle": "Could not load the review queue",
       "save": "Could not save the corrections",
       "verify": "Could not verify this document",
-      "lookups": "Could not load the faculty and document-type lists"
+      "lookups": "Could not load the faculty and document-type lists",
+      "preview": "Could not open the scanned file"
     },
     "toasts": {
       "saved": "Nothing to save | 1 correction saved | {count} corrections saved",

@@ -58,6 +58,17 @@ export interface PipelineDocument {
   fileUrl: string | null
   submittedAt: string | null
   createdAt: string | null
+  /**
+   * Pipeline state, inlined on the list resource — no follow-up request per
+   * row. Verified against the live API: `StudentDocumentResource` emits
+   * `pipeline_status`, `pipeline_status_label` and `pipeline_error` alongside
+   * the identity fields.
+   */
+  pipelineStatus: PipelineStatus
+  /** Arabic label rendered by the API's enum (`PipelineStatus::label()`). */
+  pipelineStatusLabel: string | null
+  /** Failure reason recorded by `markFailed()`; null unless the state is `failed`. */
+  pipelineError: string | null
 }
 
 /** Result of a bulk import — `BulkImportResponseResource`. */

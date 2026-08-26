@@ -108,8 +108,17 @@ interface StudentDocumentResource {
   document_type?: DocumentTypeSummaryResource | null
   file_number: string | null
   file_status: string | null
+  /**
+   * Inlined by `StudentDocumentResource` so a page of rows needs one request,
+   * not one per row. `pipeline_status_label` is `PipelineStatus::label()`, and
+   * `pipeline_error` is null outside the `failed` state.
+   */
+  pipeline_status: string | null
+  pipeline_status_label: string | null
+  pipeline_error: string | null
   notes: string | null
   submitted_at: string | null
+  /** Short-lived **signed** URL (`SignsMediaUrls`), absolute; '' becomes null below. */
   file_url: string | null
   file_name: string | null
   created_at: string | null
@@ -198,6 +207,9 @@ function documentFromResource(resource: StudentDocumentResource): PipelineDocume
     fileUrl: resource.file_url ? resource.file_url : null,
     submittedAt: resource.submitted_at,
     createdAt: resource.created_at,
+    pipelineStatus: toStatus(resource.pipeline_status ?? ''),
+    pipelineStatusLabel: resource.pipeline_status_label ?? null,
+    pipelineError: resource.pipeline_error ?? null,
   }
 }
 
@@ -273,28 +285,6 @@ export const pipelineApi = {
   },
 
   /**
-   * Pipeline status for a page of documents, keyed by document id.
-   *
-   * One request per document, because `/v1/student-documents` does not expose
-   * `pipeline_status` (see `listDocuments`) and there is no batch status
-   * endpoint. Bounded by the page size, and a document whose status request
-   * fails is simply left out of the map rather than sinking the whole page.
-   */
-  documentStatuses: async (ids: string[]): Promise<Map<string, DocumentPipelineStatus>> => {
-    // Each request carries its own id through the settle, so the results never
-    // have to be matched back up by array position.
-    const settled = await Promise.allSettled(
-      ids.map(async (id) => [id, await pipelineApi.documentStatus(id)] as const),
-    )
-
-    const byId = new Map<string, DocumentPipelineStatus>()
-    for (const result of settled) {
-      if (result.status === 'fulfilled') byId.set(result.value[0], result.value[1])
-    }
-    return byId
-  },
-
-  /**
    * Re-dispatches a stuck or failed document. Responds 202 with a bare message
    * and no data; a document in any other state comes back 422 from
    * `PipelineRetryRequest`, which the caller surfaces as a toast.
@@ -304,16 +294,21 @@ export const pipelineApi = {
   },
 
   /**
-   * One page of documents for the monitor.
+   * One page of documents for the monitor, pipeline state included.
    *
-   * verify against live API: `StudentDocumentResource` carries no
-   * `pipeline_status`, and `StudentDocumentController::index` only allows the
-   * filters `file_number`, `student_id`, `document_type_id` and `file_status` —
-   * so there is no way to ask the server for "every failed document". The
-   * monitor works around it by hydrating each visible row through
-   * `documentStatuses` and filtering by state within the loaded page. If the
-   * backend later adds `pipeline_status` to the resource and its allowed
-   * filters, delete the hydration pass and filter server-side instead.
+   * Verified against the live API: every row carries `pipeline_status`,
+   * `pipeline_status_label` and `pipeline_error`, so the monitor renders a page
+   * from this one request — the per-row `/pipeline/status/{id}` hydration pass
+   * that used to compensate is gone.
+   *
+   * What the server still cannot do is *filter* by state:
+   * `StudentDocumentController::index` allows only `file_number`, `student_id`,
+   * `document_type_id` and `file_status`, and Spatie's query builder answers an
+   * unknown key with 400 `InvalidFilterQuery` rather than ignoring it — so
+   * `filter[pipeline_status]` must never be sent. The monitor narrows the
+   * loaded page client-side instead and says so on screen. Add the filter to
+   * `toDocumentQuery` the day `allowedFilters` grows an exact
+   * `pipeline_status`.
    */
   listDocuments: async (
     params: ServerTableParams,

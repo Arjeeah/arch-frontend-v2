@@ -64,6 +64,45 @@ function select(documentId: string): void {
   selectedId.value = documentId
 }
 
+/* ---------------------------------------------------------------- *
+ * Preview URL
+ * ---------------------------------------------------------------- */
+
+/**
+ * The queue row's own `file_url` is a relative, unsigned `/storage/...` path
+ * that no `<img>`/`<iframe>` can load (see `api/reviewApi.ts`), so a signed URL
+ * is resolved for the *selected* row only — one request per row an operator
+ * opens, not one per row on the page. Signed URLs are short-lived, which is a
+ * second reason to mint them on selection rather than up front.
+ */
+const previewUrl = ref<string | null>(null)
+const previewResolving = ref(false)
+const previewError = ref<string | null>(null)
+let previewToken = 0
+
+async function resolvePreview(item: ReviewQueueItem | null): Promise<void> {
+  const token = ++previewToken
+  previewUrl.value = null
+  previewError.value = null
+
+  if (!item?.hasFile) {
+    previewResolving.value = false
+    return
+  }
+
+  previewResolving.value = true
+  try {
+    const url = await reviewApi.documentFileUrl(item.documentId)
+    if (token !== previewToken) return
+    previewUrl.value = url
+  } catch (err: unknown) {
+    if (token !== previewToken) return
+    previewError.value = getApiErrorMessage(err, t('review.errors.preview'))
+  } finally {
+    if (token === previewToken) previewResolving.value = false
+  }
+}
+
 function step(delta: number): void {
   if (selectedIndex.value < 0) return
   const next = rows.value[selectedIndex.value + delta]
@@ -131,7 +170,14 @@ function loadForm(item: ReviewQueueItem | null): void {
   form.value = draft ?? identity
 }
 
-watch(selected, (item) => loadForm(item), { immediate: true })
+watch(
+  selected,
+  (item) => {
+    loadForm(item)
+    void resolvePreview(item)
+  },
+  { immediate: true },
+)
 
 const isDirty = computed(() => JSON.stringify(form.value) !== loadedSnapshot.value)
 
@@ -529,7 +575,12 @@ const positionLabel = computed(() => {
 
       <!-- Split: document beside the identity it produced -->
       <div class="grid min-w-0 gap-4 xl:grid-cols-2">
-        <DocumentPreview :item="selected" />
+        <DocumentPreview
+          :item="selected"
+          :file-url="previewUrl"
+          :resolving="previewResolving"
+          :error="previewError"
+        />
 
         <section
           class="flex min-w-0 flex-col gap-4 rounded-lg border border-border bg-surface-card p-4"
