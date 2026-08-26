@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/shared/components/AppDialog.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
@@ -48,7 +48,10 @@ async function loadFaculties() {
   }
 }
 
-onMounted(loadFaculties)
+// Deliberately NOT loaded on mount: this dialog is mounted with the page, so a
+// mount-time fetch duplicated the list page's own faculty lookup on every
+// visit. The `open` watcher below loads it the first time the dialog is
+// actually opened.
 
 const statusOptions = computed(() => [
   { value: 'active', label: t('programs.status.active') },

@@ -28,7 +28,9 @@
       },
       "empty": {
         "title": "No programs yet",
-        "description": "Add a program to a faculty to get started."
+        "description": "Add a program to a faculty to get started.",
+        "filteredTitle": "No matching programs",
+        "filteredDescription": "No program matches the current search and filters."
       },
       "dialog": {
         "createTitle": "Add Program",
@@ -93,7 +95,9 @@
       },
       "empty": {
         "title": "لا توجد برامج بعد",
-        "description": "أضف برنامجًا إلى إحدى الكليات للبدء."
+        "description": "أضف برنامجًا إلى إحدى الكليات للبدء.",
+        "filteredTitle": "لا توجد نتائج مطابقة",
+        "filteredDescription": "لا يوجد برنامج يطابق البحث والفلاتر الحالية."
       },
       "dialog": {
         "createTitle": "إضافة برنامج",

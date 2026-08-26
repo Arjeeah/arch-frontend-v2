@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Plus, Trash2 } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import AppSelect from '@/shared/components/AppSelect.vue'
@@ -23,12 +24,15 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const operatorOptions = [
+// `computed`, not plain arrays: `t()` read once at setup freezes the labels in
+// whichever locale happened to be active, and the header's language switch does
+// not remount this dialog.
+const operatorOptions = computed(() => [
   { value: 'AND', label: t('documentTypes.conditions.and') },
   { value: 'OR', label: t('documentTypes.conditions.or') },
-]
+])
 
-const opOptions: { value: ConditionOperator; label: string }[] = [
+const opOptions = computed<{ value: ConditionOperator; label: string }[]>(() => [
   { value: '=', label: '=' },
   { value: '!=', label: '!=' },
   { value: '>', label: '>' },
@@ -37,7 +41,7 @@ const opOptions: { value: ConditionOperator; label: string }[] = [
   { value: '<=', label: '<=' },
   { value: 'in', label: t('documentTypes.conditions.opIn') },
   { value: 'not_in', label: t('documentTypes.conditions.opNotIn') },
-]
+])
 
 function addCondition() {
   emit('update:conditions', [...props.conditions, { field: '', op: '=', value: '' }])

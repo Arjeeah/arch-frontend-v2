@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Search, Plus } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import AppSelect from '@/shared/components/AppSelect.vue'
@@ -56,10 +56,22 @@ watch([statusFilter, facultyFilter], ([status, facultyId]) =>
   }),
 )
 
-const statusOptions = [
+// `computed`, not a plain array: `t()` read once at setup freezes the labels
+// in whichever locale happened to be active, and the header's language switch
+// does not remount this page.
+const statusOptions = computed(() => [
   { value: 'active', label: t('programs.status.active') },
   { value: 'inactive', label: t('programs.status.inactive') },
-]
+])
+
+/**
+ * "No programs yet" is the wrong thing to say when a search or filter is what
+ * emptied the list — it reads as "this screen is broken" to anyone who just
+ * typed a query.
+ */
+const hasActiveFilters = computed(
+  () => Boolean(search.value) || Boolean(statusFilter.value) || Boolean(facultyFilter.value),
+)
 
 const facultyOptions = ref<{ value: string; label: string }[]>([])
 onMounted(async () => {
@@ -109,10 +121,16 @@ function openDelete(item: Program) {
 async function confirmDelete() {
   if (!deletingItem.value) return
   try {
+    const wasLastRowOnPage = rows.value.length === 1 && page.value > 1
     await store.remove(deletingItem.value.id)
     toasts.success(t('programs.toasts.deleted'))
     deleteDialogOpen.value = false
-    await refresh()
+    // Laravel does not clamp an out-of-range page — it answers page N with an
+    // empty `data` array — so deleting the last row of a page would otherwise
+    // strand the user on an empty-state screen with rows still sitting on the
+    // page before it. Stepping the page back refetches via the page watcher.
+    if (wasLastRowOnPage) page.value -= 1
+    else await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('programs.toasts.deleteFailed')))
   }
@@ -168,8 +186,10 @@ async function confirmDelete() {
     <!-- Empty state -->
     <AppEmptyState
       v-else-if="isEmpty"
-      :title="t('programs.empty.title')"
-      :description="t('programs.empty.description')"
+      :title="hasActiveFilters ? t('programs.empty.filteredTitle') : t('programs.empty.title')"
+      :description="
+        hasActiveFilters ? t('programs.empty.filteredDescription') : t('programs.empty.description')
+      "
     />
 
     <!-- Table -->

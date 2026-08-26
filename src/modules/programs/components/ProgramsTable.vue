@@ -3,7 +3,7 @@ import { SquarePen, Ban } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import DataTable from '@/shared/components/DataTable.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
-import type { Program } from '../types'
+import type { Program, ProgramStatus } from '../types'
 
 defineProps<{
   items: Program[]
@@ -16,6 +16,14 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+/**
+ * `StatusBadge` falls back to printing the raw slug when no slot is given,
+ * which leaks an untranslated "active"/"inactive" into the Arabic UI.
+ */
+function statusLabel(status: ProgramStatus): string {
+  return t(`programs.status.${status}`)
+}
 </script>
 
 <template>
@@ -41,7 +49,7 @@ const { t } = useI18n()
           <span v-else class="text-text-muted">—</span>
         </td>
         <td class="px-3 py-3 text-center">
-          <StatusBadge :status="item.status" />
+          <StatusBadge :status="item.status">{{ statusLabel(item.status) }}</StatusBadge>
         </td>
         <td class="px-3 py-3">
           <div class="flex justify-center items-center gap-[15px]">

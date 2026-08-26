@@ -58,6 +58,27 @@ export interface ProgramListParams {
   faculty_id?: number
 }
 
+/**
+ * Spatie QueryBuilder only reads filters out of a nested `filter` query
+ * parameter — `?filter[name_ar]=x`, never a bare `?name_ar=x`, which it
+ * silently ignores (`config/query-builder.php` sets
+ * `parameters.filter => 'filter'`, and the backend's own tests hit
+ * `/api/v1/academic/programs?filter[faculty_id]=…`).
+ *
+ * The nesting lives here rather than at the call site so the page can keep
+ * handing `useServerTable` plain `{ name_ar, status, faculty_id }` filters —
+ * `setFilters` merges per key, which a pre-nested `filter` object would break
+ * by replacing the whole group on every change. Axios serialises the nested
+ * object back into `filter[name_ar]=x` on the wire.
+ */
+function toQuery({ page, per_page, ...filters }: ProgramListParams): Record<string, unknown> {
+  const filter: Record<string, string> = {}
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== '') filter[key] = String(value)
+  }
+  return Object.keys(filter).length > 0 ? { page, per_page, filter } : { page, per_page }
+}
+
 function toFacultySummary(
   resource: FacultyResourceLite | null | undefined,
 ): ProgramFacultySummary | null {
@@ -105,7 +126,9 @@ export const programsApi = {
   list: async (
     params: ProgramListParams,
   ): Promise<{ data: Program[]; meta: ProgramListResponse['meta'] }> => {
-    const { data } = await http.get<ProgramListResponse>(API_ENDPOINTS.programs.list, { params })
+    const { data } = await http.get<ProgramListResponse>(API_ENDPOINTS.programs.list, {
+      params: toQuery(params),
+    })
     return { data: data.data.map(fromResource), meta: data.meta }
   },
 
@@ -149,19 +172,43 @@ export const programsApi = {
   },
 }
 
+/** Hard cap on the lookup's paging loop — 10 pages of 10 is far more than the ~9 real faculties. */
+const FACULTY_LOOKUP_MAX_PAGES = 10
+
+interface FacultyListResponse {
+  data: FacultyResourceLite[]
+  meta?: { last_page?: number; current_page?: number }
+}
+
 /**
  * Own-territory lookup for the faculty filter/select — programs cannot import
  * the `faculties` module (cross-module imports are forbidden), so it hits
- * `/v1/academic/faculties` directly. Nine faculties exist today, so one
- * generously-paged request is enough; if that stops being true, swap this
- * page for `AppAsyncSelect`.
+ * `/v1/academic/faculties` directly.
+ *
+ * `FacultyController::index()` hardcodes `->paginate(10)` and ignores
+ * `per_page`, so a single request can never return more than ten faculties no
+ * matter what is asked for. Nine exist today, which is exactly the kind of
+ * off-by-one that turns into a silently truncated dropdown the day a tenth is
+ * added — so this walks the pages instead, bounded by
+ * `FACULTY_LOOKUP_MAX_PAGES`. If the list ever grows past that, swap the
+ * select for `AppAsyncSelect` rather than raising the cap.
  */
 export const facultyLookupApi = {
   listOptions: async (): Promise<{ value: string; label: string }[]> => {
-    const { data } = await http.get<{ data: FacultyResourceLite[] }>(API_ENDPOINTS.faculties.list, {
-      params: { per_page: 100 },
-    })
-    return data.data.map((faculty) => ({
+    const faculties: FacultyResourceLite[] = []
+    let page = 1
+    let lastPage = 1
+
+    do {
+      const { data } = await http.get<FacultyListResponse>(API_ENDPOINTS.faculties.list, {
+        params: { page },
+      })
+      faculties.push(...data.data)
+      lastPage = data.meta?.last_page ?? 1
+      page += 1
+    } while (page <= lastPage && page <= FACULTY_LOOKUP_MAX_PAGES)
+
+    return faculties.map((faculty) => ({
       value: String(faculty.id),
       label: `${faculty.name_ar} — ${faculty.name_en}`,
     }))

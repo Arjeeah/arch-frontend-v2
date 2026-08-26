@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Search, Plus } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import AppSelect from '@/shared/components/AppSelect.vue'
@@ -52,14 +52,26 @@ watch([statusFilter, requiredFilter], ([status, required]) =>
   }),
 )
 
-const statusOptions = [
+// `computed`, not plain arrays: `t()` read once at setup freezes the labels in
+// whichever locale happened to be active, and the header's language switch does
+// not remount this page.
+const statusOptions = computed(() => [
   { value: 'active', label: t('documentTypes.status.active') },
   { value: 'inactive', label: t('documentTypes.status.inactive') },
-]
-const requiredOptions = [
+])
+const requiredOptions = computed(() => [
   { value: '1', label: t('documentTypes.fields.required') },
   { value: '0', label: t('documentTypes.fields.optional') },
-]
+])
+
+/**
+ * "No document types yet" is the wrong thing to say when a search or filter is
+ * what emptied the list — it reads as "this screen is broken" to anyone who
+ * just typed a query.
+ */
+const hasActiveFilters = computed(
+  () => Boolean(search.value) || Boolean(statusFilter.value) || Boolean(requiredFilter.value),
+)
 
 const dialogOpen = ref(false)
 const editingItem = ref<DocumentType | null>(null)
@@ -100,10 +112,16 @@ function openDelete(item: DocumentType) {
 async function confirmDelete() {
   if (!deletingItem.value) return
   try {
+    const wasLastRowOnPage = rows.value.length === 1 && page.value > 1
     await store.remove(deletingItem.value.id)
     toasts.success(t('documentTypes.toasts.deleted'))
     deleteDialogOpen.value = false
-    await refresh()
+    // Laravel does not clamp an out-of-range page — it answers page N with an
+    // empty `data` array — so deleting the last row of a page would otherwise
+    // strand the user on an empty-state screen with rows still sitting on the
+    // page before it. Stepping the page back refetches via the page watcher.
+    if (wasLastRowOnPage) page.value -= 1
+    else await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('documentTypes.toasts.deleteFailed')))
   }
@@ -161,8 +179,14 @@ async function confirmDelete() {
     <!-- Empty state -->
     <AppEmptyState
       v-else-if="isEmpty"
-      :title="t('documentTypes.empty.title')"
-      :description="t('documentTypes.empty.description')"
+      :title="
+        hasActiveFilters ? t('documentTypes.empty.filteredTitle') : t('documentTypes.empty.title')
+      "
+      :description="
+        hasActiveFilters
+          ? t('documentTypes.empty.filteredDescription')
+          : t('documentTypes.empty.description')
+      "
     />
 
     <!-- Table -->

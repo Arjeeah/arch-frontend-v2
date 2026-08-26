@@ -59,6 +59,27 @@ export interface DocumentTypeListParams {
   is_required?: '1' | '0'
 }
 
+/**
+ * Spatie QueryBuilder only reads filters out of a nested `filter` query
+ * parameter — `?filter[name]=x`, never a bare `?name=x`, which it silently
+ * ignores (`config/query-builder.php` sets `parameters.filter => 'filter'`,
+ * and the backend's own tests hit
+ * `/api/v1/document-types?filter[status]=active`).
+ *
+ * The nesting lives here rather than at the call site so the page can keep
+ * handing `useServerTable` plain `{ name, status, is_required }` filters —
+ * `setFilters` merges per key, which a pre-nested `filter` object would break
+ * by replacing the whole group on every change. Axios serialises the nested
+ * object back into `filter[name]=x` on the wire.
+ */
+function toQuery({ page, per_page, ...filters }: DocumentTypeListParams): Record<string, unknown> {
+  const filter: Record<string, string> = {}
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== '') filter[key] = String(value)
+  }
+  return Object.keys(filter).length > 0 ? { page, per_page, filter } : { page, per_page }
+}
+
 function toStatus(raw: string): DocumentTypeStatus {
   return raw === 'inactive' ? 'inactive' : 'active'
 }
@@ -137,7 +158,9 @@ export const documentTypesApi = {
   list: async (
     params: DocumentTypeListParams,
   ): Promise<{ data: DocumentType[]; meta: DocumentTypeListResponse['meta'] }> => {
-    const { data } = await http.get<DocumentTypeListResponse>(BASE_PATH, { params })
+    const { data } = await http.get<DocumentTypeListResponse>(BASE_PATH, {
+      params: toQuery(params),
+    })
     return { data: data.data.map(fromResource), meta: data.meta }
   },
 

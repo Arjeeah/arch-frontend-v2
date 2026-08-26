@@ -28,7 +28,9 @@
       },
       "empty": {
         "title": "No document types yet",
-        "description": "Add a document type so students can start submitting it."
+        "description": "Add a document type so students can start submitting it.",
+        "filteredTitle": "No matching document types",
+        "filteredDescription": "No document type matches the current search and filters."
       },
       "dialog": {
         "createTitle": "Add Document Type",
@@ -56,6 +58,8 @@
         "valueListPlaceholder": "Comma-separated values",
         "remove": "Remove condition",
         "addCondition": "Add condition",
+        "atLeastOne": "Add at least one condition, or clear the checkbox above.",
+        "incomplete": "Every condition needs both a field and a value.",
         "tooltip": "{count} condition(s) configured"
       },
       "deleteDialog": {
@@ -101,7 +105,9 @@
       },
       "empty": {
         "title": "لا توجد أنواع وثائق بعد",
-        "description": "أضف نوع وثيقة ليتمكن الطلاب من تقديمها."
+        "description": "أضف نوع وثيقة ليتمكن الطلاب من تقديمها.",
+        "filteredTitle": "لا توجد نتائج مطابقة",
+        "filteredDescription": "لا يوجد نوع وثيقة يطابق البحث والفلاتر الحالية."
       },
       "dialog": {
         "createTitle": "إضافة نوع وثيقة",
@@ -129,6 +135,8 @@
         "valueListPlaceholder": "قيم مفصولة بفواصل",
         "remove": "إزالة الشرط",
         "addCondition": "إضافة شرط",
+        "atLeastOne": "أضف شرطًا واحدًا على الأقل، أو ألغِ تحديد الخيار أعلاه.",
+        "incomplete": "كل شرط يحتاج إلى حقل وقيمة معًا.",
         "tooltip": "تم إعداد {count} شرط"
       },
       "deleteDialog": {

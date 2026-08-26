@@ -33,7 +33,7 @@ const hasConditions = ref(false)
 const conditionsOperator = ref<'AND' | 'OR'>('AND')
 const conditionRows = ref<RequirementCondition[]>([])
 
-const errors = reactive({ name: '' })
+const errors = reactive({ name: '', conditions: '' })
 
 const statusOptions = computed(() => [
   { value: 'active', label: t('documentTypes.status.active') },
@@ -51,14 +51,33 @@ watch(
     form.status = item?.status ?? 'active'
     hasConditions.value = !!item?.requirementConditions
     conditionsOperator.value = item?.requirementConditions?.operator ?? 'AND'
-    conditionRows.value = item?.requirementConditions?.conditions ?? []
+    // Copy, so editing rows in the builder can never write through to the row
+    // object the list is still rendering.
+    conditionRows.value = (item?.requirementConditions?.conditions ?? []).map((c) => ({ ...c }))
     errors.name = ''
+    errors.conditions = ''
   },
 )
 
+/**
+ * `StoreDocumentTypeRequest` marks every `conditions.*.field`/`op`/`value` as
+ * `required`, so a half-filled row comes back as a 422 with a
+ * `requirement_conditions.conditions.0.field` message that means nothing to
+ * the person who typed it. Catch it here instead.
+ */
 function validate(): boolean {
   errors.name = form.name.trim() ? '' : t('documentTypes.dialog.nameRequired')
-  return !errors.name
+
+  errors.conditions = ''
+  if (hasConditions.value) {
+    if (conditionRows.value.length === 0) {
+      errors.conditions = t('documentTypes.conditions.atLeastOne')
+    } else if (conditionRows.value.some((c) => !c.field.trim() || !c.value.trim())) {
+      errors.conditions = t('documentTypes.conditions.incomplete')
+    }
+  }
+
+  return !errors.name && !errors.conditions
 }
 
 function submit() {
@@ -68,10 +87,16 @@ function submit() {
     description: form.description.trim() || null,
     isRequired: form.isRequired,
     status: form.status,
-    requirementConditions:
-      hasConditions.value && conditionRows.value.length > 0
-        ? { operator: conditionsOperator.value, conditions: conditionRows.value }
-        : null,
+    requirementConditions: hasConditions.value
+      ? {
+          operator: conditionsOperator.value,
+          conditions: conditionRows.value.map((c) => ({
+            ...c,
+            field: c.field.trim(),
+            value: c.value.trim(),
+          })),
+        }
+      : null,
   })
 }
 </script>
@@ -135,11 +160,15 @@ function submit() {
         {{ t('documentTypes.conditions.enable') }}
       </label>
 
-      <RequirementConditionsBuilder
-        v-if="hasConditions"
-        v-model:operator="conditionsOperator"
-        v-model:conditions="conditionRows"
-      />
+      <div v-if="hasConditions" class="flex flex-col gap-1.5">
+        <RequirementConditionsBuilder
+          v-model:operator="conditionsOperator"
+          v-model:conditions="conditionRows"
+        />
+        <p v-if="errors.conditions" class="text-xs text-danger font-sans">
+          {{ errors.conditions }}
+        </p>
+      </div>
     </div>
 
     <template #footer>
