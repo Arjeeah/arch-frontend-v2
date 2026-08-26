@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ChevronRight, SquarePen, Trash2 } from 'lucide-vue-next'
 import DataTable from '@/shared/components/DataTable.vue'
@@ -18,13 +19,14 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const columns = [
+// See RoomsTable: `computed` so the headers follow a locale switch.
+const columns = computed(() => [
   { key: 'name', label: t('locations.cabinets.columns.name') },
   { key: 'position', label: t('locations.cabinets.columns.position'), align: 'center' as const },
   { key: 'drawers', label: t('locations.cabinets.columns.drawers'), align: 'center' as const },
   { key: 'status', label: t('locations.cabinets.columns.status'), align: 'center' as const },
   { key: 'actions', label: t('locations.common.actions'), align: 'center' as const },
-]
+])
 </script>
 
 <template>
@@ -58,7 +60,8 @@ const columns = [
               :title="t('locations.cabinets.viewDrawers')"
               @click.stop="emit('view', cabinet)"
             >
-              <ChevronRight class="h-5 w-5" />
+              <!-- Drill-in chevron points at the content; mirror it under dir="rtl". -->
+              <ChevronRight class="h-5 w-5 rtl:rotate-180" />
             </button>
             <button
               type="button"

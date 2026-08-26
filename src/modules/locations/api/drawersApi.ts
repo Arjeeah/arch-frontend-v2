@@ -106,9 +106,18 @@ export const drawersApi = {
    * re-adding — a later cabinet edit would otherwise just recreate it anyway.
    */
   create: async (cabinetId: string, input: DrawerInput): Promise<Drawer> => {
+    const payload = toPayload(input)
+
+    // `DrawerStoreRequest` marks `capacity` as `nullable`, but the column is
+    // `integer NOT NULL DEFAULT 100` (create_drawers_table migration), so an
+    // explicit null clears validation and then dies on the NOT NULL constraint
+    // with a 500. Omitting the key instead is what "leave it blank" has to mean:
+    // the column default applies.
+    if (payload.capacity === null) delete payload.capacity
+
     const { data } = await http.post<DrawerItemResponse>(BASE_PATH, {
       cabinet_id: cabinetId,
-      ...toPayload(input),
+      ...payload,
     })
     return fromResource(data.data)
   },

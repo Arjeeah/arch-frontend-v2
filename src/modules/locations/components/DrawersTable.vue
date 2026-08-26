@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { SquarePen, Trash2 } from 'lucide-vue-next'
 import DataTable from '@/shared/components/DataTable.vue'
@@ -18,13 +19,14 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const columns = [
+// See RoomsTable: `computed` so the headers follow a locale switch.
+const columns = computed(() => [
   { key: 'number', label: t('locations.drawers.columns.number'), align: 'center' as const },
   { key: 'label', label: t('locations.drawers.columns.label') },
   { key: 'capacity', label: t('locations.drawers.columns.capacity') },
   { key: 'status', label: t('locations.drawers.columns.status'), align: 'center' as const },
   { key: 'actions', label: t('locations.common.actions'), align: 'center' as const },
-]
+])
 </script>
 
 <template>

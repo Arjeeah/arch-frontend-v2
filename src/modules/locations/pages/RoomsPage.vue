@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Archive, Plus } from 'lucide-vue-next'
@@ -40,11 +40,20 @@ const {
 watch(debouncedSearch, (name) => setFilters({ name }))
 watch(statusFilter, (status) => setFilters({ status }))
 
-const statusOptions = [
+// `computed`, not a plain array: read once at setup, these labels would stay in
+// whichever language was active when the page mounted, even after a locale switch.
+const statusOptions = computed(() => [
   { value: '', label: t('locations.rooms.filterAllStatuses') },
   { value: 'active', label: t('locations.common.statusActive') },
   { value: 'inactive', label: t('locations.common.statusInactive') },
-]
+])
+
+/**
+ * An empty list means two different things. With a search term or a status
+ * filter on it means "nothing matched" — telling that user "add your first
+ * room" is wrong, and so is offering them the create button as the way out.
+ */
+const hasActiveFilters = computed(() => Boolean(search.value.trim() || statusFilter.value))
 
 const dialogOpen = ref(false)
 const editingRoom = ref<Room | null>(null)
@@ -146,11 +155,17 @@ async function confirmDelete() {
     <AppErrorState v-if="error" :description="error" @retry="refresh" />
     <AppEmptyState
       v-else-if="isEmpty"
-      :title="t('locations.rooms.emptyTitle')"
-      :description="t('locations.rooms.emptyDescription')"
+      :title="
+        hasActiveFilters ? t('locations.common.noMatchesTitle') : t('locations.rooms.emptyTitle')
+      "
+      :description="
+        hasActiveFilters
+          ? t('locations.common.noMatchesDescription')
+          : t('locations.rooms.emptyDescription')
+      "
       :icon="Archive"
     >
-      <template #action>
+      <template v-if="!hasActiveFilters" #action>
         <button
           type="button"
           class="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-display font-medium text-white transition-colors hover:bg-primary-mid"

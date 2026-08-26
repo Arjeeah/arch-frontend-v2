@@ -56,7 +56,6 @@ function submit() {
   emit('save', {
     name: form.name.trim(),
     description: form.description.trim() ? form.description.trim() : null,
-    canvasData: props.room?.canvasData ?? null,
     status: form.status,
   })
 }

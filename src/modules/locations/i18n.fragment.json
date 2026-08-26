@@ -15,7 +15,9 @@
         "statusInactive": "Inactive",
         "loading": "Loading…",
         "backToRooms": "Back to Rooms",
-        "backToCabinets": "Back to Cabinets"
+        "backToCabinets": "Back to Cabinets",
+        "noMatchesTitle": "No matches",
+        "noMatchesDescription": "Nothing matches the current search or filter. Try clearing them."
       },
       "capacity": {
         "slotsSuffix": "slots",
@@ -146,13 +148,15 @@
         "statusInactive": "غير نشط",
         "loading": "جارٍ التحميل…",
         "backToRooms": "العودة إلى الغرف",
-        "backToCabinets": "العودة إلى الخزائن"
+        "backToCabinets": "العودة إلى الخزائن",
+        "noMatchesTitle": "لا توجد نتائج",
+        "noMatchesDescription": "لا يوجد ما يطابق البحث أو التصفية الحالية. جرّب مسحهما."
       },
       "capacity": {
         "slotsSuffix": "خانة",
         "status": {
           "normal": "طبيعية",
-          "warning": "تحذير",
+          "warning": "تحذيرية",
           "critical": "حرجة"
         }
       },
@@ -212,7 +216,7 @@
           "nameRequired": "الاسم مطلوب",
           "positionX": "الإحداثي X",
           "positionY": "الإحداثي Y",
-          "positionInvalid": "أدخل رقمًا صحيحًا",
+          "positionInvalid": "أدخل رقمًا صالحًا",
           "roomContext": "الغرفة: {room}",
           "autoDrawersHint": "سيتم إنشاء 4 أدراج تلقائيًا لهذه الخزانة."
         },
@@ -244,7 +248,7 @@
           "createTitle": "إضافة درج",
           "editTitle": "تعديل الدرج",
           "number": "رقم الدرج",
-          "numberInvalid": "أدخل رقمًا صحيحًا 1 أو أكبر",
+          "numberInvalid": "أدخل رقمًا صحيحًا لا يقل عن 1",
           "capacity": "السعة",
           "capacityInvalid": "أدخل سعة صالحة",
           "label": "التسمية",

@@ -14,7 +14,14 @@ interface RoomResource {
   id: string
   name: string
   description: string | null
-  canvas_data: string | null
+  /**
+   * A JSON column cast to `array` by `Room::$casts`, so this arrives decoded —
+   * an object/array, never the `string` that `Room{Store,Update}Request`
+   * validates. Typed `unknown` because it is genuinely untyped on the wire, and
+   * never mapped onto the UI model: this module does not render room layouts,
+   * and echoing a decoded value back would fail the request's `string` rule.
+   */
+  canvas_data?: unknown
   status: string
   cabinets?: unknown[]
   created_at: string
@@ -45,7 +52,6 @@ function fromResource(resource: RoomResource): Room {
     id: resource.id,
     name: resource.name,
     description: resource.description,
-    canvasData: resource.canvas_data,
     status: toStatus(resource.status),
     cabinetsCount: resource.cabinets?.length ?? 0,
     createdAt: resource.created_at,
@@ -53,12 +59,17 @@ function fromResource(resource: RoomResource): Room {
   }
 }
 
-/** camelCase UI model -> snake_case request payload. */
+/**
+ * camelCase UI model -> snake_case request payload.
+ *
+ * `canvas_data` is never sent: see the `RoomResource` note above. Both requests
+ * treat it as optional (`nullable` on store, `sometimes` on update), so leaving
+ * it out is safe and preserves whatever is already stored.
+ */
 function toPayload(input: Partial<RoomInput>): Record<string, string | null> {
   const payload: Record<string, string | null> = {}
   if (input.name !== undefined) payload.name = input.name
   if (input.description !== undefined) payload.description = input.description
-  if (input.canvasData !== undefined) payload.canvas_data = input.canvasData
   if (input.status !== undefined) payload.status = input.status
   return payload
 }

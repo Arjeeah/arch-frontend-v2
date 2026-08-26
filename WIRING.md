@@ -72,7 +72,7 @@ Add one top-level item to `navItems` in `src/shared/components/AppSidebar.vue`
 ## i18n
 
 Merge `src/modules/locations/i18n.fragment.json` into `src/locales/en.json`
-and `src/locales/ar.json` under the top-level `locations` key (97 keys per
+and `src/locales/ar.json` under the top-level `locations` key (99 keys per
 locale, verified 1:1 parity — see the module's own notes below). No key
 collides with anything already in either locale file.
 
@@ -97,6 +97,20 @@ collides with anything already in either locale file.
   api files directly from the page components, reporting through
   `useToasts()`. Nothing outside this module depends on locations state, so
   there was nothing a store would have centralized.
+- **Two shared components still render hardcoded English**, which shows up on
+  this module's screens in Arabic: `AppConfirmDialog`'s "Cancel" button and
+  `DataTable`'s "Loading…" / "No data" fallbacks. Both are in `src/shared/`,
+  outside this stream's territory, and they affect every module equally — so
+  they belong to whoever owns the shared-component i18n pass, not here.
+  Flagged so the delete-confirm dialogs on this module's three lists aren't
+  mistaken for a locations bug.
+- **Backend quirks this module works around** (documented at the api boundary,
+  where CLAUDE.md says per-endpoint quirks live): `rooms.canvas_data` is a JSON
+  column cast to `array` but validated as `nullable|string`, so nothing can
+  round-trip it — `roomsApi` neither reads nor sends it. `drawers.capacity` is
+  `NOT NULL DEFAULT 100` while `DrawerStoreRequest` marks it `nullable`, so
+  `drawersApi.create` omits the key rather than sending an explicit null (which
+  passes validation and then 500s on the constraint).
 - **Backend is offline for this stream** — every wire assumption below is
   either taken directly from reading the backend controllers/requests/
   resources, or flagged `// verify against live API` in the source where it

@@ -71,11 +71,15 @@ watch(cabinetId, (id) => {
 
 onMounted(loadCabinet)
 
-const statusOptions = [
+// See RoomsPage: `computed` so the labels follow a locale switch.
+const statusOptions = computed(() => [
   { value: '', label: t('locations.drawers.filterAllStatuses') },
   { value: 'active', label: t('locations.common.statusActive') },
   { value: 'inactive', label: t('locations.common.statusInactive') },
-]
+])
+
+/** See RoomsPage: "nothing matched" is a different empty state from "nothing here yet". */
+const hasActiveFilters = computed(() => Boolean(statusFilter.value))
 
 const dialogOpen = ref(false)
 const editingDrawer = ref<Drawer | null>(null)
@@ -146,7 +150,8 @@ async function confirmDelete() {
       class="flex w-fit items-center gap-1.5 text-sm font-sans font-medium text-text-secondary transition-colors hover:text-text-primary"
       @click="goBack"
     >
-      <ArrowLeft class="h-4 w-4" />
+      <!-- "Back" runs the other way under dir="rtl", so mirror the arrow. -->
+      <ArrowLeft class="h-4 w-4 rtl:rotate-180" />
       {{ roomIdHint ? t('locations.common.backToCabinets') : t('locations.common.backToRooms') }}
     </button>
 
@@ -196,11 +201,19 @@ async function confirmDelete() {
       <AppErrorState v-if="error" :description="error" @retry="refresh" />
       <AppEmptyState
         v-else-if="isEmpty"
-        :title="t('locations.drawers.emptyTitle')"
-        :description="t('locations.drawers.emptyDescription')"
+        :title="
+          hasActiveFilters
+            ? t('locations.common.noMatchesTitle')
+            : t('locations.drawers.emptyTitle')
+        "
+        :description="
+          hasActiveFilters
+            ? t('locations.common.noMatchesDescription')
+            : t('locations.drawers.emptyDescription')
+        "
         :icon="Inbox"
       >
-        <template #action>
+        <template v-if="!hasActiveFilters" #action>
           <button
             type="button"
             class="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-display font-medium text-white transition-colors hover:bg-primary-mid"

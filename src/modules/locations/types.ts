@@ -7,19 +7,19 @@
 /** Backend enum `App\Enums\Status`: only these two values exist. */
 export type LocationStatus = 'active' | 'inactive'
 
+/**
+ * `canvas_data` is deliberately absent from this model. It is a JSON column that
+ * `Room::$casts` decodes to an array, so the wire value is an object/array —
+ * while `Room{Store,Update}Request` validates it as `nullable|string`. Nothing
+ * round-trips cleanly, and this module's browse UI never renders it, so
+ * `roomsApi` neither maps it in nor sends it back. `RoomUpdateRequest` uses
+ * `sometimes`, so omitting it cannot clobber a value a future floor-plan editor
+ * may set.
+ */
 export interface Room {
   id: string
   name: string
   description: string | null
-  /**
-   * Free-form canvas layout data for the room (JSON string on the wire —
-   * `Room::$casts` decodes it to an array server-side, but `RoomResource`
-   * re-serializes it as-is). Not rendered by this module's browse UI; kept
-   * only so update payloads that omit it don't clobber a value another
-   * screen (a future floor-plan editor) may set.
-   * verify against live API: shape of the decoded data is not documented anywhere.
-   */
-  canvasData: string | null
   status: LocationStatus
   /** Derived from the `cabinets` relation the index/show endpoints eager-load. */
   cabinetsCount: number
@@ -28,7 +28,7 @@ export interface Room {
 }
 
 /** The subset of a room the create/edit dialog can submit. */
-export type RoomInput = Pick<Room, 'name' | 'description' | 'canvasData' | 'status'>
+export type RoomInput = Pick<Room, 'name' | 'description' | 'status'>
 
 export interface Cabinet {
   id: string
