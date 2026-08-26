@@ -36,14 +36,24 @@ const { rows, loading, error, page, totalPages, isEmpty, setFilters, refresh } =
  */
 const stats = computed(() => {
   const items = rows.value
+
+  /**
+   * Server value first. `BorrowingResource` ships `is_overdue` /
+   * `days_until_due` already computed, and `Borrowing::isOverdue()` counts an
+   * APPROVED request past its due date as overdue — a client-side
+   * `dueDate < today` check over `borrowed` rows alone silently undercounts.
+   * The local computation stays only as a fallback for a response that omits
+   * the field.
+   */
   const isOverdue = (item: Borrowing) => {
+    if (item.isOverdue !== null) return item.isOverdue
     if (item.status === 'overdue') return true
     const days = daysUntil(item.dueDate)
     return item.status === 'borrowed' && days !== null && days < 0
   }
   const isDueSoon = (item: Borrowing) => {
     if (item.status !== 'borrowed' && item.status !== 'approved') return false
-    const days = daysUntil(item.dueDate)
+    const days = item.daysUntilDue ?? daysUntil(item.dueDate)
     return days !== null && days >= 0 && days <= 7
   }
   const isReturnedThisWeek = (item: Borrowing) => {

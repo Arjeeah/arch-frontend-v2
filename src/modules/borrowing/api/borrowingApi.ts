@@ -41,6 +41,9 @@ interface BorrowingResource {
   borrowed_at?: string | null
   returned_at?: string | null
   created_at?: string | null
+  /** Server-computed; see `Borrowing::isOverdue()` / `daysUntilDue()`. */
+  is_overdue?: boolean | null
+  days_until_due?: number | null
   student_document?: StudentDocumentResource | null
   user?: BorrowingUserResource | null
 }
@@ -80,6 +83,10 @@ function fromResource(resource: BorrowingResource): Borrowing {
     borrowedAt: resource.borrowed_at ?? null,
     returnedAt: resource.returned_at ?? null,
     createdAt: resource.created_at ?? null,
+    // Narrowed rather than coerced: `?? null` on a `false` would keep `false`,
+    // but an unexpected string/number must NOT become a truthy "overdue".
+    isOverdue: typeof resource.is_overdue === 'boolean' ? resource.is_overdue : null,
+    daysUntilDue: typeof resource.days_until_due === 'number' ? resource.days_until_due : null,
     adminNotes: resource.admin_notes ?? null,
     rejectionReason: resource.rejection_reason ?? null,
   }

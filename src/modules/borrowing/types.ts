@@ -43,6 +43,15 @@ export interface Borrowing {
   borrowedAt: string | null
   returnedAt: string | null
   createdAt: string | null
+  /**
+   * `is_overdue` as the SERVER computed it, or `null` when the field was
+   * absent. Authoritative — `Borrowing::isOverdue()` also treats an APPROVED
+   * request past its due date as overdue, which a naive client-side
+   * `dueDate < today` check on `borrowed` rows alone would miss.
+   */
+  isOverdue: boolean | null
+  /** `days_until_due` as the server computed it; negative once past due. */
+  daysUntilDue: number | null
   /** Set by an archivist/admin on approve or return. */
   adminNotes: string | null
   /** Required by the backend when `status` is `rejected`. */
