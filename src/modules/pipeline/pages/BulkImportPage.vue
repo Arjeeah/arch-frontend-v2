@@ -71,11 +71,26 @@ async function submit(): Promise<void> {
 
     result.value = queued
     files.value = []
-    toasts.success(
-      t('pipeline.upload.successToast', {
-        count: formatCount(queued.documentsQueued, locale.value),
-      }),
-    )
+
+    // A short tally means PHP threw files away before Laravel ever saw them
+    // (`max_file_uploads` / `post_max_size`). The request still succeeded, so
+    // nothing else would tell the operator that part of the batch is missing —
+    // this toast stays up until it is dismissed.
+    if (queued.documentsQueued < queued.submittedCount) {
+      toasts.error(
+        t('pipeline.upload.partialToast', {
+          queued: formatCount(queued.documentsQueued, locale.value),
+          submitted: formatCount(queued.submittedCount, locale.value),
+        }),
+        0,
+      )
+    } else {
+      toasts.success(
+        t('pipeline.upload.successToast', {
+          count: formatCount(queued.documentsQueued, locale.value),
+        }),
+      )
+    }
   } catch (err: unknown) {
     // An operator-initiated cancel is not a failure to report as one.
     if (controller?.signal.aborted) toasts.info(t('pipeline.upload.cancelled'))

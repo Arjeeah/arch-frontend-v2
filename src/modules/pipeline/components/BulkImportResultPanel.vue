@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import { Activity, CircleCheck, X } from 'lucide-vue-next'
+import { Activity, CircleCheck, TriangleAlert, X } from 'lucide-vue-next'
 import { formatCount } from '../format'
 import type { BulkImportResult } from '../types'
 
-defineProps<{
+const props = defineProps<{
   result: BulkImportResult
   /** Where the monitor lives, so the panel can hand the operator straight over. */
   monitorPath: string
@@ -17,16 +17,28 @@ const emit = defineEmits<{ dismiss: [] }>()
 const { t, locale } = useI18n()
 
 const showIds = ref(false)
+
+/**
+ * The server queued fewer documents than were sent, so part of the batch never
+ * arrived. The panel drops its success colours for this — an operator scanning
+ * the screen should not read a truncated import as a clean one.
+ */
+const isPartial = computed(() => props.result.documentsQueued < props.result.submittedCount)
 </script>
 
 <template>
   <section
-    class="rounded-[10px] border border-success/30 bg-success-bg p-5"
+    class="rounded-[10px] border p-5"
+    :class="isPartial ? 'border-warning/40 bg-warning/10' : 'border-success/30 bg-success-bg'"
     role="status"
     aria-live="polite"
   >
     <div class="flex items-start gap-3">
-      <CircleCheck class="mt-0.5 h-5 w-5 shrink-0 text-success" />
+      <component
+        :is="isPartial ? TriangleAlert : CircleCheck"
+        class="mt-0.5 h-5 w-5 shrink-0"
+        :class="isPartial ? 'text-warning' : 'text-success'"
+      />
 
       <div class="min-w-0 flex-1">
         <h2 class="font-display text-sm font-semibold text-text-primary">
@@ -36,6 +48,15 @@ const showIds = ref(false)
         </h2>
         <p class="mt-1 font-sans text-xs text-text-secondary">
           {{ t('pipeline.upload.queuedBody') }}
+        </p>
+
+        <p v-if="isPartial" class="mt-2 font-sans text-xs font-medium text-danger">
+          {{
+            t('pipeline.upload.partialWarning', {
+              queued: formatCount(result.documentsQueued, locale),
+              submitted: formatCount(result.submittedCount, locale),
+            })
+          }}
         </p>
 
         <div class="mt-3 flex flex-wrap items-center gap-3">
