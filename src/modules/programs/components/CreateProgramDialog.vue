@@ -63,7 +63,10 @@ watch(
   (open) => {
     if (!open) return
     const item = props.item
-    form.facultyId = item ? String(item.facultyId) : ''
+    // `facultyId` is null when the row arrived from a response that did not
+    // carry the `faculty` relation — that is an unselected select, not a
+    // faculty whose id happens to be falsy.
+    form.facultyId = item?.facultyId != null ? String(item.facultyId) : ''
     form.code = item?.code ?? ''
     form.nameAr = item?.nameAr ?? ''
     form.nameEn = item?.nameEn ?? ''

@@ -39,13 +39,27 @@ const {
   { perPage: 10 },
 )
 
-// The Arabic name is what the table (and most of this Arabic-first UI) leads
-// with, so search filters on `name_ar`. `name_en` has its own allowed filter
-// server-side but Spatie QueryBuilder ANDs filters together, so one search
-// box cannot match "either language" in a single request.
+/** Arabic and Arabic Supplement blocks — enough to tell the two name columns apart. */
+const ARABIC_SCRIPT = /[\u0600-\u06FF\u0750-\u077F]/
+
+/**
+ * `name_ar` and `name_en` are separate allowed filters and Spatie ANDs them,
+ * so one box cannot match "either language" in a single request. Rather than
+ * pick one column and leave the other silently unsearchable on a bilingual
+ * list, route the query to the column it could actually match — Arabic script
+ * to `name_ar`, anything else to `name_en` — and clear the other half so a
+ * query typed in one language never keeps ANDing a stale filter from before.
+ */
 const search = ref('')
 const debouncedSearch = useDebouncedRef(search, 300)
-watch(debouncedSearch, (value) => setFilters({ name_ar: value || undefined }))
+watch(debouncedSearch, (value) => {
+  const query = value.trim()
+  const isArabic = ARABIC_SCRIPT.test(query)
+  setFilters({
+    name_ar: query && isArabic ? query : undefined,
+    name_en: query && !isArabic ? query : undefined,
+  })
+})
 
 const statusFilter = ref('')
 const facultyFilter = ref('')
@@ -181,7 +195,13 @@ async function confirmDelete() {
     </div>
 
     <!-- Error state -->
-    <AppErrorState v-if="tableError" :description="tableError" @retry="refresh" />
+    <AppErrorState
+      v-if="tableError"
+      :title="t('programs.errorState.title')"
+      :description="tableError"
+      :retry-label="t('programs.errorState.retry')"
+      @retry="refresh"
+    />
 
     <!-- Empty state -->
     <AppEmptyState

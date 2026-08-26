@@ -19,7 +19,14 @@ export interface ProgramFacultySummary {
 
 export interface Program {
   id: number
-  facultyId: number
+  /**
+   * `ProgramResource` never exposes the `faculty_id` column — the id is only
+   * reachable through the nested `faculty` relation, which `index` eager-loads
+   * but `store`/`update`/`show` leave off. `null` therefore means "the response
+   * this row came from did not carry the relation", which is a different thing
+   * from "no faculty" and must not be smuggled onto the wire as an id.
+   */
+  facultyId: number | null
   faculty: ProgramFacultySummary | null
   code: string
   nameAr: string

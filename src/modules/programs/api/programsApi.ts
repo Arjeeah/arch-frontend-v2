@@ -100,7 +100,10 @@ function fromResource(resource: ProgramResource): Program {
   const faculty = toFacultySummary(resource.faculty)
   return {
     id: resource.id,
-    facultyId: faculty?.id ?? 0,
+    // Deliberately `null`, not a `0` sentinel: the wire has no `faculty_id`
+    // column, so an absent relation means "unknown here", and `0` would sail
+    // through the edit dialog's required check and POST an id that cannot exist.
+    facultyId: faculty?.id ?? null,
     faculty,
     code: resource.code,
     nameAr: resource.name_ar,

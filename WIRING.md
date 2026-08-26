@@ -100,12 +100,30 @@ enough.
   `programs` reuses the `API_ENDPOINTS.programs` entries that already exist
   there, except `restore`, which isn't in that map either and is hardcoded
   the same way.
-- Not blocking, and **not fixable from inside this stream's territory**: two
-  shared components still print hardcoded English inside these pages —
-  `AppConfirmDialog`'s "Cancel" button and `DataTable`'s "Loading…" / "No data"
-  rows. They show up untranslated on every list in the app, not just these two;
-  whoever owns `src/shared/` should route them through `t()` (the delete
-  confirm dialog on both pages is the most visible case in an Arabic UI).
+- Not blocking, and **not fixable from inside this stream's territory** —
+  three `src/shared/` gaps that show on every list in the app, not just these
+  two pages. Whoever owns `src/shared/` should pick them up:
+  - `AppConfirmDialog`'s "Cancel" button is hardcoded English. Most visible
+    case in an Arabic UI, since it sits next to a translated confirm label on
+    both delete dialogs here.
+  - `DataTable`'s "Loading…" row is hardcoded English (its "No data" row never
+    shows on these two pages — both switch to `AppEmptyState` before the table
+    renders).
+  - `DataTable` puts `text-left` on every column header that isn't explicitly
+    `align: 'center'`/`'right'`, and its column type has no `'start'` option.
+    Under `dir="rtl"` the header sits left while the cell text under it sits
+    right. Making the default `text-start` fixes it app-wide.
+- `programsApi.restore` (`POST /v1/academic/programs/{id}/restore`) is
+  implemented but **deliberately not surfaced in the UI**: `ProgramController`
+  soft-deletes, but its `index` has no `AllowedFilter::trashed()` and no
+  `withTrashed` path, so there is no endpoint that can list a deleted program
+  to restore it. If the backend adds a trashed filter, the api call is already
+  there and only a "trashed" view is missing.
+- `ProgramListPage`'s faculty **filter** dropdown loads once on mount and only
+  reports a failure through a toast — a failed lookup leaves that one select
+  empty until the page is revisited. The list itself and the create/edit
+  dialog's faculty select (which retries on every open) are unaffected, so
+  this is cosmetic rather than blocking.
 - Backend was offline for this stream; every wire-shape assumption was verified
   by reading `arch-backend` controllers/requests/resources directly rather than
   guessing, **except** one spot flagged `verify against live API` in
@@ -120,3 +138,14 @@ enough.
   them to `*ListParams` and let `toQuery` nest them rather than passing a
   pre-built `filter` object through `useServerTable.setFilters` (which merges
   per key and would clobber the group).
+- Spatie ANDs allowed filters, so the programs search box cannot match
+  `name_ar` OR `name_en` in one request. `ProgramListPage` routes the query by
+  script instead — Arabic characters go to `name_ar`, anything else to
+  `name_en`, and the unused half is cleared each keystroke. A program's `code`
+  is not an allowed filter at all, so it stays unsearchable until the backend
+  adds one.
+- `ProgramResource` exposes no `faculty_id` column — the id is only reachable
+  through the nested `faculty` relation, which `index` eager-loads but
+  `store`/`update`/`show` do not. `Program.facultyId` is therefore typed
+  `number | null` on the UI model. If the backend ever adds `faculty_id` to the
+  resource, read it directly in `fromResource` and the `null` case disappears.

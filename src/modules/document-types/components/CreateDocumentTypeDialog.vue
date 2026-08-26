@@ -60,6 +60,20 @@ watch(
 )
 
 /**
+ * Mirrors `fromConditionsInput` in the api file: an `in`/`not_in` value is
+ * split on commas and the blank parts dropped, so a value of nothing but
+ * separators (`",,"`) serialises to `[]` — which fails the backend's
+ * `required` rule even though the raw string looked non-empty here.
+ */
+function hasListValue(condition: RequirementCondition): boolean {
+  return condition.value.split(',').some((part) => part.trim())
+}
+
+function isListOp(condition: RequirementCondition): boolean {
+  return condition.op === 'in' || condition.op === 'not_in'
+}
+
+/**
  * `StoreDocumentTypeRequest` marks every `conditions.*.field`/`op`/`value` as
  * `required`, so a half-filled row comes back as a 422 with a
  * `requirement_conditions.conditions.0.field` message that means nothing to
@@ -74,6 +88,8 @@ function validate(): boolean {
       errors.conditions = t('documentTypes.conditions.atLeastOne')
     } else if (conditionRows.value.some((c) => !c.field.trim() || !c.value.trim())) {
       errors.conditions = t('documentTypes.conditions.incomplete')
+    } else if (conditionRows.value.some((c) => isListOp(c) && !hasListValue(c))) {
+      errors.conditions = t('documentTypes.conditions.emptyList')
     }
   }
 

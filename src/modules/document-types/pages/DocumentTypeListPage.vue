@@ -174,7 +174,13 @@ async function confirmDelete() {
     </div>
 
     <!-- Error state -->
-    <AppErrorState v-if="tableError" :description="tableError" @retry="refresh" />
+    <AppErrorState
+      v-if="tableError"
+      :title="t('documentTypes.errorState.title')"
+      :description="tableError"
+      :retry-label="t('documentTypes.errorState.retry')"
+      @retry="refresh"
+    />
 
     <!-- Empty state -->
     <AppEmptyState

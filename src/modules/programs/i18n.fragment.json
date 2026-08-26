@@ -4,7 +4,7 @@
       "title": "Programs",
       "subtitle": "Manage the academic programs offered under each faculty",
       "addNew": "Add Program",
-      "searchPlaceholder": "Search by Arabic name…",
+      "searchPlaceholder": "Search by name…",
       "fields": {
         "code": "Code",
         "name": "Name",
@@ -31,6 +31,10 @@
         "description": "Add a program to a faculty to get started.",
         "filteredTitle": "No matching programs",
         "filteredDescription": "No program matches the current search and filters."
+      },
+      "errorState": {
+        "title": "Could not load programs",
+        "retry": "Try again"
       },
       "dialog": {
         "createTitle": "Add Program",
@@ -71,7 +75,7 @@
       "title": "البرامج الدراسية",
       "subtitle": "إدارة البرامج الدراسية المطروحة ضمن كل كلية",
       "addNew": "إضافة برنامج",
-      "searchPlaceholder": "البحث بالاسم بالعربية…",
+      "searchPlaceholder": "البحث بالاسم…",
       "fields": {
         "code": "الرمز",
         "name": "الاسم",
@@ -98,6 +102,10 @@
         "description": "أضف برنامجًا إلى إحدى الكليات للبدء.",
         "filteredTitle": "لا توجد نتائج مطابقة",
         "filteredDescription": "لا يوجد برنامج يطابق البحث والفلاتر الحالية."
+      },
+      "errorState": {
+        "title": "تعذر تحميل البرامج",
+        "retry": "إعادة المحاولة"
       },
       "dialog": {
         "createTitle": "إضافة برنامج",

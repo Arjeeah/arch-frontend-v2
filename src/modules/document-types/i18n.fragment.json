@@ -32,6 +32,10 @@
         "filteredTitle": "No matching document types",
         "filteredDescription": "No document type matches the current search and filters."
       },
+      "errorState": {
+        "title": "Could not load document types",
+        "retry": "Try again"
+      },
       "dialog": {
         "createTitle": "Add Document Type",
         "editTitle": "Edit Document Type",
@@ -60,6 +64,7 @@
         "addCondition": "Add condition",
         "atLeastOne": "Add at least one condition, or clear the checkbox above.",
         "incomplete": "Every condition needs both a field and a value.",
+        "emptyList": "A list condition needs at least one value between the commas.",
         "tooltip": "{count} condition(s) configured"
       },
       "deleteDialog": {
@@ -109,6 +114,10 @@
         "filteredTitle": "لا توجد نتائج مطابقة",
         "filteredDescription": "لا يوجد نوع وثيقة يطابق البحث والفلاتر الحالية."
       },
+      "errorState": {
+        "title": "تعذر تحميل أنواع الوثائق",
+        "retry": "إعادة المحاولة"
+      },
       "dialog": {
         "createTitle": "إضافة نوع وثيقة",
         "editTitle": "تعديل نوع الوثيقة",
@@ -137,6 +146,7 @@
         "addCondition": "إضافة شرط",
         "atLeastOne": "أضف شرطًا واحدًا على الأقل، أو ألغِ تحديد الخيار أعلاه.",
         "incomplete": "كل شرط يحتاج إلى حقل وقيمة معًا.",
+        "emptyList": "شرط القائمة يحتاج إلى قيمة واحدة على الأقل بين الفواصل.",
         "tooltip": "تم إعداد {count} شرط"
       },
       "deleteDialog": {
