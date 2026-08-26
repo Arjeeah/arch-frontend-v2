@@ -1,0 +1,80 @@
+# ARCH frontend — SEPARATE-ORIGIN VARIANT. **This is not the configuration we
+# chose.** It is kept so the trade-off is on record and so the fallback is one
+# copy away if the shared-origin snippet ever has to be abandoned.
+#
+# Read docs/deploy/FRONTEND_DEPLOY.md §2 before using this. In short:
+#
+#   * Tailscale Funnel publishes ONE hostname for this node
+#     (arch-os-server.tailf7bd4c.ts.net) and its certificate covers only that
+#     name, so a genuinely different `server_name` is not reachable from the
+#     public internet. The only separate origin you can actually get is a
+#     different PORT — Funnel can publish 443, 8443 and 10000.
+#   * A different port is a different origin. Every API call then becomes
+#     cross-origin: the backend must list
+#     `https://arch-os-server.tailf7bd4c.ts.net:8443` in config/cors.php,
+#     every non-simple request pays an OPTIONS preflight, and the list has to
+#     be maintained in two repositories. The app must also be built with an
+#     absolute VITE_API_BASE_URL, because a relative `/api` would point at this
+#     server block, which has no API.
+#   * Nothing is gained in exchange except a tidier URL.
+#
+# If you use it anyway:
+#   1. build with `--base=/` and `VITE_API_BASE_URL=https://arch-os-server.tailf7bd4c.ts.net/api`
+#   2. publish with `--subdir ''` so the release root *is* the web root
+#   3. sudo tailscale funnel --bg --https=8443 http://localhost:8081
+#   4. add the origin to the backend's CORS allow-list and redeploy the backend
+
+server {
+    listen 127.0.0.1:8081;
+    listen [::1]:8081;
+
+    # Funnel terminates TLS, so this block speaks plain HTTP on the loopback.
+    server_name arch-os-server.tailf7bd4c.ts.net;
+
+    root /var/www/arch-frontend/current;
+    index index.html;
+
+    access_log /var/log/nginx/arch-frontend.access.log;
+    error_log  /var/log/nginx/arch-frontend.error.log;
+
+    # In this variant the release root IS the web root, so the deploy
+    # metadata would otherwise be fetchable at /RELEASE.txt.
+    location = /RELEASE.txt {
+        deny all;
+    }
+
+    location ^~ /assets/ {
+        try_files $uri =404;
+        access_log off;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 1024;
+        gzip_proxied any;
+        gzip_types application/javascript text/javascript text/css image/svg+xml application/json;
+    }
+
+    location = /index.html {
+        add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+        add_header X-Content-Type-Options "nosniff" always;
+
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 256;
+        gzip_proxied any;
+        gzip_types text/html;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+        add_header X-Content-Type-Options "nosniff" always;
+
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 256;
+        gzip_proxied any;
+        gzip_types text/html text/css application/javascript text/javascript image/svg+xml application/json;
+    }
+}
