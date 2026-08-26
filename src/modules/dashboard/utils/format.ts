@@ -27,11 +27,24 @@ export function formatNumber(value: number, locale: string): string {
   return new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 0 }).format(value)
 }
 
-/** Whole percentage from a 0–100 value, e.g. `62%`. */
-export function formatPercent(value: number, locale: string): string {
+/**
+ * Percentage from a 0–100 value, e.g. `62%`.
+ *
+ * `fractionDigits` exists for one caller. Both storage tiles on the admin
+ * dashboard derive from the same two numbers — `DB::table('media')->sum('size')`
+ * over `config('dashboard.storage_limit_bytes')` — but the API rounds them
+ * differently on the way out: `DashboardService::getStorageStats()` sends
+ * `storage.percentage` as `round($x)` (an int), while `ReportsService` sends
+ * the weekly digest's `storage_usage_percent` as `round($x, 1)`. Formatting the
+ * one-decimal value at zero digits rounds it a *second* time, and double
+ * rounding disagrees with a single one at the midpoint: x = 62.45 leaves the
+ * digest showing 63% beside a card showing 62%. Rendering the decimal the
+ * server bothered to compute keeps the two tiles reconcilable.
+ */
+export function formatPercent(value: number, locale: string, fractionDigits = 0): string {
   return new Intl.NumberFormat(intlLocale(locale), {
     style: 'percent',
-    maximumFractionDigits: 0,
+    maximumFractionDigits: fractionDigits,
   }).format(value / 100)
 }
 

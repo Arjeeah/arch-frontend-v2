@@ -118,7 +118,10 @@ const digestItems = computed<DigestItem[]>(() => {
     {
       key: 'storage',
       label: t('dashboard.weeklyDigest.storage'),
-      value: formatPercent(data.storageUsagePercent, locale.value),
+      // One decimal: `ReportsService` rounds this to 1dp server-side, and the
+      // System Health card beside it renders the same underlying number as an
+      // int. See `formatPercent`.
+      value: formatPercent(data.storageUsagePercent, locale.value, 1),
       tone: 'warning',
     },
   ]
