@@ -36,7 +36,7 @@ const {
       data: res.data,
       meta: res.meta ?? {},
     })),
-  { perPage: 10 },
+  { perPage: 10, errorFallback: t('documentTypes.errorState.title') },
 )
 
 const search = ref('')

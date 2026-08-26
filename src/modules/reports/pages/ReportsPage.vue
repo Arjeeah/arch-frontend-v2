@@ -14,7 +14,7 @@ import ReportJobsTable from '../components/ReportJobsTable.vue'
 import WeeklyDigestCard from '../components/WeeklyDigestCard.vue'
 import { useReportsStore } from '../stores/useReportsStore'
 import { reportsApi } from '../api/reportsApi'
-import { saveBlob } from '../utils/saveBlob'
+import { saveBlob } from '@/shared/utils/saveBlob'
 import type { GenerateReportInput, ReportJob } from '../types'
 
 const { t } = useI18n()

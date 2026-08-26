@@ -59,6 +59,7 @@ const {
 } = useServerTable((params) => cabinetsApi.list({ ...params, roomId: roomId.value }), {
   perPage: 15,
   filters: { roomId: roomId.value },
+  errorFallback: t('locations.common.loadFailed'),
 })
 
 watch(debouncedSearch, (name) => setFilters({ name }))

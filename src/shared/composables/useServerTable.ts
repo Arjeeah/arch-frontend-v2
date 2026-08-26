@@ -28,6 +28,13 @@ export interface ServerTableResponse<T> {
 export type ServerTableFetcher<T> = (params: ServerTableParams) => Promise<ServerTableResponse<T>>
 
 export interface ServerTableOptions {
+  /**
+   * Translated message shown when the request fails with no `{ message }` body
+   * (network down, timeout, a bare 500). Required — and required *translated* —
+   * because `error` is rendered verbatim by every list page, and
+   * `src/shared/` may not import the app's i18n instance to translate it here.
+   */
+  errorFallback: string
   /** Rows per page. Default 10. */
   perPage?: number
   /** Initial filter/query params merged into every request. */
@@ -46,18 +53,23 @@ function readMeta(meta: ServerTableMeta, snake: 'last_page' | 'current_page'): n
  * for the client-side `usePagination` pattern once a list grows past one page.
  *
  * ```ts
- * const table = useServerTable((params) => usersApi.list(params), { perPage: 15 })
+ * const table = useServerTable((params) => usersApi.list(params), {
+ *   perPage: 15,
+ *   errorFallback: t('users.errors.listFailed'),
+ * })
  * watch(debouncedSearch, (q) => table.setFilters({ search: q }))
  * ```
  *
  * Changing `page`, `perPage` or the filters triggers a refetch; stale responses
  * from slower in-flight requests are discarded.
  */
-export function useServerTable<T>(
-  fetcher: ServerTableFetcher<T>,
-  options: ServerTableOptions = {},
-) {
-  const { perPage: initialPerPage = 10, filters: initialFilters = {}, immediate = true } = options
+export function useServerTable<T>(fetcher: ServerTableFetcher<T>, options: ServerTableOptions) {
+  const {
+    errorFallback,
+    perPage: initialPerPage = 10,
+    filters: initialFilters = {},
+    immediate = true,
+  } = options
 
   const rows = ref([]) as Ref<T[]>
   const loading = ref(false)
@@ -95,7 +107,7 @@ export function useServerTable<T>(
       rows.value = []
       total.value = 0
       totalPages.value = 1
-      error.value = getApiErrorMessage(err, 'Could not load this list')
+      error.value = getApiErrorMessage(err, errorFallback)
     } finally {
       if (currentRequest === requestId) loading.value = false
     }

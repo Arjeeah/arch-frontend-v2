@@ -33,7 +33,10 @@ const {
   isEmpty,
   setFilters,
   refresh,
-} = useServerTable<User>((params) => usersApi.list(params), { perPage: 10 })
+} = useServerTable<User>((params) => usersApi.list(params), {
+  perPage: 10,
+  errorFallback: t('users.error.title'),
+})
 
 // Filters
 const search = ref('')

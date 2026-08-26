@@ -140,7 +140,10 @@ const {
   isEmpty: serverIsEmpty,
   setFilters: setServerFilters,
   refresh: refreshServerTable,
-} = useServerTable<DemoRow>(demoFetcher, { perPage: 5 })
+} = useServerTable<DemoRow>(demoFetcher, {
+  perPage: 5,
+  errorFallback: 'Could not load this list',
+})
 
 const serverSearch = ref('')
 const debouncedServerSearch = useDebouncedRef(serverSearch, 300)

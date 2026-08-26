@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ChevronDown, LoaderCircle, X } from 'lucide-vue-next'
 import { useDebouncedRef } from '@/shared/composables/useDebouncedRef'
 
@@ -29,21 +30,39 @@ const props = withDefaults(
     clearLabel?: string
   }>(),
   {
-    placeholder: 'Search…',
+    placeholder: undefined,
     minChars: 2,
     debounceMs: 300,
     disabled: false,
     clearable: true,
     id: undefined,
-    loadingText: 'Searching…',
-    emptyText: 'No results found',
-    errorText: 'Could not load results',
-    minCharsText: 'Type at least {n} characters',
-    clearLabel: 'Clear selection',
+    loadingText: undefined,
+    emptyText: undefined,
+    errorText: undefined,
+    minCharsText: undefined,
+    clearLabel: undefined,
   },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [option: AsyncSelectOption | null] }>()
+
+const { t } = useI18n()
+
+/**
+ * Every text prop falls back to a translated default. They used to be English
+ * literals, which every production call site happened to override — a trap for
+ * the next caller rather than a live defect.
+ */
+const placeholderText = computed(() => props.placeholder ?? t('common.searchPlaceholder'))
+const loadingLabel = computed(() => props.loadingText ?? t('common.searching'))
+const emptyLabel = computed(() => props.emptyText ?? t('common.noResults'))
+const errorLabel = computed(() => props.errorText ?? t('common.loadResultsFailed'))
+const clearText = computed(() => props.clearLabel ?? t('common.clearSelection'))
+const minCharsLabel = computed(() =>
+  props.minCharsText
+    ? props.minCharsText.replace('{n}', String(props.minChars))
+    : t('common.typeAtLeast', { n: props.minChars }),
+)
 
 const listboxId = `async-select-${useId()}`
 const rootRef = ref<HTMLElement | null>(null)
@@ -202,7 +221,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
         type="text"
         role="combobox"
         autocomplete="off"
-        :placeholder="placeholder"
+        :placeholder="placeholderText"
         :disabled="disabled"
         :aria-expanded="open"
         :aria-controls="listboxId"
@@ -217,7 +236,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
         v-if="clearable && modelValue && !disabled"
         type="button"
         class="absolute end-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-text-secondary transition-colors hover:text-text-primary"
-        :aria-label="clearLabel"
+        :aria-label="clearText"
         @click="clear"
       >
         <X class="h-4 w-4" />
@@ -238,22 +257,22 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
     >
       <p v-if="loading" class="flex items-center gap-2 px-4 py-3 text-sm text-text-secondary">
         <LoaderCircle class="h-4 w-4 animate-spin" />
-        {{ loadingText }}
+        {{ loadingLabel }}
       </p>
-      <p v-else-if="failed" class="px-4 py-3 text-sm text-danger">{{ errorText }}</p>
+      <p v-else-if="failed" class="px-4 py-3 text-sm text-danger">{{ errorLabel }}</p>
       <p
         v-else-if="query.trim().length < minChars"
         class="px-4 py-3 text-sm text-text-secondary"
         role="status"
       >
-        {{ minCharsText.replace('{n}', String(minChars)) }}
+        {{ minCharsLabel }}
       </p>
       <p
         v-else-if="options.length === 0"
         class="px-4 py-3 text-sm text-text-secondary"
         role="status"
       >
-        {{ emptyText }}
+        {{ emptyLabel }}
       </p>
       <ul v-else :id="listboxId" ref="listRef" role="listbox" class="max-h-60 overflow-y-auto py-1">
         <li

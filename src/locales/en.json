@@ -120,9 +120,11 @@
   },
   "common": {
     "cancel": "Cancel",
+    "clearSelection": "Clear selection",
     "confirm": "Confirm",
     "dismissNotification": "Dismiss notification",
     "errorTitle": "Something went wrong",
+    "export": "Export Report",
     "fileAlreadySelected": "{name} is already selected",
     "fileBrowse": "browse",
     "fileCountExceeded": "{name} exceeds the limit of {max} files",
@@ -132,11 +134,22 @@
     "fileRemove": "Remove file",
     "fileTooLarge": "{name} is larger than {max} MB",
     "fileTypeRejected": "{name} is not an accepted file type",
+    "goToPage": "Go to page {page}",
     "language": "Language",
+    "live": "Live",
+    "loadResultsFailed": "Could not load results",
     "loading": "Loading…",
     "logout": "Log out",
+    "nextPage": "Next page",
     "noData": "No data",
-    "retry": "Try again"
+    "noResults": "No results found",
+    "nothingHere": "Nothing here yet",
+    "previousPage": "Previous page",
+    "retry": "Try again",
+    "searchPlaceholder": "Search…",
+    "searching": "Searching…",
+    "select": "Select",
+    "typeAtLeast": "Type at least {n} characters"
   },
   "dashboard": {
     "title": "System Dashboard",
@@ -540,7 +553,8 @@
       "errorTitle": "Something went wrong",
       "retry": "Try again",
       "noMatchesTitle": "No matches",
-      "noMatchesDescription": "Nothing matches the current search or filter. Try clearing them."
+      "noMatchesDescription": "Nothing matches the current search or filter. Try clearing them.",
+      "loadFailed": "Could not load this list"
     },
     "capacity": {
       "slotsSuffix": "slots",

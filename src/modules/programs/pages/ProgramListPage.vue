@@ -36,7 +36,7 @@ const {
       data: res.data,
       meta: res.meta ?? {},
     })),
-  { perPage: 10 },
+  { perPage: 10, errorFallback: t('programs.errorState.title') },
 )
 
 /** Arabic and Arabic Supplement blocks — enough to tell the two name columns apart. */

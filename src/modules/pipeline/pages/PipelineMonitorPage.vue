@@ -79,7 +79,10 @@ const hasWorkInFlight = computed(() => inFlightTotal.value > 0)
 
 // --- Document list ----------------------------------------------------------
 
-const table = useServerTable<PipelineDocument>(pipelineApi.listDocuments, { perPage: 15 })
+const table = useServerTable<PipelineDocument>(pipelineApi.listDocuments, {
+  perPage: 15,
+  errorFallback: t('pipeline.monitor.listError'),
+})
 
 const search = ref('')
 const debouncedSearch = useDebouncedRef(search)

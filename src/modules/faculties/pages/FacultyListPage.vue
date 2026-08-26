@@ -30,7 +30,10 @@ const {
   isEmpty,
   setFilters,
   refresh,
-} = useServerTable<Faculty>((params) => facultiesApi.list(params), { perPage: 10 })
+} = useServerTable<Faculty>((params) => facultiesApi.list(params), {
+  perPage: 10,
+  errorFallback: t('faculties.error.title'),
+})
 
 const search = ref('')
 const debouncedSearch = useDebouncedRef(search, 300)

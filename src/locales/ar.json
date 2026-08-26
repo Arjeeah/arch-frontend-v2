@@ -120,9 +120,11 @@
   },
   "common": {
     "cancel": "إلغاء",
+    "clearSelection": "مسح الاختيار",
     "confirm": "تأكيد",
     "dismissNotification": "إغلاق الإشعار",
     "errorTitle": "حدث خطأ ما",
+    "export": "تصدير التقرير",
     "fileAlreadySelected": "{name} محدد بالفعل",
     "fileBrowse": "استعراض",
     "fileCountExceeded": "{name} يتجاوز الحد الأقصى البالغ {max} ملفات",
@@ -132,11 +134,22 @@
     "fileRemove": "إزالة الملف",
     "fileTooLarge": "{name} أكبر من {max} ميجابايت",
     "fileTypeRejected": "{name} ليس نوع ملف مقبول",
+    "goToPage": "الانتقال إلى الصفحة {page}",
     "language": "اللغة",
+    "live": "مباشر",
+    "loadResultsFailed": "تعذّر تحميل النتائج",
     "loading": "جارٍ التحميل…",
     "logout": "تسجيل الخروج",
+    "nextPage": "الصفحة التالية",
     "noData": "لا توجد بيانات",
-    "retry": "إعادة المحاولة"
+    "noResults": "لا توجد نتائج",
+    "nothingHere": "لا يوجد شيء هنا بعد",
+    "previousPage": "الصفحة السابقة",
+    "retry": "إعادة المحاولة",
+    "searchPlaceholder": "بحث…",
+    "searching": "جارٍ البحث…",
+    "select": "اختر",
+    "typeAtLeast": "اكتب ما لا يقل عن {n} من الأحرف"
   },
   "dashboard": {
     "title": "لوحة تحكم النظام",
@@ -540,7 +553,8 @@
       "errorTitle": "حدث خطأ ما",
       "retry": "إعادة المحاولة",
       "noMatchesTitle": "لا توجد نتائج",
-      "noMatchesDescription": "لا يوجد ما يطابق البحث أو التصفية الحالية. جرّب مسحهما."
+      "noMatchesDescription": "لا يوجد ما يطابق البحث أو التصفية الحالية. جرّب مسحهما.",
+      "loadFailed": "تعذّر تحميل هذه القائمة"
     },
     "capacity": {
       "slotsSuffix": "خانة",

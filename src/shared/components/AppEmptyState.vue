@@ -1,8 +1,15 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Inbox } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
-withDefaults(
+/**
+ * `title` falls back to a translated default rather than an English literal —
+ * the same treatment `AppErrorState` already had, so a caller that omits it
+ * cannot leak English into the Arabic UI.
+ */
+const props = withDefaults(
   defineProps<{
     title?: string
     description?: string
@@ -11,12 +18,16 @@ withDefaults(
     compact?: boolean
   }>(),
   {
-    title: 'Nothing here yet',
+    title: undefined,
     description: '',
     icon: undefined,
     compact: false,
   },
 )
+
+const { t } = useI18n()
+
+const headline = computed(() => props.title ?? t('common.nothingHere'))
 </script>
 
 <template>
@@ -34,7 +45,7 @@ withDefaults(
       class="font-display font-medium text-text-primary"
       :class="compact ? 'text-sm' : 'text-base'"
     >
-      {{ title }}
+      {{ headline }}
     </p>
     <p v-if="description" class="max-w-sm text-sm text-text-secondary">{{ description }}</p>
     <div v-if="$slots.action" class="mt-1">

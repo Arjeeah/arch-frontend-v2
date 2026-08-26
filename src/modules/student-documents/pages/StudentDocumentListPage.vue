@@ -26,6 +26,7 @@ const toasts = useToasts()
 const table = useServerTable((params) => studentDocumentsApi.list(params), {
   perPage: 15,
   filters: { sort: '-created_at' },
+  errorFallback: t('studentDocuments.errors.listFailed'),
 })
 
 const fileNumberQuery = ref('')

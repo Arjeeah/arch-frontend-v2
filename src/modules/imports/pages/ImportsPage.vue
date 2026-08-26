@@ -14,7 +14,7 @@ import ImportJobsTable from '../components/ImportJobsTable.vue'
 import ImportErrorsTable from '../components/ImportErrorsTable.vue'
 import { useImportsStore } from '../stores/useImportsStore'
 import { importsApi } from '../api/importsApi'
-import { saveBlob } from '../utils/saveBlob'
+import { saveBlob } from '@/shared/utils/saveBlob'
 import { IMPORT_ENTITIES } from '../types'
 import type { ImportEntity } from '../types'
 

@@ -24,7 +24,10 @@ const toasts = useToasts()
 const notificationsStore = useNotificationsStore()
 
 const { rows, loading, error, page, totalPages, isEmpty, setFilters, refresh } =
-  useServerTable<AppNotification>(notificationsApi.list, { perPage: 15 })
+  useServerTable<AppNotification>(notificationsApi.list, {
+    perPage: 15,
+    errorFallback: t('notifications.list.loadError'),
+  })
 
 /** Plain string, not a narrowed union — `AppSelect`'s `v-model` is `string`, matching the rest of the app (see `FacultyListPage`'s `statusFilter`). */
 const readFilterValue = ref('')

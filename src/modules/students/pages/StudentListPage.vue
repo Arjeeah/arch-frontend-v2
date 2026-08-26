@@ -38,6 +38,7 @@ const table = useServerTable((params) => studentsApi.list(params), {
   // `created_at` is one of the endpoint's allowed sorts; newest first puts
   // freshly scanned draft students where an archivist will see them.
   filters: { sort: '-created_at' },
+  errorFallback: t('students.errors.listFailed'),
 })
 
 const nameQuery = ref('')

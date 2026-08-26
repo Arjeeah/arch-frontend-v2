@@ -35,7 +35,10 @@ const {
   isEmpty,
   setFilters,
   refresh,
-} = useServerTable((params) => roomsApi.list(params), { perPage: 15 })
+} = useServerTable((params) => roomsApi.list(params), {
+  perPage: 15,
+  errorFallback: t('locations.common.loadFailed'),
+})
 
 watch(debouncedSearch, (name) => setFilters({ name }))
 watch(statusFilter, (status) => setFilters({ status }))

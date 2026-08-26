@@ -26,7 +26,10 @@ const store = useBorrowingStore()
 const actor = currentActor()
 
 const { rows, loading, error, page, totalPages, isEmpty, setFilters, refresh } =
-  useServerTable<Borrowing>((params) => borrowingApi.list(params), { perPage: 10 })
+  useServerTable<Borrowing>((params) => borrowingApi.list(params), {
+    perPage: 10,
+    errorFallback: t('borrowing.error.title'),
+  })
 
 /**
  * There is no borrowings stats endpoint, so these four cards are derived

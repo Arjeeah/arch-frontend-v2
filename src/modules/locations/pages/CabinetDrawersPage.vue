@@ -59,6 +59,7 @@ const {
 } = useServerTable((params) => drawersApi.list({ ...params, cabinetId: cabinetId.value }), {
   perPage: 15,
   filters: { cabinetId: cabinetId.value },
+  errorFallback: t('locations.common.loadFailed'),
 })
 
 watch(statusFilter, (status) => setFilters({ status }))

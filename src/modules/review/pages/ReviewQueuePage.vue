@@ -28,7 +28,10 @@ const toasts = useToasts()
  * is always the work that matters most.
  */
 const { rows, loading, error, page, totalPages, total, isEmpty, setFilters, refresh } =
-  useServerTable<ReviewQueueItem>((params) => reviewApi.queue(params), { perPage: 15 })
+  useServerTable<ReviewQueueItem>((params) => reviewApi.queue(params), {
+    perPage: 15,
+    errorFallback: t('review.errors.loadTitle'),
+  })
 
 /* ---------------------------------------------------------------- *
  * Selection

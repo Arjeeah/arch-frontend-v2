@@ -1,12 +1,14 @@
 /**
  * Hands a fetched blob to the browser as a download.
  *
- * Template and error-sheet endpoints are Sanctum-protected, so the file has to
+ * Every downloadable endpoint in this app (report files, import templates,
+ * import error sheets, the audit CSV) is Sanctum-protected, so the file has to
  * travel through axios (bearer header attached) rather than a plain `<a href>`
  * — this turns the resulting blob back into a save dialog.
  *
- * Module-private on purpose: `src/shared/` is owned by the foundations stream,
- * and a module may not import another module's helpers.
+ * Lives in `src/shared/` because three modules need it: `imports`, `reports`
+ * and `audit` each carried their own copy, and the audit copy revoked the
+ * object URL synchronously, which cancels the download in some browsers.
  */
 export function saveBlob(blob: Blob, fileName: string): void {
   const url = URL.createObjectURL(blob)
