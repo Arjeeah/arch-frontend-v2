@@ -4,6 +4,9 @@ How `arch-frontend-v2` gets from a merge on `main` to
 `https://arch-os-server.tailf7bd4c.ts.net/app/`, how to undo it, and what has to
 exist on the server first.
 
+Merging is **not** deploying. `main` is what CI gates; `staging` is what the
+server serves. Publishing is a second, deliberate push (section 4.0).
+
 **Nothing in this document has been executed against the server** — it was
 written while the box was offline for relocation. Section 8 lists every fact it
 assumes, with the command that confirms each one. Work through that list on
@@ -13,7 +16,7 @@ deployment day before the first run.
 |---|---|
 | Repository | `Arjeeah/arch-frontend-v2` (personal account — **not** the GDG org) |
 | Workflow | `.github/workflows/deploy-staging.yml` |
-| Trigger | push to `main`, or **Run workflow** (`workflow_dispatch`) |
+| Trigger | push to `staging`, or **Run workflow** (`workflow_dispatch`) |
 | Builds on | GitHub-hosted `ubuntu-latest` |
 | Publishes from | self-hosted runner labelled `[self-hosted, arch-frontend]` |
 | Release root | `/var/www/arch-frontend` |
@@ -52,7 +55,7 @@ ways out:
 
 **Security note.** A self-hosted runner must never take jobs from untrusted
 forks: a `pull_request` job from a fork would execute attacker-controlled code
-on the server. This workflow triggers only on `push` to `main` and on manual
+on the server. This workflow triggers only on `push` to `staging` and on manual
 dispatch — never on `pull_request`. Keep it that way, and keep the repository
 private. `ci.yml` runs on GitHub-hosted runners and is unaffected.
 
@@ -128,11 +131,20 @@ automated, because all of it needs `sudo` and the pipeline deliberately needs
 none.
 
 Throughout, `RUNNER_USER` is the OS user the GitHub Actions runner runs as —
-**use the same user as the existing backend runner**. Find it with:
+**use the same user as the existing backend runner**. Every block below expects
+it to be set in your shell, so set it first and check the answer looks sane
+before pasting anything else:
 
 ```bash
-systemctl show -p User --value "$(systemctl list-units --type=service --no-legend 'actions.runner.*' | awk '{print $1}' | head -1)"
+RUNNER_USER=$(systemctl show -p User --value "$(systemctl list-units --type=service --no-legend 'actions.runner.*' | awk '{print $1}' | head -1)")
+echo "RUNNER_USER=$RUNNER_USER"
 ```
+
+If that prints nothing, the backend runner's service is not registered under
+`actions.runner.*`; find it with `systemctl list-units | grep -i runner` and
+read its `User=` directly. If it prints `root`, stop — the runner should not be
+running as root, and the release tree must not be root-owned. Re-export
+`RUNNER_USER` in every new shell you open, including after `sudo -u … bash`.
 
 ### 3.1 Directories and permissions
 
@@ -223,8 +235,15 @@ New self-hosted runner → Linux x64**. That page prints the current runner
 version, the exact download URL and a token that **expires in one hour**. Use
 the URL it gives you rather than a version copied from here.
 
+**Paste this one line at a time, not as a block.** `sudo -u … bash` opens an
+interactive sub-shell: everything between it and `exit` runs as the runner user,
+everything after `exit` runs as you again. Pasted in one go, the lines meant for
+the sub-shell are swallowed by `sudo`'s stdin instead.
+
 ```bash
 sudo install -d -o "$RUNNER_USER" -g "$RUNNER_USER" /opt/actions-runner-frontend
+
+# ---- everything from here to `exit` runs inside the runner user's shell ----
 sudo -u "$RUNNER_USER" -H bash
 cd /opt/actions-runner-frontend
 
@@ -240,6 +259,7 @@ tar xzf actions-runner-linux-x64.tar.gz
   --work _work \
   --unattended --replace
 exit
+# ---- back in your own shell (RUNNER_USER is still set here) ----
 
 cd /opt/actions-runner-frontend
 sudo ./svc.sh install "$RUNNER_USER"
@@ -288,9 +308,44 @@ The post-deploy checks talk to `http://127.0.0.1` with an explicit
 request looks like to nginx. If Funnel forwards to a port other than 80, the
 checks in the workflow need that port added — see section 8.
 
+### 3.7 The two pipelines share one box
+
+The backend repository has its own runner and its own deploy workflow on the
+same server, and neither pipeline knows the other exists. A backend deploy holds
+Laravel in `php artisan down` for its whole window. Every check this pipeline
+runs hits `/app/…`, which nginx serves straight off disk without touching
+PHP-FPM, so the two do not currently collide — **but that is a property worth
+preserving.** If you ever add a check here that touches `/api` or `/up`, it will
+fail spuriously whenever a backend deploy happens to be in flight. If a deploy
+here fails for no visible reason, check the backend repository's Actions tab
+before believing the error.
+
 ---
 
 ## 4. How the pipeline works
+
+### 4.0 What starts it: the `staging` branch
+
+The workflow fires on pushes to **`staging`**, never on pushes to `main`. That
+mirrors the backend repository, and it exists so that merging a pull request is
+not the same act as publishing to a shared server. `ci.yml` gates `main` and
+every PR; promoting to the server is a separate step you take on purpose:
+
+```bash
+git fetch origin
+git push origin main:staging        # or open a main -> staging PR and merge it
+```
+
+Keep the workflow file merged into `main` as well — GitHub only shows the
+**Run workflow** button for workflows that exist on the repository's *default*
+branch, so `workflow_dispatch` disappears if `deploy-staging.yml` lives only on
+`staging`.
+
+If `staging` does not exist yet, create it from the commit you want live:
+
+```bash
+git push origin main:refs/heads/staging
+```
 
 Two jobs, and the split is the point.
 
@@ -308,7 +363,10 @@ Two jobs, and the split is the point.
    this and every asset 404s behind nginx).
 6. Write `RELEASE.txt` (commit, ref, run id, build time, API base URL) *outside*
    `dist/`, so it never becomes web-reachable.
-7. Upload `dist/` + `RELEASE.txt` as the `spa-dist` artifact.
+7. Upload `dist/` + `RELEASE.txt` as the `spa-dist` artifact, with
+   `include-hidden-files: true` pinned rather than left at the action's default
+   of `false` — otherwise a dot-prefixed file (a Vite manifest, a dotfile in
+   `public/`) would disappear between build and publish with only a warning.
 
 The server therefore needs no Node.js, no npm registry access and no build
 cache, and the gates run on a clean machine every time.
@@ -359,9 +417,17 @@ everything lives under one root.
 nginx needs no reload: it resolves the symlink per request (as long as
 `open_file_cache` is off, see 3.3), so the flip is live immediately.
 
-The outgoing release is recorded as `previous` before the flip. Releases are
-pruned to the newest 5, and the targets of `current` and `previous` are never
-pruned even if they fall outside that window.
+The outgoing release's id is *read* before the flip and the `previous` symlink
+is *written* after it. Between those two comes one thing only: the script writes
+`flipped=1` to `$GITHUB_OUTPUT` the instant `current` moves, before any other
+work that could fail. That single line is the pipeline's whole notion of
+"the live site changed" — it decides whether the rollback step runs, and whether
+the summary claims the site was untouched. Written any later (as it originally
+was), a failure in the `previous` bookkeeping would leave a new, unverified
+release live while the run reported the opposite. Keep it first.
+
+Releases are pruned to the newest 5, and the targets of `current` and `previous`
+are never pruned even if they fall outside that window.
 
 Release ids are `<UTC yyyymmdd-HHMMSS>-<short sha>`, so they sort
 chronologically and name the commit they came from.
@@ -397,11 +463,25 @@ The pipeline does this for you when its own verification fails after a flip, so
 a bad deploy is undone before the run ends. It cannot help if the failure comes
 *before* the flip — but in that case the live site was never touched.
 
-Raw equivalent, if the script is missing:
+**The automatic rollback can itself fail**, and the run summary says so in bold
+when it does. The case to expect is the **first ever deploy**: there is no
+`previous` symlink, so there is nothing to fall back to and the broken release
+stays live. Fix forward, or `arch-frontend-rollback --list` and pick a release
+with `--release <ID>`. Read the summary rather than assuming — it distinguishes
+"rolled back", "rollback FAILED, still live", and "never touched".
+
+Raw equivalent, if the script is missing. Both symlinks have to move: the
+script **swaps** them, and flipping only `current` leaves `previous` pointing at
+the release that is now live, so the next `arch-frontend-rollback` dies with
+*"already the live release"* and your only way out is `--release <ID>`.
 
 ```bash
 cd /var/www/arch-frontend
-ln -sfn "$(readlink previous)" .current.tmp && mv -Tf .current.tmp current
+OLD="$(readlink current)"                 # where we are now
+NEW="$(readlink previous)"                # where we are going
+ln -sfn "$NEW" .current.tmp  && mv -Tf .current.tmp  current
+ln -sfn "$OLD" .previous.tmp && mv -Tf .previous.tmp previous
+readlink current previous                 # confirm they swapped
 ```
 
 ---
@@ -443,8 +523,9 @@ releases are tagged `-manual` in their id so they are obvious in `--list`.
 
 ## 7. What gets verified, and how to check by hand
 
-After the flip the pipeline runs four checks against the real nginx, over the
-loopback with the public `Host` header:
+After the flip the pipeline runs six checks against the real nginx, over the
+loopback with the public `Host` header. None of them touches `/api` or `/up`, on
+purpose — see 3.7:
 
 1. `GET /app/` returns 2xx **and the served HTML names the hashed asset from the
    release just published** — proving nginx is serving the new release and not a
@@ -455,6 +536,15 @@ loopback with the public `Host` header:
 3. The hashed asset itself returns 2xx with an `immutable` `Cache-Control`.
 4. `GET /app/students/1` returns the same entry document — proving the
    `try_files` history fallback works, so deep links and refreshes do not 404.
+5. `GET /app/login` returns the same entry document. That is the exact URL the
+   axios 401 interceptor navigates to when a token expires, built as
+   `import.meta.env.BASE_URL + '/login'`. If the mount and the build's `--base`
+   ever disagree, every expired session lands on the Laravel vhost's 404 instead
+   of the login form — and checks 1-4 would all still pass.
+6. `GET /app/` carries `X-Content-Type-Options`, `X-Frame-Options` and
+   `Referrer-Policy`. nginx *replaces* rather than merges `add_header` between
+   levels, so the snippet has to restate every header it wants; this check is
+   what stops that from silently regressing (assumption 6).
 
 Any failure rolls the release back. The same checks by hand:
 
@@ -466,6 +556,8 @@ curl -sS -H "$H" http://127.0.0.1/app/ | grep -F "$ASSET"          # new release
 curl -sSI -H "$H" http://127.0.0.1/app/ | grep -i cache-control     # no-store
 curl -sSI -H "$H" "http://127.0.0.1$ASSET" | grep -i cache-control  # immutable
 curl -sS  -H "$H" http://127.0.0.1/app/students/1 | grep -F "$ASSET" # history fallback
+curl -sS  -H "$H" http://127.0.0.1/app/login | grep -F "$ASSET"      # 401 landing page
+curl -sSI -H "$H" http://127.0.0.1/app/ | grep -iE 'x-frame|referrer|content-type-opt'
 cat /var/www/arch-frontend/current/RELEASE.txt                       # what is live
 ```
 
@@ -487,7 +579,7 @@ or during the first deploy.
 | 3 | nginx answers the backend on **port 80** of the loopback | `curl -sSI -H 'Host: arch-os-server.tailf7bd4c.ts.net' http://127.0.0.1/up` | Add the port to `ORIGIN` in the workflow's verify step and to section 7 |
 | 4 | Funnel forwards the public hostname to that nginx | `sudo tailscale funnel status` | Re-point Funnel, or adjust the verify step |
 | 5 | No `open_file_cache` in that vhost or in `nginx.conf` | `grep -R open_file_cache /etc/nginx/` | Deploys appear to succeed but serve the old release |
-| 6 | No server-level `add_header` that must survive into `/app/` | `grep -n add_header <vhost>` | Repeat those headers inside the snippet |
+| 6 | No server-level `add_header` beyond the three the snippet already repeats | `sudo nginx -T \| grep -n add_header` | Copy each extra one into **all three** blocks of the snippet — nginx replaces, never merges. CSP and HSTS are deliberately not guessed; see the header note at the top of the snippet. Post-deploy check 6 verifies the three it does set |
 | 7 | No regex `location` that could capture `/app/…` | `grep -n 'location ~' <vhost>` | `^~` should already win; verify with `curl` |
 | 8 | nginx runs as `www-data` | `ps -o user= -C nginx \| sort -u` | Adjust the group in 3.1 |
 | 9 | Runner version supports `actions/upload-artifact@v4` (≥ 2.316) | `/opt/actions-runner-frontend/config.sh --version` | Update the runner (`svc.sh stop`, re-extract, `svc.sh start`) |
@@ -522,9 +614,27 @@ carries the exact `install` command.
 The `location ^~ /app/` block, or its `try_files … /app/index.html`, is missing
 from the included snippet. `sudo nginx -T | grep -A5 'location ^~ /app/'`.
 
-**Everything 403s.**
-`www-data` cannot traverse or read the release. Check that every directory from
-`/var/www` down is `o+x` and that files are `o+r`:
+**`/app/` 403s, but `/app/students/1` and the assets are fine.**
+This is *not* a permissions problem. `GET /app/` resolves to a real directory,
+so nginx hands it to the index module, which uses the `index` directive of the
+**surrounding server block** — Laravel's, which is `index index.php;`. There is
+no `/app/index.php`, autoindex is off, and nginx answers
+`403 directory index of "…/app/" is forbidden` (it will say exactly that in
+`/var/log/nginx/error.log`). The fix is the `index index.html;` line inside
+`location ^~ /app/`: confirm the installed copy has it, because a snippet
+installed before that line was added will not.
+
+```bash
+sudo nginx -T | grep -A4 'location ^~ /app/'
+sudo tail -20 /var/log/nginx/error.log
+```
+
+If it is missing, re-run section 3.3 — the pipeline never touches
+`/etc/nginx/snippets/`, so the copy on disk only changes when a human copies it.
+
+**Everything 403s, including the assets.**
+*Now* it is permissions: `www-data` cannot traverse or read the release. Check
+that every directory from `/var/www` down is `o+x` and that files are `o+r`:
 `namei -l /var/www/arch-frontend/current/app/index.html`.
 
 **The site shows the old build after a successful deploy.**
@@ -557,12 +667,15 @@ than `/app/`, three things change together and must change together:
    publish script puts the build at the release root instead of in `app/`.
 2. nginx: the backend vhost's `location /` has to stop being Laravel's
    catch-all. Give Laravel explicit prefixes (`/api`, `/up`, `/storage`,
-   `/sanctum`) and let the SPA own `/` with `try_files $uri $uri/ /index.html`
-   and `root /var/www/arch-frontend/current`. This is the risky edit — it
-   changes how every existing backend URL is routed, so do it with
-   `nginx -t`, a rehearsal on a copy of the vhost, and the backend's `/up`
-   endpoint in front of you.
-3. The verify step's paths (`/`, `/students/1`) and section 7's commands.
+   `/sanctum`) and let the SPA own `/` with `index index.html;`,
+   `try_files $uri /index.html;` and `root /var/www/arch-frontend/current`.
+   The `index` line matters as much at the root as it does at `/app/` — see the
+   403 entry in section 9 — and it is why the standalone example config sets it
+   at server level. This is the risky edit: it changes how every existing
+   backend URL is routed, so do it with `nginx -t`, a rehearsal on a copy of the
+   vhost, and the backend's `/up` endpoint in front of you.
+3. The verify step's paths (`/`, `/students/1`, `/login`) and section 7's
+   commands.
 4. `RELEASE.txt` stops being safely out of reach. With `SUBDIR` empty the
    release root *is* the web root, so add
    `location = /RELEASE.txt { deny all; }` — see the standalone example config,

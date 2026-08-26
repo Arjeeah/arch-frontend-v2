@@ -10,9 +10,18 @@ name: Deploy Frontend to Staging
 # setup exists the `publish` job fails on its very first step with the exact
 # commands to run — it never copies a partial site.
 
+# TRIGGER: pushes to `staging`, NOT to `main`. This mirrors the backend repo,
+# and it exists so that merging a PR is not the same act as publishing to the
+# shared server. `ci.yml` runs the gates on `main` and on every PR; promoting to
+# staging is a second, deliberate step:
+#
+#     git push origin main:staging     # or open a main -> staging PR
+#
+# (The `workflow_dispatch` button only appears once this file is on the repo's
+# DEFAULT branch, so keep it merged into `main` as well as `staging`.)
 on:
   push:
-    branches: [main]
+    branches: [staging]
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -169,6 +178,12 @@ jobs:
             RELEASE.txt
           retention-days: 7
           if-no-files-found: error
+          # Pinned, not inherited: the action defaults this to `false`, and a
+          # dot-prefixed file would then vanish between build and publish with
+          # only a log warning. Nothing in dist/ is hidden today (the Vite
+          # manifest is off and public/ holds one favicon), but enabling either
+          # would silently break the release rather than fail the run.
+          include-hidden-files: true
 
       - name: Build summary
         env:
@@ -288,14 +303,21 @@ jobs:
 
           test -f "$INDEX_PATH" || { echo "::error::'$INDEX_PATH' is missing after the flip."; exit 1; }
 
+          # Every command substitution below ends in `|| true` on purpose. A
+          # no-match grep or a failing curl exits non-zero, `pipefail` carries
+          # that out of the pipeline, and under `set -e` an assignment whose
+          # substitution failed kills the step ON THAT LINE — so the explicit,
+          # useful `::error::` on the next line would never be printed. Let the
+          # checks below do the reporting.
+
           # The hashed entry chunk of the release we just published.
-          ASSET="$(grep -o 'src="[^"]*/assets/[^"]*\.js"' "$INDEX_PATH" | head -n 1 | sed -e 's/^src="//' -e 's/"$//')"
+          ASSET="$(grep -o 'src="[^"]*/assets/[^"]*\.js"' "$INDEX_PATH" | head -n 1 | sed -e 's/^src="//' -e 's/"$//' || true)"
           [ -n "$ASSET" ] || { echo "::error::Could not find a hashed /assets/*.js reference in '$INDEX_PATH'."; exit 1; }
           echo "Expecting the served index to reference: $ASSET"
 
           # 1. The entry document is served, and it is the NEW one.
           if ! BODY="$("${CURL[@]}" "$ORIGIN$APP_BASE")"; then
-            echo "::error::GET $APP_BASE did not return 2xx from nginx. Is deploy/nginx/arch-frontend.conf installed and included in the backend vhost (docs/deploy/FRONTEND_DEPLOY.md §3.3)?"
+            echo "::error::GET $APP_BASE did not return 2xx from nginx. A 403 here almost always means the snippet's 'index index.html;' is missing and the request fell through to the vhost's 'index index.php;'. Otherwise: is deploy/nginx/arch-frontend.conf installed and included in the backend vhost (docs/deploy/FRONTEND_DEPLOY.md §3.3)?"
             exit 1
           fi
           printf '%s' "$BODY" | grep -qF "$ASSET" || {
@@ -305,14 +327,14 @@ jobs:
 
           # 2. index.html must never be cached — it is the only file naming the
           #    current asset hashes.
-          IHDR="$("${CURL[@]}" --dump-header - --output /dev/null "$ORIGIN$APP_BASE")"
+          IHDR="$("${CURL[@]}" --dump-header - --output /dev/null "$ORIGIN$APP_BASE" || true)"
           printf '%s' "$IHDR" | grep -qi '^cache-control:.*no-store' || {
             echo "::error::The entry document is served without 'Cache-Control: no-store'. Browsers would pin themselves to a dead release. Check the 'location = ${APP_BASE}index.html' block."
             exit 1
           }
 
           # 3. The new hashed asset is reachable and cached forever.
-          AHDR="$("${CURL[@]}" --dump-header - --output /dev/null "$ORIGIN$ASSET")"
+          AHDR="$("${CURL[@]}" --dump-header - --output /dev/null "$ORIGIN$ASSET" || true)"
           printf '%s' "$AHDR" | grep -qi '^cache-control:.*immutable' || {
             echo "::error::'$ASSET' is served without an immutable Cache-Control header. Check the 'location ^~ ${APP_BASE}assets/' block."
             exit 1
@@ -328,9 +350,40 @@ jobs:
             exit 1
           }
 
-          echo "All four post-deploy checks passed."
+          # 5. The login path the 401 interceptor navigates to. It is built as
+          #    BASE_URL + '/login' in src/app/plugins/axios.ts, so it lands
+          #    INSIDE the mount; if the mount and the base ever disagree, an
+          #    expired token would dump every user on the Laravel vhost's 404
+          #    instead of the login form, and checks 1-4 would not notice.
+          #    Deliberately no /api probe here: the backend pipeline can hold
+          #    Laravel in maintenance mode while this runs (docs/deploy/
+          #    FRONTEND_DEPLOY.md §3.7), and these checks must not fail for it.
+          LOGIN="$("${CURL[@]}" "${ORIGIN}${APP_BASE}login")" || {
+            echo "::error::GET ${APP_BASE}login did not return 2xx. The 401 interceptor sends expired sessions there; it must be inside the SPA mount, not on the Laravel vhost."
+            exit 1
+          }
+          printf '%s' "$LOGIN" | grep -qF "$ASSET" || {
+            echo "::error::GET ${APP_BASE}login did not return the SPA entry document."
+            exit 1
+          }
+
+          # 6. nginx REPLACES rather than merges `add_header` across levels, so
+          #    every security header the backend vhost sets is dropped for
+          #    /app/ unless the snippet restates it. Assert the ones it does
+          #    restate actually survive — that catches both a snippet that was
+          #    never updated on the server and a newly nested `add_header` that
+          #    wiped the set again.
+          for H in x-content-type-options x-frame-options referrer-policy; do
+            printf '%s' "$IHDR" | grep -qi "^${H}:" || {
+              echo "::error::'$H' is missing from the ${APP_BASE} response. The installed /etc/nginx/snippets/arch-frontend.conf is older than this commit, or another add_header in that location replaced the set. Re-run docs/deploy/FRONTEND_DEPLOY.md §3.3."
+              exit 1
+            }
+          done
+
+          echo "All six post-deploy checks passed."
 
       - name: Roll back to the previous release
+        id: rollback
         if: failure() && steps.publish.outputs.flipped == '1'
         run: |
           set -uo pipefail
@@ -344,6 +397,7 @@ jobs:
           RELEASE_ID: ${{ steps.publish.outputs.release_id }}
           PREVIOUS_RELEASE: ${{ steps.publish.outputs.previous }}
           FLIPPED: ${{ steps.publish.outputs.flipped }}
+          ROLLBACK: ${{ steps.rollback.outcome }}
           JOB_STATUS: ${{ job.status }}
         run: |
           {
@@ -360,10 +414,37 @@ jobs:
             echo "| Commit | \`${GITHUB_SHA:0:7}\` |"
             echo "| URL | https://$PUBLIC_HOST$APP_BASE |"
             echo ""
-            if [ "$JOB_STATUS" != "success" ] && [ "$FLIPPED" = "1" ]; then
-              echo "The release was rolled back automatically. Nothing to do on the server."
-            elif [ "$JOB_STATUS" != "success" ]; then
-              echo "The live site was **not** touched — the failure happened before the symlink flip."
+            # Branch on what the rollback step ACTUALLY did, not merely on
+            # whether a rollback was attempted. `steps.rollback.outcome` is
+            # success / failure / skipped; it is empty only when the summary
+            # runs on the happy path. The failure that matters most is the very
+            # first deploy: there is no `previous` symlink, rollback.sh exits
+            # non-zero, and the broken release stays live.
+            if [ "$JOB_STATUS" != "success" ]; then
+              case "${ROLLBACK:-}" in
+                success)
+                  echo "The release was rolled back automatically. Nothing to do on the server."
+                  ;;
+                failure)
+                  echo "**ROLLBACK FAILED — the broken release is still live.**"
+                  echo ""
+                  echo "On the server, as the owner of \`$DEPLOY_ROOT\`:"
+                  echo ""
+                  echo "\`\`\`bash"
+                  echo "arch-frontend-rollback --list"
+                  echo "arch-frontend-rollback --release <ID>   # a known-good release id"
+                  echo "\`\`\`"
+                  echo ""
+                  echo "On a first-ever deploy there is nothing to roll back to; fix forward instead."
+                  ;;
+                *)
+                  if [ "$FLIPPED" = "1" ]; then
+                    echo "The new release is live and was **not** rolled back (the rollback step did not run). Check it by hand before leaving it."
+                  else
+                    echo "The live site was **not** touched — the failure happened before the symlink flip."
+                  fi
+                  ;;
+              esac
             fi
             echo ""
             echo "Roll back by hand: \`sudo -u \$(stat -c %U $DEPLOY_ROOT) arch-frontend-rollback\` (docs/deploy/FRONTEND_DEPLOY.md §5)."

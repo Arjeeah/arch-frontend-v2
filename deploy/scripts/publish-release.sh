@@ -136,6 +136,19 @@ ln -sfn "releases/$RELEASE_ID" "$ROOT/.current.tmp"
 mv -Tf "$ROOT/.current.tmp" "$ROOT/current"
 note "current -> releases/$RELEASE_ID"
 
+# IMMEDIATELY after the flip, and before anything else that can fail. This one
+# line is what tells the workflow the live site changed; the workflow decides
+# whether to roll back from it, and prints "the live site was not touched" when
+# it is absent. Under `set -e` any failure between the flip and this write —
+# a stale real directory at `previous`, ENOSPC — would kill the script with the
+# new, unverified release already live and the workflow reporting the opposite.
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  {
+    echo "flipped=1"
+    echo "release_id=$RELEASE_ID"
+  } >> "$GITHUB_OUTPUT"
+fi
+
 if [ -n "$PREVIOUS" ] && [ "$PREVIOUS" != "releases/$RELEASE_ID" ]; then
   ln -sfn "$PREVIOUS" "$ROOT/.previous.tmp"
   mv -Tf "$ROOT/.previous.tmp" "$ROOT/previous"
@@ -144,13 +157,9 @@ else
   note "no earlier release to record as 'previous'"
 fi
 
-# Tell the workflow the live site changed, so a failing verification can undo it.
+# Bookkeeping only — a rollback reads the `previous` SYMLINK, not this output.
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  {
-    echo "flipped=1"
-    echo "release_id=$RELEASE_ID"
-    echo "previous=$PREVIOUS"
-  } >> "$GITHUB_OUTPUT"
+  echo "previous=$PREVIOUS" >> "$GITHUB_OUTPUT"
 fi
 
 # ── Prune ────────────────────────────────────────────────────────────────────
