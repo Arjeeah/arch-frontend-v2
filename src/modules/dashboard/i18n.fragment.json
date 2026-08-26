@@ -94,10 +94,11 @@
       "ocrQueue": {
         "title": "OCR Queue",
         "pending": "Pending",
+        "processing": "Processing",
         "completed": "Completed",
         "failed": "Failed",
-        "today": "Documents scanned today.",
-        "unavailable": "The server is not reporting OCR counts yet."
+        "today": "One document scanned today. | {count} documents scanned today.",
+        "none": "No documents scanned today."
       },
       "capacityWarning": {
         "title": "A drawer is {percent} full",
@@ -138,9 +139,6 @@
         "overdueEmpty": "Nothing is overdue",
         "borrowingsTitle": "Recent Borrowings",
         "borrowingsEmpty": "No borrowings yet"
-      },
-      "faculty": {
-        "knownFault": "The dashboard service failed on a pending borrowing request"
       }
     }
   },
@@ -239,10 +237,11 @@
       "ocrQueue": {
         "title": "طابور التعرّف الضوئي",
         "pending": "قيد الانتظار",
+        "processing": "قيد المعالجة",
         "completed": "مكتملة",
         "failed": "فاشلة",
-        "today": "المستندات الممسوحة اليوم.",
-        "unavailable": "الخادم لا يرسل بيانات التعرّف الضوئي بعد."
+        "today": "لم تُمسح أي مستندات اليوم. | مُسح مستند واحد اليوم. | مُسح مستندان اليوم. | مُسحت {count} مستندات اليوم. | مُسح {count} مستندًا اليوم. | مُسح {count} مستند اليوم.",
+        "none": "لم تُمسح أي مستندات اليوم."
       },
       "capacityWarning": {
         "title": "أحد الأدراج ممتلئ بنسبة {percent}",
@@ -283,9 +282,6 @@
         "overdueEmpty": "لا توجد ملفات متأخرة",
         "borrowingsTitle": "آخر الإعارات",
         "borrowingsEmpty": "لا توجد إعارات بعد"
-      },
-      "faculty": {
-        "knownFault": "تعذّر تحميل اللوحة بسبب طلب إعارة قيد الانتظار"
       }
     }
   }
