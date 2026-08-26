@@ -1,6 +1,14 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import DashboardLayout from '@/app/layouts/DashboardLayout.vue'
 import { authStorage } from '@/app/config/authStorage'
+// The role is read through `readSessionRole()`, never `authStorage.getUser()?.role`.
+// The login mapper reduces `roles[]` to a scalar before persisting, so the two
+// agree today — but `sessionRole.ts` documents itself as "the same source the
+// router guard decides on", and it was not. Any stored session that still
+// carries the wire's `roles` array (a hand-written fixture, an older build's
+// storage, a future endpoint that persists a `UserResource` verbatim) resolved
+// to `undefined` here and bounced the user off every `meta.roles` route.
+import { readSessionRole, roleAllowed } from '@/app/config/sessionRole'
 import type { UserRole } from '@/modules/auth/types'
 
 declare module 'vue-router' {
@@ -71,7 +79,7 @@ const router = createRouter({
       component: DashboardLayout,
       meta: { requiresAuth: true },
       children: [
-        { path: '', redirect: () => landingFor(authStorage.getUser()?.role) },
+        { path: '', redirect: () => landingFor(readSessionRole()) },
 
         // ── Overview ──────────────────────────────────────────────────────
         {
@@ -286,13 +294,12 @@ router.beforeEach((to) => {
   }
 
   if (to.meta.guest && isAuthenticated) {
-    return { path: landingFor(authStorage.getUser()?.role) }
+    return { path: landingFor(readSessionRole()) }
   }
 
   const allowedRoles = to.meta.roles
   if (isAuthenticated && allowedRoles && to.path !== HOME_PATH) {
-    const role = authStorage.getUser()?.role
-    if (!role || !allowedRoles.includes(role)) {
+    if (!roleAllowed(allowedRoles)) {
       return { path: HOME_PATH }
     }
   }

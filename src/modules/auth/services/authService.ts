@@ -89,11 +89,17 @@ export const AuthService = {
    * `routes/api/v1.php` and answers
    * `404 {"message":"The route api/v1/me could not be found."}`.
    *
-   * `useAuthStore.init()` swallows that — only a 401 clears the session — so
-   * boot still succeeds from the stored user and the cost is one failed
-   * request per app load. It is mapped through the same `{ data: UserResource }`
-   * envelope every other endpoint uses, so it starts refreshing for real the
-   * moment the backend registers the route; nothing here changes then.
+   * **Deliberately unreferenced today.** `useAuthStore.init()` used to await
+   * this on every boot and swallow the 404 (only a 401 cleared the session), so
+   * the app started from the stored user regardless and paid one blocking
+   * failed request plus a console error per load. `init()` now rehydrates from
+   * `authStorage` instead.
+   *
+   * This mapper is kept rather than deleted because it is already correct: the
+   * `{ data: UserResource }` envelope is the one every other endpoint uses, and
+   * `fromResource` reduces the `roles` array the same way login does. When the
+   * backend registers the route, re-await this in `init()` — nothing else
+   * changes.
    */
   async me(): Promise<AuthUser> {
     const { data } = await http.get<{ data: UserResource }>(API_ENDPOINTS.auth.me)

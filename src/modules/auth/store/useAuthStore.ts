@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { authStorage } from '@/app/config/authStorage'
+import { readSessionRole } from '@/app/config/sessionRole'
 import { i18n } from '@/app/plugins/i18n'
 import { AuthService } from '../services/authService'
 import type { AuthUser, LoginCredentials, UserRole } from '../types'
@@ -15,7 +16,14 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => !!state.token,
     currentUser: (state): AuthUser | null => state.user,
-    role: (state): UserRole | null => state.user?.role ?? null,
+    /**
+     * Falls back to `readSessionRole()` so the sidebar cannot disagree with the
+     * router guard. `AuthService.fromResource` always persists a scalar `role`,
+     * so the fallback is unreachable on the normal login path — it exists for a
+     * stored session that still carries the wire's `roles` array, which
+     * `readSessionRole()` reduces by precedence and this getter cannot.
+     */
+    role: (state): UserRole | null => state.user?.role ?? readSessionRole(),
     userName: (state): string | null => state.user?.name ?? null,
   },
 
@@ -55,19 +63,27 @@ export const useAuthStore = defineStore('auth', {
       authStorage.clear()
     },
 
-    async init(): Promise<void> {
+    /**
+     * Restores the session `main.ts` boots with.
+     *
+     * This used to `await AuthService.me()`. Verified against the running API:
+     * `GET /v1/me` is not registered in `routes/api/v1.php` and answers
+     * `404 {"message":"The route api/v1/me could not be found."}` — for every
+     * role, on every load. The 404 was swallowed (only a 401 cleared the
+     * session), so boot always fell back to the stored user anyway; all the
+     * request bought was one blocking round-trip in front of `app.mount()` and
+     * the app's only console error.
+     *
+     * Rehydrating from `authStorage` is therefore what the app has effectively
+     * been doing all along, minus the failed request. `AuthService.me()` is
+     * kept, and stays correct for the `{ data: UserResource }` envelope: when
+     * the route is registered, restore the `await` here and nothing else
+     * changes. A revoked token is still caught — the first real request of the
+     * session 401s and the axios interceptor clears and redirects.
+     */
+    init(): void {
       if (!this.token) return
-      try {
-        const user = await AuthService.me()
-        this.user = user
-        authStorage.setUser(user)
-      } catch (err) {
-        const status = (err as { response?: { status?: number } })?.response?.status
-        // 401 → the axios response interceptor already redirected; just make
-        // sure the in-memory state matches the cleared storage.
-        // Network error or 5xx → keep the token, user stays logged in.
-        if (status === 401) this.clearSession()
-      }
+      this.user = authStorage.getUser()
     },
 
     clearError() {
