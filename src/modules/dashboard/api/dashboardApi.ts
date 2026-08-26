@@ -7,10 +7,13 @@ import type {
   BorrowStatus,
   FacultyBorrowRow,
   FacultyOverview,
-  RoleCount,
+  RoleBreakdown,
   WeeklyDigest,
 } from '../types'
-import { BORROW_STATUSES } from '../types'
+import { BORROW_STATUSES, USER_ROLE_SLUGS } from '../types'
+
+/** Wire values for `filter[role]=`, in precedence order. */
+const [SUPER_ADMIN, ARCHIVIST, FACULTY_STAFF] = USER_ROLE_SLUGS
 
 /*
  * The dashboards are read-only aggregates, so this file is all `fromResource`
@@ -227,8 +230,14 @@ function facultyRowFromResource(
     actorName: str(resource.borrowed_by) ?? str(resource.requested_by),
     status: toBorrowStatus(resource.status),
     dueDate: str(resource.due_date),
+    // The server sends `now()->diffInDays($dueDate)`, and on Carbon 3 that diff
+    // is signed and fractional. The due date is by definition in the past on
+    // this list, so the value arrives as e.g. `-3.98`; printed raw the column
+    // would read "-4 days late". Only the magnitude is meaningful.
     daysOverdue:
-      typeof resource.days_overdue === 'number' ? Math.round(resource.days_overdue) : null,
+      typeof resource.days_overdue === 'number'
+        ? Math.round(Math.abs(resource.days_overdue))
+        : null,
     timestamp: str(resource.borrowed_at) ?? str(resource.created_at),
   }
 }
@@ -389,25 +398,55 @@ export const dashboardApi = {
   },
 
   /**
-   * Head count per role for the users card.
+   * Head count per role, plus the authoritative user total, for the users card.
    *
-   * There is no aggregate endpoint, so this asks the paginated user list for
-   * each role and reads `meta.total` — three tiny requests in parallel rather
-   * than downloading every user. `/v1/users` is super_admin-only (UserPolicy),
-   * which is why the card only appears on the admin dashboard.
+   * There is no aggregate endpoint, so this asks the paginated user list for a
+   * count and reads `meta.total` (`UserController::index()` hard-codes
+   * `paginate(10)`, so `per_page` is ignored — only the meta is used here).
+   * `/v1/users` is super_admin-only per `UserPolicy`, which is why this card
+   * only appears on the admin dashboard.
    *
-   * A user holds exactly one role, so the totals sum to the head count.
+   * The counts need arithmetic, not just reading. Roles on this backend are
+   * HIERARCHICAL: `User::assignRoleWithHierarchy()` gives a super_admin all
+   * three role names and an archivist two, and `filter[role]=` resolves through
+   * Spatie's `scopeRole`, which matches "holds this role". The raw counts are
+   * therefore cumulative — `filter[role]=faculty_staff` returns very nearly
+   * every user — and adding them up would count each super_admin three times.
+   *
+   * Exclusive buckets, by the same precedence `utils/role.ts` applies to the
+   * signed-in user's own roles:
+   *
+   *     super_admin   = holds(super_admin)
+   *     archivist     = holds(archivist) − holds(super_admin)
+   *     faculty_staff = total            − holds(archivist)
+   *
+   * which reconciles back to `total` exactly, and needs three requests rather
+   * than four. Clamped at zero because `DatabaseSeeder` assigns the bootstrap
+   * account flat (`assignRole`), so that one user can hold `super_admin`
+   * without the two roles beneath it.
    */
-  getUserRoleCounts: async (roles: readonly string[]): Promise<RoleCount[]> => {
-    const counts = await Promise.all(
-      roles.map(async (role) => {
-        const { data } = await http.get<Paginated<unknown>>('/v1/users', {
-          params: { filter: { role }, per_page: 1 },
-        })
-        return { role, count: num(data.meta?.total) }
-      }),
-    )
-    return counts
+  getUserRoleBreakdown: async (): Promise<RoleBreakdown> => {
+    const countUsers = async (role?: string): Promise<number> => {
+      const { data } = await http.get<Paginated<unknown>>('/v1/users', {
+        params: role ? { filter: { role } } : {},
+      })
+      return num(data.meta?.total)
+    }
+
+    const [total, superAdmins, archivists] = await Promise.all([
+      countUsers(),
+      countUsers(SUPER_ADMIN),
+      countUsers(ARCHIVIST),
+    ])
+
+    return {
+      total,
+      rows: [
+        { role: SUPER_ADMIN, count: superAdmins },
+        { role: ARCHIVIST, count: Math.max(0, archivists - superAdmins) },
+        { role: FACULTY_STAFF, count: Math.max(0, total - archivists) },
+      ],
+    }
   },
 
   /**

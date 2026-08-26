@@ -8,6 +8,7 @@
       "refreshed": "Dashboard updated",
       "refreshFailed": "Could not refresh the dashboard",
       "retry": "Try again",
+      "loadFailed": "Could not load this panel",
       "linkUnavailable": "This screen is not available for your account yet",
       "stats": {
         "totalArchive": "Total Files",
@@ -129,7 +130,6 @@
         "status": "Status",
         "dueDate": "Due date",
         "daysOverdue": "Days late",
-        "daysOverdueValue": "{days} days",
         "timestamp": "Requested",
         "requestsTitle": "Pending Requests",
         "requestsEmpty": "No pending requests",
@@ -152,6 +152,7 @@
       "refreshed": "تم تحديث اللوحة",
       "refreshFailed": "تعذّر تحديث اللوحة",
       "retry": "إعادة المحاولة",
+      "loadFailed": "تعذّر تحميل هذا القسم",
       "linkUnavailable": "هذه الشاشة غير متاحة لحسابك حتى الآن",
       "stats": {
         "totalArchive": "إجمالي الملفات",
@@ -161,14 +162,14 @@
         "activeBorrows": "الإعارات النشطة",
         "activeBorrowsHint": "ملفات خارج الأرشيف",
         "securityAlerts": "تنبيهات أمنية",
-        "securityAlertsHint": "محاولات دخول فاشلة خلال 24 ساعة",
+        "securityAlertsHint": "محاولات دخول فاشلة خلال آخر 24 ساعة",
         "totalFiles": "إجمالي الملفات",
         "totalFilesHint": "المستندات داخل الأرشيف",
         "borrowedNow": "معارة حالياً",
         "borrowedNowHint": "ملفات خارج الأرشيف الآن",
         "overdue": "متأخرة",
         "overdueHint": "تجاوزت تاريخ الإرجاع",
-        "scansToday": "المسح اليوم",
+        "scansToday": "عمليات المسح اليوم",
         "scansTodayHint": "مستندات أُضيفت اليوم",
         "scansTodayChange": "{change} مقارنة بالأمس",
         "facultyFiles": "ملفات الكلية",
@@ -253,7 +254,7 @@
         "report_downloaded": "تم تنزيل تقرير"
       },
       "roles": {
-        "super_admin": "مدير عام",
+        "super_admin": "مدير النظام",
         "archivist": "أمين أرشيف",
         "faculty_staff": "موظف كلية"
       },
@@ -273,7 +274,6 @@
         "status": "الحالة",
         "dueDate": "تاريخ الإرجاع",
         "daysOverdue": "أيام التأخير",
-        "daysOverdueValue": "{days} يوم",
         "timestamp": "تاريخ الطلب",
         "requestsTitle": "الطلبات قيد الانتظار",
         "requestsEmpty": "لا توجد طلبات قيد الانتظار",

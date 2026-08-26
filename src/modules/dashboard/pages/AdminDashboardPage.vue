@@ -15,7 +15,7 @@ import WeeklyDigestCard from '../components/WeeklyDigestCard.vue'
 import { useAsyncResource } from '../composables/useAsyncResource'
 import { dashboardApi } from '../api/dashboardApi'
 import { formatNumber, formatPercent } from '../utils/format'
-import { USER_ROLE_SLUGS, type DigestItem, type HealthItem } from '../types'
+import type { DigestItem, HealthItem } from '../types'
 
 /**
  * Super-admin dashboard.
@@ -28,11 +28,14 @@ import { USER_ROLE_SLUGS, type DigestItem, type HealthItem } from '../types'
 const { t, locale } = useI18n()
 const toasts = useToasts()
 
-const overview = useAsyncResource(() => dashboardApi.getAdminOverview())
-const auditStats = useAsyncResource(() => dashboardApi.getAuditStats())
-const activity = useAsyncResource(() => dashboardApi.getRecentActivity(8))
-const roleCounts = useAsyncResource(() => dashboardApi.getUserRoleCounts(USER_ROLE_SLUGS))
-const digest = useAsyncResource(() => dashboardApi.getWeeklyDigest())
+/** Shown when a request fails without a message of its own (e.g. a dropped connection). */
+const panelOptions = { errorFallback: t('dashboard.loadFailed') }
+
+const overview = useAsyncResource(() => dashboardApi.getAdminOverview(), panelOptions)
+const auditStats = useAsyncResource(() => dashboardApi.getAuditStats(), panelOptions)
+const activity = useAsyncResource(() => dashboardApi.getRecentActivity(8), panelOptions)
+const roleCounts = useAsyncResource(() => dashboardApi.getUserRoleBreakdown(), panelOptions)
+const digest = useAsyncResource(() => dashboardApi.getWeeklyDigest(), panelOptions)
 
 const resources = [overview, auditStats, activity, roleCounts, digest]
 
@@ -44,9 +47,12 @@ function statValue(value: number | null | undefined, loading: boolean): string {
   return typeof value === 'number' ? formatNumber(value, locale.value) : PENDING
 }
 
-const totalUsers = computed(() =>
-  roleCounts.data.value ? roleCounts.data.value.reduce((sum, row) => sum + row.count, 0) : null,
-)
+/**
+ * The unfiltered head count from `/v1/users`, not the sum of the role rows.
+ * Role names are hierarchical on this backend, so the per-role counts overlap —
+ * see `dashboardApi.getUserRoleBreakdown`.
+ */
+const totalUsers = computed(() => roleCounts.data.value?.total ?? null)
 
 const healthItems = computed<HealthItem[]>(() => {
   const items: HealthItem[] = []
@@ -222,7 +228,8 @@ function retryHealth(): void {
         @retry="retryHealth"
       />
       <UsersByRoleCard
-        :rows="roleCounts.data.value ?? []"
+        :rows="roleCounts.data.value?.rows ?? []"
+        :total="roleCounts.data.value?.total ?? 0"
         :loading="roleCounts.loading.value"
         :error="roleCounts.error.value"
         @retry="roleCounts.load()"

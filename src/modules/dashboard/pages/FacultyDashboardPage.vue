@@ -25,7 +25,9 @@ import { formatNumber } from '../utils/format'
 const { t, locale } = useI18n()
 const toasts = useToasts()
 
-const faculty = useAsyncResource(() => dashboardApi.getFacultyOverview())
+const faculty = useAsyncResource(() => dashboardApi.getFacultyOverview(), {
+  errorFallback: t('dashboard.loadFailed'),
+})
 
 const PENDING = '—'
 

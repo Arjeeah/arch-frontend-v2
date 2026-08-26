@@ -16,8 +16,15 @@ export interface AsyncResource<T> {
 export interface AsyncResourceOptions {
   /** Fetch as soon as the resource is created. Default true. */
   immediate?: boolean
-  /** Message shown when the error carries none. */
-  errorFallback?: string
+  /**
+   * Message to show when the failure carries none of its own — a dropped
+   * connection, a CORS refusal, a timeout.
+   *
+   * Required, and required to be a translated string: this text is rendered to
+   * the user, so a default baked in here would ship English into the Arabic UI
+   * without ever passing through `t()`. Callers pass `t('dashboard.loadFailed')`.
+   */
+  errorFallback: string
 }
 
 /**
@@ -33,9 +40,9 @@ export interface AsyncResourceOptions {
  */
 export function useAsyncResource<T>(
   loader: () => Promise<T>,
-  options: AsyncResourceOptions = {},
+  options: AsyncResourceOptions,
 ): AsyncResource<T> {
-  const { immediate = true, errorFallback = 'Could not load this panel' } = options
+  const { immediate = true, errorFallback } = options
 
   const data = ref(null) as Ref<T | null>
   const loading = ref(false)

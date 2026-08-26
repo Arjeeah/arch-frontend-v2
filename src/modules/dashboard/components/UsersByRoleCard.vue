@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { Users } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import DashboardCard from './DashboardCard.vue'
@@ -9,7 +8,10 @@ import { formatNumber } from '../utils/format'
 import type { RoleCount } from '../types'
 
 const props = defineProps<{
+  /** Exclusive per-role buckets — each user counted once, under their highest role. */
   rows: RoleCount[]
+  /** Unfiltered head count the rows reconcile to; the denominator for the bars. */
+  total: number
   loading?: boolean
   error?: string | null
 }>()
@@ -17,8 +19,6 @@ const props = defineProps<{
 defineEmits<{ retry: [] }>()
 
 const { t, te, locale } = useI18n()
-
-const total = computed(() => props.rows.reduce((sum, row) => sum + row.count, 0))
 
 /** Translated role name, falling back to the raw slug for an unknown role. */
 function roleLabel(role: string): string {
@@ -28,7 +28,7 @@ function roleLabel(role: string): string {
 
 /** Share of all users, used for the proportion bar. */
 function share(count: number): number {
-  return total.value > 0 ? Math.round((count / total.value) * 100) : 0
+  return props.total > 0 ? Math.min(100, Math.round((count / props.total) * 100)) : 0
 }
 </script>
 

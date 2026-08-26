@@ -47,9 +47,55 @@ the merge is idempotent.
 
 ## Notes
 
-1. **Nothing else is required.** No router, sidebar, or shared-component edits.
+### Required before this stream is useful
 
-2. **The three dead footer CTAs are now live-when-possible.** "System Settings",
+1. **Repoint `ROLE_LANDING.faculty_staff` to `/dashboard`** (`src/app/router/index.ts`).
+   It is still `/borrowing`, which predates this module. S5's contract is a
+   role-routed landing for all three roles, and faculty staff now have a
+   dashboard — as it stands they never reach it unless they click the sidebar.
+   One-line change:
+
+   ```diff
+   -  faculty_staff: '/borrowing',
+   +  faculty_staff: '/dashboard',
+   ```
+
+2. **Fix the login response mapping (auth module).** This one is blocking, not
+   cosmetic — nothing role-aware in the app works until it lands, the dashboard
+   dispatcher included. `POST /v1/login` answers with a `UserResource` wrapped
+   by Laravel plus siblings:
+
+   ```jsonc
+   {
+     "data": { "id": 1, "name": "…", "roles": ["super_admin", "archivist", "faculty_staff"] },
+     "token": "…",
+     "message": "…",
+   }
+   ```
+
+   `AuthService.login` returns that body as `LoginResponse` and
+   `useAuthStore.login` destructures `{ token, user }` from it. `token` resolves;
+   **`user` is `undefined`**, so `authStorage.setSession` writes the literal
+   string `"undefined"` into `auth_user`, and every later `authStorage.getUser()`
+   fails its `JSON.parse` and returns `null`. Consequences today:
+   - the router guard sees no role, so `meta.roles` routes bounce to `/dashboard`;
+   - `AppSidebar` receives `role = null` and hides every role-restricted item;
+   - this module's dispatcher falls through to the **admin** dashboard for
+     everyone, so an archivist gets one 403 card and faculty staff get a
+     screen of them.
+
+   The fix is in the auth module (read `data`, reduce `roles[]` by precedence to
+   the scalar `AuthUser.role`). Also note `authService.me()` calls `/v1/me`,
+   which **does not exist** in `routes/api/v1.php` — `authStore.init()` therefore
+   always fails (harmlessly: non-401 keeps the session).
+
+   `utils/role.ts` in this module already reads either shape and reduces an
+   array by precedence, so the dispatcher will be correct the moment the login
+   mapping is, with no change here.
+
+### Informational
+
+3. **The three dead footer CTAs are now live-when-possible.** "System Settings",
    "View Users" and "View Full Digest" go through `DashboardLinkButton`, which
    asks the router whether the target resolves _and_ whether the signed-in role
    passes its `meta.roles`. Paths are in `src/modules/dashboard/links.ts`:
@@ -58,28 +104,24 @@ the merge is idempotent.
    and lights up by itself once the route is registered — so merge order does not
    matter. If S8/S9 register different paths, edit `links.ts` only.
 
-3. **`ROLE_LANDING.faculty_staff` is still `/borrowing`** (unchanged, per the
-   foundations decision). A faculty dashboard now exists at `/dashboard`, so the
-   integrator _may_ repoint that entry — it is a product call, not a dependency.
-   Do not change it just because this module landed.
+4. **Role counts are derived, not read.** Roles are hierarchical server-side
+   (`User::assignRoleWithHierarchy`: a super_admin holds all three names), and
+   `/v1/users?filter[role]=` resolves through Spatie's `scopeRole`, which matches
+   "holds this role". The raw counts are therefore cumulative and must never be
+   summed. `getUserRoleBreakdown` subtracts them into exclusive buckets against
+   an unfiltered `meta.total`; the derivation is documented at the call site. Any
+   other module that counts users by role needs the same treatment.
 
-4. **Shared-kit follow-up (not mine to fix):** `DataTable` renders header cells
-   with physical `text-left` / `text-right`, so a column's header does not follow
-   `dir` in RTL while the body cells (which use `text-start` / `text-end`) do.
-   This affects every existing table in the app, not only the dashboard; the
-   one-line fix belongs in `src/shared/components/DataTable.vue`.
-
-5. **The session's role shape needs checking app-wide (auth module, not mine).**
-   `AuthUser.role` is a scalar everywhere in the frontend, but the backend's
-   login response is a `UserResource`: it carries `roles: []` from Spatie's
-   `getRoleNames()` — with the token as a _sibling_ of `data`, not inside it —
-   and there is no `/v1/me` route for `authService.me()` to call. Those roles are
-   also hierarchical (`User::assignRoleWithHierarchy`): a super_admin holds all
-   three names, an archivist holds two, so an array must be reduced by
-   precedence, never by first element. `utils/role.ts` in this module reads
-   either shape defensively so the dispatcher cannot silently hand a super_admin
-   the faculty dashboard, but the underlying login mapping is worth a look —
-   every `meta.roles` gate and the sidebar depend on it.
+5. **Shared-kit follow-ups (outside this module's territory).** Both affect the
+   whole app, not only the dashboard, and both are accepted debt here:
+   - `DataTable` renders header cells with physical `text-left` / `text-right`,
+     so a column header does not follow `dir` in RTL while the body cells (which
+     use `text-start` / `text-end`) do. Every table in the app is affected; the
+     one-line fix belongs in `src/shared/components/DataTable.vue`.
+   - `shared/utils/date.ts` → `formatDate()` hard-codes `toLocaleDateString('en-US')`,
+     so due dates render as "Dec 1, 2025" in the Arabic UI. It should take the
+     active locale the way `relativeTime()` already does. Every due-date cell and
+     timestamp tooltip on the faculty dashboard shows this.
 
 6. **Two server-side bugs are rendered, not hidden** — both are marked in
    `api/dashboardApi.ts` at the call site:
@@ -90,3 +132,23 @@ the merge is idempotent.
    - `GET /v1/faculty-staff/dashboard` → 500s when a pending borrowing exists
      (`getRecentBorrowings()` calls `->format()` on a nullable `due_date`). The
      page turns that specific 500 into a named error with a retry.
+   - Same endpoint, `overdue_files[].days_overdue` is `now()->diffInDays($dueDate)`.
+     Carbon 3 returns that **signed and fractional**, and the due date is in the
+     past, so it arrives negative (`-3.98`). The mapper takes the magnitude; the
+     server-side call wants `->diffInDays($dueDate, true)` (or the operands
+     swapped) if anyone touches it.
+
+## Deliberate omissions
+
+- **No files-per-month chart.** Nothing in the backend aggregates documents (or
+  borrowings) into a time series or per-faculty borrowing split — the only
+  `groupBy` clauses in `app/Services` and `app/Http/Controllers` are storage by
+  faculty, drawer capacity, `ocr_status` and `pipeline_status`. The two mock
+  charts were replaced by a real storage-by-faculty bar chart and a storage
+  gauge in the same grid slots, rather than fabricating a series.
+- **`useServerTable` is not used.** It is for Laravel-paginated lists; every
+  dashboard payload is a single unpaginated aggregate. `useAsyncResource` gives
+  each panel its own loading / error / retry instead. The one paginated call,
+  `/v1/audit-logs`, is fetched as a fixed top-8 feed, not a browsable table.
+- **Toasts are on the refresh action only.** The dashboards are read-only —
+  there is no mutation to report.

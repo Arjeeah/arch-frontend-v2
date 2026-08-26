@@ -94,6 +94,19 @@ export interface RoleCount {
 }
 
 /**
+ * The users-by-role card's data.
+ *
+ * `rows` are *exclusive* buckets — each user counted once, under the highest
+ * role they hold — and `total` is the unfiltered head count they reconcile to.
+ * The derivation (and why the raw API counts cannot be used directly) is
+ * documented on `dashboardApi.getUserRoleBreakdown`.
+ */
+export interface RoleBreakdown {
+  total: number
+  rows: RoleCount[]
+}
+
+/**
  * The three role slugs, in the order the users card lists them.
  *
  * Deliberately re-declared instead of imported from `modules/auth`: modules may

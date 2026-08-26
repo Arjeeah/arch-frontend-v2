@@ -25,8 +25,11 @@ import { formatChangePercent, formatNumber } from '../utils/format'
 const { t, locale } = useI18n()
 const toasts = useToasts()
 
-const archivist = useAsyncResource(() => dashboardApi.getArchivistOverview())
-const overview = useAsyncResource(() => dashboardApi.getAdminOverview())
+/** Shown when a request fails without a message of its own (e.g. a dropped connection). */
+const panelOptions = { errorFallback: t('dashboard.loadFailed') }
+
+const archivist = useAsyncResource(() => dashboardApi.getArchivistOverview(), panelOptions)
+const overview = useAsyncResource(() => dashboardApi.getAdminOverview(), panelOptions)
 
 const resources = [archivist, overview]
 

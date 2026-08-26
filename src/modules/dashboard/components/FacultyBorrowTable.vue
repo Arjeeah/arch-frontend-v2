@@ -106,14 +106,10 @@ const BADGE_STATUS: Record<
             {{ formatDate(row.dueDate) }}
           </td>
 
+          <!-- Bare count: the column header already names the unit, and an
+               Arabic "{n} يوم" would be wrong for every count but one. -->
           <td v-if="has('daysOverdue')" class="px-3 py-3 text-sm font-sans text-end text-danger">
-            {{
-              row.daysOverdue === null
-                ? '-'
-                : t('dashboard.borrowTable.daysOverdueValue', {
-                    days: formatNumber(row.daysOverdue, locale),
-                  })
-            }}
+            {{ row.daysOverdue === null ? '-' : formatNumber(row.daysOverdue, locale) }}
           </td>
 
           <td
