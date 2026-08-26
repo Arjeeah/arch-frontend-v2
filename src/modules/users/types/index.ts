@@ -1,14 +1,14 @@
 /**
- * The three role slugs the backend recognises. `value` is what goes on the
- * wire; `label` is what the UI shows.
+ * The three role slugs the backend recognises — exactly what goes on the wire.
+ *
+ * Slugs only, deliberately: the label a user sees comes from `common.roles.<slug>`
+ * in the locale files, never from here. This used to carry an English `label`
+ * beside each slug that no call site read, so a contributor could plausibly have
+ * wired it back up and shipped "Super Admin" into the Arabic UI.
  */
-export const ROLES = [
-  { value: 'super_admin', label: 'Super Admin' },
-  { value: 'archivist', label: 'Archivist' },
-  { value: 'faculty_staff', label: 'Faculty Staff' },
-] as const
+export const ROLES = ['super_admin', 'archivist', 'faculty_staff'] as const
 
-export type UserRole = (typeof ROLES)[number]['value']
+export type UserRole = (typeof ROLES)[number]
 
 export type UserStatus = 'Active' | 'Inactive'
 

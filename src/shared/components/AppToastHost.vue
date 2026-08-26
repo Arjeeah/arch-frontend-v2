@@ -1,9 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { CircleAlert, CircleCheck, Info, X } from 'lucide-vue-next'
 import { useToastHost, useToasts } from '@/shared/composables/useToasts'
 import type { ToastVariant } from '@/shared/composables/useToasts'
 
-withDefaults(defineProps<{ closeLabel?: string }>(), { closeLabel: 'Dismiss notification' })
+const props = defineProps<{ closeLabel?: string }>()
+
+const { t } = useI18n()
+
+/**
+ * The close button's `aria-label` falls back to a translated default, the same
+ * way `AppConfirmDialog`/`AppFileUpload` do (the narrow `shared/` exception in
+ * CLAUDE.md). It used to be the English literal `'Dismiss notification'`, which
+ * only stayed invisible because `App.vue` happens to pass the prop — a second
+ * host, or a dropped prop, would have shipped English into an Arabic UI.
+ */
+const closeText = computed(() => props.closeLabel ?? t('common.dismissNotification'))
 
 const { dismiss } = useToasts()
 // Only the first mounted host renders, so an extra demo host never doubles toasts.
@@ -51,7 +64,7 @@ const styles: Record<ToastVariant, string> = {
           <button
             type="button"
             class="-me-1 flex h-5 w-5 shrink-0 items-center justify-center rounded transition-opacity hover:opacity-70"
-            :aria-label="closeLabel"
+            :aria-label="closeText"
             @click="dismiss(toast.id)"
           >
             <X class="h-4 w-4" />
