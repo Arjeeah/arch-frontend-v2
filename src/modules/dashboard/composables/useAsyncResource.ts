@@ -7,7 +7,14 @@ export interface AsyncResource<T> {
   loading: Ref<boolean>
   /** Human-readable message from the failed request, or `null`. */
   error: Ref<string | null>
-  /** HTTP status of the failure, so a card can explain a 403 or a known 500. */
+  /**
+   * HTTP status of the failure, so a card can tell one refusal from another —
+   * an archivist calling a super-admin-only panel gets a 403 that deserves
+   * different copy from a server fault. No page reads it at the moment: the
+   * faculty dashboard used to, to blame every 500 on a since-fixed
+   * pending-borrowing bug, and naming a repaired bug as the cause of any 500
+   * was worse than saying nothing.
+   */
   status: Ref<number | null>
   /** (Re)runs the loader. Safe to call from a retry button. */
   load: () => Promise<void>
@@ -30,10 +37,10 @@ export interface AsyncResourceOptions {
 /**
  * One read-only request with its own loading / error / retry state.
  *
- * A dashboard is a grid of independent panels fed by several endpoints, two of
- * which are known to fail (see `dashboardApi`). Giving every panel its own
- * resource means one 403 or 500 costs that panel only — the rest of the page
- * still renders — and each panel gets its own retry without refetching the lot.
+ * A dashboard is a grid of independent panels fed by several endpoints, each
+ * role-gated differently — the admin page alone draws on five. Giving every
+ * panel its own resource means one 403 or 500 costs that panel only, the rest
+ * of the page still renders, and each panel retries without refetching the lot.
  *
  * Lists use `useServerTable` instead; this is for single aggregate payloads
  * that are not paginated.

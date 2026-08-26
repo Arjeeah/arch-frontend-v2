@@ -97,9 +97,11 @@ export interface RoleCount {
  * The users-by-role card's data.
  *
  * `rows` are *exclusive* buckets — each user counted once, under the highest
- * role they hold — and `total` is the unfiltered head count they reconcile to.
- * The derivation (and why the raw API counts cannot be used directly) is
- * documented on `dashboardApi.getUserRoleBreakdown`.
+ * role they hold — and `total` is the unfiltered head count. The rows sum to
+ * `total` unless some account holds no recognised role, in which case they sum
+ * to less; they can never sum to more. The derivation (and why the cumulative
+ * `filter[role]=` counts cannot be subtracted to get here) is documented on
+ * `dashboardApi.getUserRoleBreakdown`.
  */
 export interface RoleBreakdown {
   total: number
@@ -134,10 +136,25 @@ export interface ArchivistSummary {
   scansTodayChangePct: number
 }
 
+/**
+ * Today's extraction-pipeline counts, as `ArchivistDashboardService::
+ * getOcrQueueToday()` folds them out of the eight-state `PipelineStatus` enum.
+ *
+ * `processing` covers everything in flight (`ocr_processing`, `ocr_completed`,
+ * `refining`, `refined`, `embedding`); `pending`, `completed` and `failed` are
+ * the single states of the same name.
+ *
+ * `total` counts every document scanned today independently of the buckets — a
+ * row whose `pipeline_status` the server does not recognise is added to `total`
+ * only. It is therefore `>=` the sum of the four buckets, and is the figure to
+ * test when asking "was anything scanned today at all?".
+ */
 export interface OcrQueue {
   pending: number
+  processing: number
   completed: number
   failed: number
+  total: number
 }
 
 /** `GET /v1/dashboard/archivist` — archivist only (super_admin is refused). */

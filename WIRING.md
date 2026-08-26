@@ -67,6 +67,43 @@ records what was applied centrally and what is still outstanding.
   English and `"، مثل min:8"` in Arabic. Escaped as `{'|'}` in the locale files
   and in S8's fragment.
 
+### Live-API verification round (`verify/v1` … `verify/v5`)
+
+Five streams re-checked their modules against a running backend. Their
+module-local fixes are in their own commits; these are the items that landed in
+shared territory (`src/app/`, `src/shared/`, `src/locales/`) and so could only
+be applied centrally:
+
+- **The router guard did not use `readSessionRole()`.** `sessionRole.ts`
+  documents itself as "the same source the router guard decides on", and three
+  call sites in `src/app/router/index.ts` read `authStorage.getUser()?.role`
+  instead. Identical today (the login mapper persists a scalar), but a session
+  still carrying the wire's `roles[]` array resolved to `undefined` and bounced
+  the user off every `meta.roles` route while `AppSidebar` hid every gated item.
+  The guard now calls `roleAllowed()`, and `useAuthStore`'s `role` getter falls
+  back to `readSessionRole()` so the sidebar cannot disagree with the guard.
+- **`authStore.init()` no longer awaits `GET /v1/me`.** See "Still outstanding".
+- **`users.dialog.errors.emailDomain`** (new key, en + ar + fragment).
+  `CreateUserDialog` now rejects a non-`@limu.edu.ly` address before the round
+  trip, instead of surfacing the backend's English 422 inside an Arabic dialog.
+  The check is case-sensitive because `ends_with` is: `probe@LIMU.EDU.LY` was
+  verified to 422 as well. It is skipped when the email is unchanged on an edit,
+  matching `usersApi.toUpdateInput`, so the two seeded `@limu.local` accounts
+  stay editable.
+- **`documentTypes.conditions.custom` / `.customTooltip`** (new keys, en + ar +
+  fragment). A row whose `requirement_conditions` the builder cannot express
+  (two seeded rows hold the legacy `{"applies_to": …}` shape) rendered the same
+  "—" as a row with no rule at all. It now shows a "Custom rule" chip whose
+  tooltip says the rule survives an edit untouched.
+- **`shared/utils/date.ts` gained a verified timezone caveat**, replacing an
+  assumption. No behaviour changed: the API was checked and emits **no** bare
+  `yyyy-mm-dd` and no zone-less `Y-m-d H:i:s` — `due_date` included, which is a
+  full ISO instant. The one boundary shape is a date this app's own picker
+  produces (`submitted_at: "2026-08-26"` is stored and returned as
+  `2026-08-26T00:00:00.000000Z`); the note explains why that is a backend
+  question and why patching one function here would only desynchronise the
+  picker from the table.
+
 ## Still outstanding
 
 Backend changes, flagged by the streams and unchanged by integration — see the
@@ -78,23 +115,40 @@ per-stream files for the detail:
   guaranteed a 404), and the page disables both write actions with an
   explanation. Adding `'refinement_id' => $refinement?->id` to the resource is
   a one-line change and lights the screen up with no further frontend edit.
-- `StudentDocumentsExport::query()` casts `document_type_id` with `(int)`, so
-  that report filter can never match a UUID (S9 note 8), and
-  `ReportType::filterSchema()` mis-declares the field as `integer`.
-  **Mitigated on the frontend**: `ReportGenerateForm` withholds the filter, so
-  the user cannot generate a report that is certain to fail. Remove the key
-  from `UNSUPPORTED_FILTER_KEYS` once the cast is dropped.
+- `ReportType::filterSchema()` still mis-declares `document_type_id` as
+  `integer` though the column is a uuid. The `(int)` cast in
+  `StudentDocumentsExport::query()` that made the filter unusable **is gone** —
+  verified end-to-end against the live API (36 rows filtered against 337
+  unfiltered) — so `UNSUPPORTED_FILTER_KEYS` is now empty and the filter is
+  offered again. Only the label is wrong; `FIELD_TYPE_OVERRIDES` in
+  `ReportFilterField` corrects it and can be deleted once the schema is fixed.
 - `UserController::index` allowlists `status` as a partial filter, so the Users
   list's "Active" option also matches `inactive` (S10 note 2).
 - `UserResource` omits `faculties`, so a user's current faculties are not
   visible anywhere (S10 note 3).
-- `/v1/me` is not routed, so `authStore.init()` always fails (harmlessly).
+- `/v1/me` is not routed —
+  `404 {"message":"The route api/v1/me could not be found."}` for every role.
+  `useAuthStore.init()` no longer calls it: it rehydrates from `authStorage`,
+  which is what boot fell back to anyway, and the app's only console error is
+  gone. `AuthService.me()` is kept and still correct; re-await it in `init()`
+  the day the route is registered.
 - `FacultyController` / `ProgramController` / `UserController` hardcode
   `paginate(10)` and ignore `per_page`; several lookups page-walk because of it.
 - `/v1/academic/faculties` has no policy — `/faculties` is a frontend-only
   restriction (S10 note 6).
-- `student_documents` cannot be filtered or sorted by `pipeline_status`, which
-  is why the pipeline monitor hydrates per row (S2 note 2).
+- **Archivists can call `POST /v1/settings/storage/override-capacity` but
+  cannot reach it.** Verified live: the archivist token gets `422` (a validation
+  error, i.e. authorized) on that endpoint while `GET /v1/settings` answers
+  `403`. The frontend gates `settings/:group?` to `super_admin`, which matches
+  every _other_ settings endpoint, so the dialog is unreachable for the one role
+  the backend lets use it. Deliberately not "fixed" by widening the route —
+  that would hand archivists the whole settings screen. It needs either a
+  read-scoped settings endpoint for archivists or a standalone capacity dialog.
+- `student_documents` cannot be **filtered or sorted** by `pipeline_status` —
+  `?filter[pipeline_status]=…` is a `400 InvalidFilterQuery`, so that parameter
+  must never be sent. The _reading_ half of this is retired:
+  `StudentDocumentResource` now ships `pipeline_status`, `_label` and `_error`
+  on the list, so the monitor no longer hydrates per row (the N+1 is gone).
 
 ## Adversarial audit — outcomes
 
@@ -139,3 +193,100 @@ the commits above or recorded below.
   `WeeklyDigestNotification::via()` returns `['mail']`, so it never reaches the
   database channel the bell and `/notifications` read; it has no in-app copy to
   translate.
+
+## Second adversarial audit — outcomes
+
+A second pass audited what the five verification streams left untested, and
+re-ran every finding against the live API at `http://127.0.0.1:8088/api/v1`
+before acting. Row counts were unchanged by the audit itself.
+
+### Fixed
+
+- **`getApiErrorMessage` rendered the server's raw `message` for 404 and 5xx.**
+  Confirmed live: a missing document answers `404 {"message":"No query results
+for model [App\Models\StudentDocument] 01a03de0-…"}` and `POST /v1/search`
+  answers `500` with the whole failing `SELECT` in `message`, both of which
+  reached the screen — the 404 in place of the localized "not found" line
+  `StudentDocumentDetailPage` was written to show. The 404 is not debug-only:
+  Laravel's `convertExceptionToArray()` returns `$e->getMessage()` for any
+  `HttpExceptionInterface`. Both statuses now answer with the caller's
+  translated fallback; every other 4xx keeps the server's text.
+- **422s collapsed to `message`, dropping the `errors` bag.** No call site read
+  `err.response.data.errors`. `POST /v1/imports/{type}` is the one endpoint
+  that answers `{"message":"Validation failed.","errors":{"file":[…]}}`, so the
+  upload toast said "Validation failed." and dropped the only useful sentence;
+  Laravel's own default `message` is lossy too ("… (and 7 more errors)").
+  `getApiErrorMessage` now reads a 422 out of `errors`, joining up to three.
+- **`useServerTable` claimed the API clamps out-of-range pages. It does not.**
+  `GET /v1/students?page=999&per_page=5` answers `200` with
+  `current_page: 999, last_page: 10` and `data: []`. Five list pages had each
+  grown a private `page.value -= 1` workaround and six delete-capable ones had
+  not. `refresh()` clamps centrally now and the five workarounds are gone.
+- **Archivists took a guaranteed 403 on every document detail load.** The
+  segment card reads `GET /v1/ai-console/documents/{id}/segments`, gated on the
+  `ai-console.access` **permission**, which no row in `role_has_permissions`
+  grants — verified in sqlite and live (admin 200, archivist 403, staff 403).
+  Gated on `readSessionRole()` and the card hidden, matching `AuditPage`.
+- **`searchApi`'s last `// verify against live API` marker is retired.**
+  `SearchResultResource` wraps the value in `round()`, which returns `float`
+  unconditionally, so `similarity_score` is always a JSON number and never
+  `null` — no Postgres deployment needed to settle the _type_. Narrowed to
+  `number`; the _distribution_ is still unobserved and the comment says so.
+- **The weekly-digest storage tile double-rounded.** `ReportsService` sends
+  `storage_usage_percent` as `round($x, 1)` while `DashboardService` sends
+  `storage.percentage` as `round($x)` — the same `media.size` sum over the same
+  `dashboard.storage_limit_bytes`. Formatting the 1dp value at 0 digits rounds
+  it a second time, so `x = 62.45` showed 63% beside a card showing 62%. The
+  digest tile renders the decimal the server computed.
+
+### Accepted debt
+
+- **A 422's field errors still land as one sentence, not on the fields.**
+  `getApiErrorMessage` now surfaces the _text_ of every failing rule, and
+  `getApiFieldErrors` is exported for a dialog that wants the bag — but no
+  dialog maps it onto per-field state yet. Doing so means touching every form
+  dialog and inventing a field-name → input mapping for each (`student_number`
+  → which control?), for server-only rules that client-side validation already
+  covers in the common cases. Left until a rule appears that only the server
+  can enforce and that users actually hit.
+- **`400 InvalidFilterQuery` / `InvalidSortQuery` still render Spatie's English
+  text.** These fire only on a frontend coding error — an unknown `filter[…]`
+  or `sort` — so the leak is a developer-facing string on a path that should
+  never execute in production. Folding them into the fallback would hide the
+  one message that says which parameter is wrong.
+- **Six percent/confidence-bearing fields have never been observed non-zero on
+  this stack**, so their scale is confirmed from the producers only:
+  `storage.percentage` / `storage_usage_percent` (`media` has 0 rows),
+  `capacity_warning.usagePercent` (payload is `{"show":false}`),
+  `confidence_score` and `structured_data.confidence` (`document_refinements`
+  has 0 rows), segment `confidence` (`document_segments` has 0 rows) and
+  `similarity_score` (the endpoint 500s). Every producer was read and every
+  formatter agrees on a 0–100 input scale; only `scansTodayChangePct` (100 →
+  `+100%`) and imports `successPercent` (0/3 → `0%`) were seen with live
+  values.
+- **The refinement/review write path is unexercisable here.**
+  `document_refinements`, `document_segments`, `document_embeddings`,
+  `document_contents` and `media` all hold 0 rows, so
+  `GET /v1/pipeline/review-queue` with rows, `PATCH /v1/refinements/{id}` and
+  `POST /v1/refinements/{id}/verify` have no success path to observe. Every
+  success-path mutation is likewise unverified; each was probed with an invalid
+  body and every 4xx shape matched what the module expects.
+
+### Corrected
+
+- The digest-tile finding illustrated the disagreement with `0.4 %`. At 0.4
+  both tiles round to `0%` and agree — `round(0.4)` is 0 and `Intl` at zero
+  fraction digits gives `0%`. The disagreement is real but only at a rounding
+  midpoint (`x = 62.45` → digest `63%`, card `62%`), and it is caused by the
+  double rounding, not by the lost decimal as such. Fixed on that basis.
+
+### Notes recorded from the endpoint sweep
+
+- `GET /v1/imports/{jobId}/status` returns a **bare object with no `data`
+  envelope**, unlike its `/v1/reports/{jobId}/status` sibling.
+- `GET /v1/pipeline/status` returns a **sparse** map — absent keys for empty
+  buckets, e.g. `{"data":{"pending":331}}`.
+- `has_embeddings` is an **integer count**, not a boolean
+  (`documentLookupsApi` maps it as `embeddedPages`).
+- `per_page` is ignored (hard `paginate(10)`) on `/academic/faculties`,
+  `/academic/programs` and `/users`; three lookups page-walk because of it.

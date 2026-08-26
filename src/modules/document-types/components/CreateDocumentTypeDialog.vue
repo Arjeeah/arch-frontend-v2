@@ -33,6 +33,18 @@ const hasConditions = ref(false)
 const conditionsOperator = ref<'AND' | 'OR'>('AND')
 const conditionRows = ref<RequirementCondition[]>([])
 
+/**
+ * This row's `requirement_conditions` hold JSON the builder cannot express
+ * (a pre-builder shape such as `{"applies_to":"international_students"}`).
+ *
+ * The API has no way to accept that value back — `operator` and `conditions`
+ * are `required_with`, so echoing it is a 422 — and sending `null` would wipe
+ * a live compliance rule during an unrelated rename. So the key is left out of
+ * the payload entirely, which the backend treats as "don't touch it". Ticking
+ * the conditions box is the deliberate opt-in that replaces it.
+ */
+const preserveUnsupported = ref(false)
+
 const errors = reactive({ name: '', conditions: '' })
 
 const statusOptions = computed(() => [
@@ -49,6 +61,7 @@ watch(
     form.description = item?.description ?? ''
     form.isRequired = item?.isRequired ?? false
     form.status = item?.status ?? 'active'
+    preserveUnsupported.value = !!item?.hasUnsupportedConditions
     hasConditions.value = !!item?.requirementConditions
     conditionsOperator.value = item?.requirementConditions?.operator ?? 'AND'
     // Copy, so editing rows in the builder can never write through to the row
@@ -98,11 +111,23 @@ function validate(): boolean {
 
 function submit() {
   if (!validate()) return
-  emit('save', {
+
+  const base = {
     name: form.name.trim(),
     description: form.description.trim() || null,
     isRequired: form.isRequired,
     status: form.status,
+  }
+
+  // Untouched conditions the builder could not load: omit the key so the stored
+  // JSON survives (see `preserveUnsupported`).
+  if (preserveUnsupported.value && !hasConditions.value) {
+    emit('save', base)
+    return
+  }
+
+  emit('save', {
+    ...base,
     requirementConditions: hasConditions.value
       ? {
           operator: conditionsOperator.value,

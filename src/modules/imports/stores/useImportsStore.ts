@@ -17,10 +17,14 @@ import type { ImportEntity, ImportJob, ImportRowError } from '../types'
  * on every visit. It also carries the two facts the status endpoint omits: the
  * entity that was imported and the uploaded file's name.
  *
- * Namespaced per user id: archive workstations are shared, and
- * `ImportStatusController::status` carries no ownership check at all, so a
- * browser-global key would hand the next person to sign in a live view of the
- * previous one's import — uploaded file name included.
+ * Namespaced per user id: archive workstations are shared, and the entity and
+ * file name this list carries never came from the server — they came from
+ * whoever did the upload. A browser-global key would hand the next person to
+ * sign in the previous one's file names, and then poll rows that answer 403
+ * for them forever: `ImportStatusController::status` does authorize `view`,
+ * and `ImportPolicy::view` limits an archivist to jobs they created
+ * themselves. Verified live — the archivist reading a super admin's import job
+ * gets 403, as does the reports equivalent.
  */
 const STORAGE_PREFIX = 'arch.imports.jobs'
 

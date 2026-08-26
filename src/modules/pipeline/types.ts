@@ -58,6 +58,39 @@ export interface PipelineDocument {
   fileUrl: string | null
   submittedAt: string | null
   createdAt: string | null
+  /**
+   * Pipeline state, inlined on the list resource — no follow-up request per
+   * row. Verified against the live API: `StudentDocumentResource` emits
+   * `pipeline_status`, `pipeline_status_label` and `pipeline_error` alongside
+   * the identity fields.
+   */
+  pipelineStatus: PipelineStatus
+  /** Arabic label rendered by the API's enum (`PipelineStatus::label()`). */
+  pipelineStatusLabel: string | null
+  /** Failure reason recorded by `markFailed()`; null unless the state is `failed`. */
+  pipelineError: string | null
+}
+
+/**
+ * `BulkImportRequest`'s truncation report — how many files the client said it
+ * attached versus how many PHP actually handed to Laravel.
+ *
+ * `confirmed: true` means the client declared a count (via the
+ * `X-Expected-File-Count` header) and the server received fewer: proof, and the
+ * whole batch is refused with a 422. `confirmed: false` means the batch landed
+ * exactly on `max_file_uploads`, which is equally likely to be a complete batch
+ * — those files *are* imported and the caller is warned instead.
+ */
+export interface UploadTruncation {
+  /** What the client declared, or null when it did not say. */
+  declaredFileCount: number | null
+  /** What PHP actually handed to Laravel. */
+  receivedFileCount: number
+  /** `declared - received`, or null when nothing was declared. */
+  discardedFileCount: number | null
+  /** The server's per-request file cap (PHP's `max_file_uploads`). */
+  maxFileUploads: number
+  confirmed: boolean
 }
 
 /** Result of a bulk import — `BulkImportResponseResource`. */
@@ -74,6 +107,13 @@ export interface BulkImportResult {
   submittedCount: number
   documentsQueued: number
   documentIds: string[]
+  /**
+   * Set only on a *suspected* truncation — a batch that landed exactly on the
+   * server's per-request cap. A confirmed one never reaches here: it is a 422
+   * that throws `BulkImportTruncatedError` instead, because nothing was
+   * imported.
+   */
+  truncation: UploadTruncation | null
 }
 
 /**

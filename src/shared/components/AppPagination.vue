@@ -12,6 +12,13 @@ const emit = defineEmits<{ 'update:currentPage': [page: number] }>()
 
 const { t } = useI18n()
 
+/**
+ * `<=` / `>=` rather than `===` on the two arrow buttons: an out-of-range
+ * `currentPage` used to leave "next" enabled while no page button was
+ * highlighted. `useServerTable` clamps that away at the source now, but the
+ * control is shared and a caller that paginates by hand should not be able to
+ * reintroduce it.
+ */
 const visiblePages = computed((): (number | '...')[] => {
   const { currentPage: cur, totalPages: total } = props
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
@@ -33,7 +40,7 @@ const visiblePages = computed((): (number | '...')[] => {
       type="button"
       :aria-label="t('common.previousPage')"
       class="w-8 h-8 flex items-center justify-center rounded border border-border text-text-secondary hover:bg-surface disabled:opacity-40"
-      :disabled="currentPage === 1"
+      :disabled="currentPage <= 1"
       @click="emit('update:currentPage', currentPage - 1)"
     >
       <ChevronLeft class="w-4 h-4 rtl:-scale-x-100" />
@@ -67,7 +74,7 @@ const visiblePages = computed((): (number | '...')[] => {
       type="button"
       :aria-label="t('common.nextPage')"
       class="w-8 h-8 flex items-center justify-center rounded border border-border text-text-secondary hover:bg-surface disabled:opacity-40"
-      :disabled="currentPage === totalPages"
+      :disabled="currentPage >= totalPages"
       @click="emit('update:currentPage', currentPage + 1)"
     >
       <ChevronRight class="w-4 h-4 rtl:-scale-x-100" />

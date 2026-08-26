@@ -15,22 +15,36 @@ defineEmits<{ retry: [] }>()
 
 const { t, locale } = useI18n()
 
+/**
+ * The four states the server folds its eight-state pipeline enum into.
+ * `processing` is everything actually in flight — it was missing while this
+ * card still read the pre-pipeline three-bucket payload, so a queue that was
+ * entirely mid-extraction rendered as four zeros.
+ */
 const buckets = computed(() => {
   const queue = props.queue
   return [
     { key: 'pending', count: queue?.pending ?? 0, class: 'bg-warning/10 text-warning' },
+    { key: 'processing', count: queue?.processing ?? 0, class: 'bg-primary/10 text-primary' },
     { key: 'completed', count: queue?.completed ?? 0, class: 'bg-success-bg text-success-text' },
     { key: 'failed', count: queue?.failed ?? 0, class: 'bg-danger/10 text-danger' },
   ]
 })
 
 /**
- * The server can only ever answer zeros here: `getOcrQueueToday()` bails out
- * unless `student_documents.ocr_status` exists, and the pipeline migrations
- * never created that column. Showing "0 / 0 / 0" as if it were a real quiet day
- * would be a lie, so an all-zero payload is labelled as "no data reported".
+ * `total` counts today's scans independently of the buckets, so it — not the
+ * buckets — answers "did anything happen today?". A document whose
+ * `pipeline_status` the server does not recognise is counted in `total` only,
+ * which is why an all-zero set of buckets can still sit under a non-zero total.
  */
-const hasData = computed(() => buckets.value.some((bucket) => bucket.count > 0))
+const scannedToday = computed(() => {
+  const queue = props.queue
+  if (!queue) return 0
+  return Math.max(
+    queue.total,
+    buckets.value.reduce((sum, bucket) => sum + bucket.count, 0),
+  )
+})
 </script>
 
 <template>
@@ -42,7 +56,7 @@ const hasData = computed(() => buckets.value.some((bucket) => bucket.count > 0))
     @retry="$emit('retry')"
   >
     <div class="flex flex-col gap-3 flex-1">
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-2 gap-2">
         <div
           v-for="bucket in buckets"
           :key="bucket.key"
@@ -57,7 +71,15 @@ const hasData = computed(() => buckets.value.some((bucket) => bucket.count > 0))
       </div>
 
       <p class="text-xs font-sans text-text-secondary">
-        {{ hasData ? t('dashboard.ocrQueue.today') : t('dashboard.ocrQueue.unavailable') }}
+        {{
+          scannedToday > 0
+            ? t(
+                'dashboard.ocrQueue.today',
+                { count: formatNumber(scannedToday, locale) },
+                scannedToday,
+              )
+            : t('dashboard.ocrQueue.none')
+        }}
       </p>
     </div>
   </DashboardCard>

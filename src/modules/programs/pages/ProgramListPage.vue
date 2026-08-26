@@ -8,6 +8,7 @@ import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
+import { readSessionRole } from '@/app/config/sessionRole'
 import { useServerTable } from '@/shared/composables/useServerTable'
 import { useDebouncedRef } from '@/shared/composables/useDebouncedRef'
 import { useToasts } from '@/shared/composables/useToasts'
@@ -39,6 +40,19 @@ const {
     })),
   { perPage: 10, errorFallback: t('programs.errorState.title') },
 )
+
+/**
+ * Who may actually change the catalogue.
+ *
+ * The route admits `super_admin` and `archivist` (`ProgramPolicy::viewAny`
+ * returns true for everyone, and the list endpoint answers 200 for both), but
+ * create/update/delete/restore are `isSuperAdmin` only — verified against the
+ * running API, where a non-super-admin token posting a program gets
+ * `403 { message: 'This action is unauthorized.' }`. Rendering the buttons for
+ * an archivist promises an action the API will refuse, so they are hidden
+ * instead, the same way the sidebar hides a route the guard would bounce.
+ */
+const canWrite = computed(() => readSessionRole() === 'super_admin')
 
 /** Arabic and Arabic Supplement blocks — enough to tell the two name columns apart. */
 const ARABIC_SCRIPT = /[\u0600-\u06FF\u0750-\u077F]/
@@ -136,16 +150,12 @@ function openDelete(item: Program) {
 async function confirmDelete() {
   if (!deletingItem.value) return
   try {
-    const wasLastRowOnPage = rows.value.length === 1 && page.value > 1
     await store.remove(deletingItem.value.id)
     toasts.success(t('programs.toasts.deleted'))
     deleteDialogOpen.value = false
-    // Laravel does not clamp an out-of-range page — it answers page N with an
-    // empty `data` array — so deleting the last row of a page would otherwise
-    // strand the user on an empty-state screen with rows still sitting on the
-    // page before it. Stepping the page back refetches via the page watcher.
-    if (wasLastRowOnPage) page.value -= 1
-    else await refresh()
+    // Deleting the last row of the last page leaves `page` past `last_page`;
+    // `useServerTable.refresh()` clamps and refetches. See the note there.
+    await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('programs.toasts.deleteFailed')))
   }
@@ -163,6 +173,7 @@ async function confirmDelete() {
         <p class="text-sm text-text-secondary font-sans mt-0.5">{{ t('programs.subtitle') }}</p>
       </div>
       <button
+        v-if="canWrite"
         class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-display font-medium hover:bg-primary-mid transition-colors"
         @click="openCreate"
       >
@@ -206,7 +217,13 @@ async function confirmDelete() {
 
     <!-- Table -->
     <template v-else>
-      <ProgramsTable :items="rows" :loading="tableLoading" @edit="openEdit" @delete="openDelete" />
+      <ProgramsTable
+        :items="rows"
+        :loading="tableLoading"
+        :can-write="canWrite"
+        @edit="openEdit"
+        @delete="openDelete"
+      />
 
       <AppPagination v-if="totalPages > 1" v-model:current-page="page" :total-pages="totalPages" />
     </template>

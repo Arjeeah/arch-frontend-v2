@@ -16,11 +16,13 @@ import { formatNumber } from '../utils/format'
  * what is pending or late.
  *
  * Everything comes from one endpoint, so the failure state is page-level rather
- * than per-card — and it is worth handling well, because that endpoint has a
- * known server-side fault (see `dashboardApi.getFacultyOverview`): a pending
- * borrowing has no due date, and the service formats one anyway, so the request
- * 500s exactly when the staff member has something waiting for approval. The
- * error state names that cause instead of showing a bare "server error".
+ * than per-card.
+ *
+ * This page used to special-case a 500 as "the service failed on a pending
+ * borrowing request" — a real server bug at the time, since fixed (see
+ * `dashboardApi.getFacultyOverview`) and confirmed fixed against the live API.
+ * Naming a repaired bug as the cause of *any* 500 misdiagnoses the next
+ * unrelated one, so the generic error message stands on its own again.
  */
 const { t, locale } = useI18n()
 const toasts = useToasts()
@@ -37,11 +39,6 @@ function statValue(value: number | undefined): string {
 }
 
 const summary = computed(() => faculty.data.value?.summary)
-
-/** A 500 here is the known pending-borrowing bug; anything else is generic. */
-const errorTitle = computed(() =>
-  faculty.status.value === 500 ? t('dashboard.faculty.knownFault') : undefined,
-)
 
 async function refresh(): Promise<void> {
   await faculty.load()
@@ -94,8 +91,7 @@ async function refresh(): Promise<void> {
 
     <div v-if="faculty.error.value" class="bg-white rounded-[10px] border border-border shadow-sm">
       <AppErrorState
-        :title="errorTitle ?? faculty.error.value"
-        :description="errorTitle ? faculty.error.value : ''"
+        :title="faculty.error.value"
         :retry-label="t('dashboard.retry')"
         @retry="faculty.load()"
       />

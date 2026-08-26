@@ -14,8 +14,14 @@ export interface ServerTableParams extends Record<string, unknown> {
  */
 export interface ServerTableMeta {
   last_page?: number
-  current_page?: number
   lastPage?: number
+  /**
+   * Read for completeness only — never trusted. Laravel echoes the page that
+   * was *asked for*, not the one it could serve, so a request past the end
+   * comes back as `current_page: 999, last_page: 10`. `refresh()` clamps
+   * against `last_page` instead; see the note there.
+   */
+  current_page?: number
   currentPage?: number
   total?: number
 }
@@ -43,9 +49,9 @@ export interface ServerTableOptions {
   immediate?: boolean
 }
 
-function readMeta(meta: ServerTableMeta, snake: 'last_page' | 'current_page'): number | undefined {
-  const camel = snake === 'last_page' ? meta.lastPage : meta.currentPage
-  return meta[snake] ?? camel
+/** Both casings, because the axios interceptor may or may not camelCase. */
+function readLastPage(meta: ServerTableMeta): number | undefined {
+  return meta.last_page ?? meta.lastPage
 }
 
 /**
@@ -86,6 +92,9 @@ export function useServerTable<T>(fetcher: ServerTableFetcher<T>, options: Serve
     const currentRequest = ++requestId
     loading.value = true
     error.value = null
+    // Set when this run hands off to a clamping refetch, so `finally` leaves
+    // `loading` true and the table never flashes its empty state in between.
+    let clamping = false
 
     try {
       const response = await fetcher({
@@ -95,13 +104,35 @@ export function useServerTable<T>(fetcher: ServerTableFetcher<T>, options: Serve
       })
       if (currentRequest !== requestId) return
 
+      const lastPage = Math.max(1, readLastPage(response.meta ?? {}) ?? 1)
+
+      /**
+       * Laravel's paginator does **not** clamp an out-of-range page — it echoes
+       * the requested one back with an empty `data` array:
+       *
+       *   GET /v1/students?page=999&per_page=5
+       *     -> meta { current_page: 999, last_page: 10, total: 50 }, data: []
+       *
+       * Left alone, `page` stays 999, `totalPages` collapses to 10, `isEmpty`
+       * flips true — and `AppPagination` highlights no page while leaving
+       * "next" enabled, because `currentPage === totalPages` is false. The
+       * table is replaced by the empty state with no way back.
+       *
+       * Deleting the last row of the last page is the reachable route into
+       * that: five list pages had each grown their own `page.value -= 1`
+       * workaround, and six delete-capable ones had not. Clamping here covers
+       * every caller, including a hand-typed `?page=`.
+       */
+      if (page.value > lastPage) {
+        totalPages.value = lastPage
+        clamping = true
+        page.value = lastPage // the `page` watcher refetches
+        return
+      }
+
       rows.value = response.data ?? []
       total.value = response.meta?.total ?? rows.value.length
-      totalPages.value = Math.max(1, readMeta(response.meta ?? {}, 'last_page') ?? 1)
-
-      // The API is the source of truth for the current page (it clamps out-of-range pages).
-      const serverPage = readMeta(response.meta ?? {}, 'current_page')
-      if (serverPage && serverPage !== page.value) page.value = serverPage
+      totalPages.value = lastPage
     } catch (err: unknown) {
       if (currentRequest !== requestId) return
       rows.value = []
@@ -109,7 +140,7 @@ export function useServerTable<T>(fetcher: ServerTableFetcher<T>, options: Serve
       totalPages.value = 1
       error.value = getApiErrorMessage(err, errorFallback)
     } finally {
-      if (currentRequest === requestId) loading.value = false
+      if (currentRequest === requestId && !clamping) loading.value = false
     }
   }
 

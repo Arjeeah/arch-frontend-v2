@@ -3,12 +3,12 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ArrowLeft, Eye, EyeOff, FileText, Pencil, Trash2 } from 'lucide-vue-next'
-import { authStorage } from '@/app/config/authStorage'
+import { readSessionRole } from '@/app/config/sessionRole'
 import AppButton from '@/shared/components/AppButton.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import { useToasts } from '@/shared/composables/useToasts'
-import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { getApiErrorMessage, getApiErrorStatus } from '@/shared/utils/apiError'
 import { formatDate } from '@/shared/utils/date'
 import PipelineStatusPanel from '../components/PipelineStatusPanel.vue'
 import ExtractionDataCard from '../components/ExtractionDataCard.vue'
@@ -29,8 +29,31 @@ const router = useRouter()
 const { t } = useI18n()
 const toasts = useToasts()
 
-const role = authStorage.getUser()?.role ?? null
+/**
+ * `readSessionRole()` rather than reading `role` off the stored user: the
+ * backend's `UserResource` reports Spatie's hierarchical role names as a
+ * `roles` **array** — a super admin literally holds all three — so a session
+ * persisted in that shape has no scalar `role` at all and every control here
+ * would silently disappear. `readSessionRole` accepts both shapes and reduces
+ * an array by `AUTH_ROLES` precedence, which is also what the router guard
+ * decides on, so a hidden control and a refused navigation cannot disagree.
+ */
+const role = readSessionRole()
 const canManage = computed(() => role === 'super_admin' || role === 'archivist')
+
+/**
+ * The segment card is fed by `GET /v1/ai-console/documents/{id}/segments`,
+ * which opens with `$this->authorize('ai-console.access')` — a **permission**,
+ * not a role. No row in `role_has_permissions` holds an `ai-console*`
+ * permission at all, so only the super admin gets through, via Spatie's
+ * `Gate::before`. This route admits archivists too (`meta.roles`), so every
+ * archivist was firing a guaranteed 403 on load and again on every 10s poll,
+ * and the card then explained that the breakdown "is unavailable for this
+ * document" — which is false: it is unavailable for their role, on every
+ * document, permanently. Same shape as `AuditPage`'s super-admin-only
+ * timeline: don't ask, and don't show the card.
+ */
+const canSeeSegments = computed(() => role === 'super_admin')
 
 const documentId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
@@ -65,7 +88,16 @@ async function loadDocument(id: string): Promise<void> {
     document.value = await studentDocumentsApi.show(id)
   } catch (err) {
     document.value = null
-    documentError.value = getApiErrorMessage(err, t('studentDocuments.errors.detailFailed'))
+    // A deleted document answers 404 with `No query results for model
+    // [App\Models\StudentDocument] <uuid>`, which `getApiErrorMessage` now
+    // suppresses in favour of the fallback — so the fallback has to be the
+    // localized not-found line this screen was already written to show.
+    documentError.value = getApiErrorMessage(
+      err,
+      getApiErrorStatus(err) === 404
+        ? t('studentDocuments.errors.notFound')
+        : t('studentDocuments.errors.detailFailed'),
+    )
   } finally {
     documentLoading.value = false
   }
@@ -88,6 +120,7 @@ async function loadSnapshot(id: string, quiet = false): Promise<void> {
 
 /** Best-effort: the segment view is an AI-console extra, not a contract. */
 async function loadSegments(id: string): Promise<void> {
+  if (!canSeeSegments.value) return
   segmentsLoading.value = true
   segmentsUnavailable.value = false
   try {
@@ -325,6 +358,7 @@ async function confirmDelete(): Promise<void> {
       />
 
       <DocumentSegmentsCard
+        v-if="canSeeSegments"
         :segments="segments"
         :loading="segmentsLoading"
         :unavailable="segmentsUnavailable"

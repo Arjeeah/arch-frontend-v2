@@ -12,10 +12,15 @@ import type { ServerTableParams, ServerTableResponse } from '@/shared/composable
 /**
  * The archived document nested on a borrowing (snake_case).
  *
- * verify against live API: `StudentDocumentResource` has no `title` field —
- * `file_number` is the closest thing to a human label (an auto-generated
- * `DOC-YYYYMMDD-XXXXXXXX` code), with `file_name` (the uploaded filename) as
- * a fallback.
+ * Confirmed against the live API: `StudentDocumentResource` has no `title`
+ * field — `file_number` is the closest thing to a human label (an
+ * auto-generated `DOC-YYYYMMDD-XXXXXXXX` code, populated on every row seen),
+ * with `file_name` (the uploaded filename, often null) as a fallback.
+ *
+ * The nested object the borrowing ships is the FULL `StudentDocumentResource`
+ * — student_id, document_type_id, pipeline_status, file_url and the rest.
+ * Only the three keys below are read; the others are deliberately unmodelled
+ * because student-documents is another module's territory.
  */
 interface StudentDocumentResource {
   id: string
@@ -108,9 +113,14 @@ export const borrowingApi = {
    * allowlisted `Spatie\QueryBuilder` filters on `BorrowingController::index`
    * (`filter[status|user_id|student_document_id|overdue]`).
    *
-   * verify against live API: there is no free-text filter for borrowings
-   * (no `AllowedFilter::partial` on this controller) — a search box can only
-   * narrow what's already on the current page.
+   * Confirmed against the live API: there is no free-text filter for
+   * borrowings (no `AllowedFilter::partial` on this controller) — a search box
+   * can only narrow what's already on the current page. Every one of the six
+   * `BORROWING_STATUSES` was exercised as `filter[status]` and answered 200,
+   * as did `filter[overdue]=1`.
+   *
+   * The list is also role-scoped server-side: a faculty-only token sees only
+   * its own requests, while archivist and super_admin see all of them.
    */
   list: async (params: ServerTableParams): Promise<ServerTableResponse<Borrowing>> => {
     const { data } = await http.get<BorrowingListResponse>(API_ENDPOINTS.borrowings.list, {
@@ -193,9 +203,12 @@ export const borrowingApi = {
    * to a different module) and searches the one partial filter it exposes,
    * `file_number`.
    *
-   * verify against live API: `/v1/student-documents` is not in
-   * `API_ENDPOINTS` (that file is outside this module's territory), so the
-   * path is inlined here.
+   * `/v1/student-documents` is not in `API_ENDPOINTS` (that file is outside
+   * this module's territory), so the path is inlined here. Confirmed live:
+   * the route and the `filter[file_number]` partial both resolve, and the
+   * endpoint is faculty-scoped per role — a faculty-only token saw 25 of the
+   * 332 documents a super_admin sees, which is exactly what keeps the picker
+   * from offering a document `BorrowingPolicy::create` would 403 on.
    */
   searchDocuments: async (query: string): Promise<DocumentOption[]> => {
     const { data } = await http.get<DocumentLookupResponse>('/v1/student-documents', {

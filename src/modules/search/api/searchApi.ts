@@ -15,6 +15,11 @@ import type {
  * Declared here rather than in `src/app/config/api.ts`: that file belongs to the
  * app shell, and this module owns its own endpoint until the integrator chooses
  * to lift it. See WIRING.md.
+ *
+ * Role note, verified live: `PipelinePolicy::search()` grants every role,
+ * including `faculty_staff` — the service confines a faculty-only caller to
+ * their own faculties rather than refusing them. That is why `/search` is the
+ * one route in this module's neighbourhood with no `meta.roles` allowlist.
  */
 const SEARCH_ENDPOINT = '/v1/search'
 
@@ -48,11 +53,33 @@ interface SearchResultResource {
   faculty_name: string | null
   program_name: string | null
   /**
-   * verify against live API: the controller rounds a Postgres numeric, which
-   * PDO can surface as a string. Accepting both and coercing keeps a stringy
-   * score from rendering a zero-width bar.
+   * Always a JSON number — settled from the backend source, not from a live
+   * response, because there cannot be one here.
+   *
+   * `POST /v1/search` cannot run against the development database at all.
+   * `HybridSearchService` tries pgvector first and falls back to a PostgreSQL
+   * `tsvector` query, and *both* halves are Postgres-only: the fallback SQL
+   * uses `ts_rank(...)` and the `@@` operator, which sqlite rejects outright
+   * (`unrecognized token: "@"`), so the endpoint answers 500 for every role on
+   * the local stack. The request shape below *is* verified against
+   * `SearchRequest` — a 2-char minimum, a 500-char maximum and
+   * `filters.faculty_id` / `program_id` / `student_status` all bounce with the
+   * expected 422 — but the *response* body has never been observed.
+   *
+   * The type does not need one. `SearchResultResource::toArray()` emits
+   * `'similarity_score' => round($this->similarity_score, 4)`, and PHP's
+   * `round()` returns `float` unconditionally — it coerces a numeric string on
+   * the way in, and `round(null, 4)` is `0.0` — so a Postgres `numeric`
+   * arriving through PDO as a string cannot reach the wire as one, and the
+   * field can never be `null`.
+   *
+   * The scale is settled the same way: `SemanticSearchService` emits
+   * `1 - (vector <=> vector)` (0..1) and `HybridSearchService` emits
+   * `ts_rank(...)` (open scale) — which is what `SimilarityBar` already
+   * assumes. What still needs a Postgres deployment is the *distribution* of
+   * the value, not its type.
    */
-  similarity_score: number | string | null
+  similarity_score: number
 }
 
 /** The `additional(['meta' => …])` block on the search response. */
@@ -95,10 +122,15 @@ interface PaginatedBody<T> {
 
 // ── Mappers ────────────────────────────────────────────────────────────────
 
-function toNumberOrNull(value: number | string | null | undefined): number | null {
-  if (value === null || value === undefined || value === '') return null
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : null
+/**
+ * Guards the one thing the wire types cannot: a `NaN`/`Infinity` that survived
+ * `JSON.parse` (or a field the backend dropped entirely). No string branch —
+ * both callers below are typed `number | null`, and the `round()` note on
+ * `similarity_score` is why.
+ */
+function toNumberOrNull(value: number | null | undefined): number | null {
+  if (value === null || value === undefined) return null
+  return Number.isFinite(value) ? value : null
 }
 
 /** Narrows the wire string onto the `SearchMode` union. */

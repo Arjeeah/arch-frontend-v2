@@ -3,10 +3,21 @@ import { useI18n } from 'vue-i18n'
 import { SquarePen, Ban } from 'lucide-vue-next'
 import type { Faculty } from '../types'
 
-defineProps<{
-  items: Faculty[]
-  loading?: boolean
-}>()
+withDefaults(
+  defineProps<{
+    items: Faculty[]
+    loading?: boolean
+    /**
+     * Whether to render the row actions at all. `FacultyPolicy` grants
+     * create/update/delete to `super_admin` only — an archivist can read this
+     * list but every write answers 403 — so the column is dropped rather than
+     * shown disabled. Defaults to `true` so the component stays usable
+     * standalone; `FacultyListPage` passes the real answer.
+     */
+    canWrite?: boolean
+  }>(),
+  { loading: false, canWrite: true },
+)
 
 const emit = defineEmits<{
   edit: [item: Faculty]
@@ -47,7 +58,10 @@ const { t } = useI18n()
           t('faculties.table.status')
         }}</span>
       </div>
-      <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
+      <div
+        v-if="canWrite"
+        class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full"
+      >
         <span class="text-[15px] font-sans font-bold text-text-secondary">{{
           t('faculties.table.actions')
         }}</span>
@@ -71,7 +85,10 @@ const { t } = useI18n()
         <div class="flex justify-center items-center px-[13px] w-[150px] shrink-0 h-full">
           <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
         </div>
-        <div class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full">
+        <div
+          v-if="canWrite"
+          class="flex justify-center items-center px-[13px] w-[90px] shrink-0 h-full"
+        >
           <div class="h-4 bg-surface rounded animate-pulse w-[60px]" />
         </div>
       </div>
@@ -129,7 +146,10 @@ const { t } = useI18n()
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-center items-center px-[13px] gap-[15px] w-[90px] shrink-0">
+        <div
+          v-if="canWrite"
+          class="flex justify-center items-center px-[13px] gap-[15px] w-[90px] shrink-0"
+        >
           <button
             class="text-[#4285F4] hover:opacity-70 transition-opacity"
             :title="t('faculties.table.editAction')"

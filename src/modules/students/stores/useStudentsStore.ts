@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { getApiErrorMessage, getApiErrorStatus } from '@/shared/utils/apiError'
 import { i18n } from '@/app/plugins/i18n'
 import { studentsApi } from '../api/studentsApi'
 import type { Student, StudentInput } from '../types'
@@ -40,7 +40,16 @@ export const useStudentsStore = defineStore('students', () => {
     } catch (err) {
       current.value = null
       requiredDocumentTypes.value = []
-      error.value = getApiErrorMessage(err, tr('students.errors.detailFailed'))
+      // `getApiErrorMessage` answers a 404 with the fallback rather than
+      // Laravel's `No query results for model [App\Models\Student] <uuid>`,
+      // so a deleted student has to pick the localized not-found line here —
+      // `StudentDetailPage` renders `store.error` verbatim.
+      error.value = getApiErrorMessage(
+        err,
+        getApiErrorStatus(err) === 404
+          ? tr('students.errors.notFound')
+          : tr('students.errors.detailFailed'),
+      )
     } finally {
       loading.value = false
     }

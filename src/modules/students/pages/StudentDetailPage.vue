@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ArrowLeft, BadgeCheck, Pencil, Trash2 } from 'lucide-vue-next'
-import { authStorage } from '@/app/config/authStorage'
+import { readSessionRole } from '@/app/config/sessionRole'
 import AppButton from '@/shared/components/AppButton.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
@@ -22,7 +22,16 @@ const { t, locale } = useI18n()
 const toasts = useToasts()
 const store = useStudentsStore()
 
-const role = authStorage.getUser()?.role ?? null
+/**
+ * `readSessionRole()` rather than reading `role` off the stored user: the
+ * backend's `UserResource` reports Spatie's hierarchical role names as a
+ * `roles` **array** — a super admin literally holds all three — so a session
+ * persisted in that shape has no scalar `role` at all and every control here
+ * would silently disappear. `readSessionRole` accepts both shapes and reduces
+ * an array by `AUTH_ROLES` precedence, which is also what the router guard
+ * decides on, so a hidden control and a refused navigation cannot disagree.
+ */
+const role = readSessionRole()
 const canManage = computed(() => role === 'super_admin' || role === 'archivist')
 
 const studentId = computed(() => {
@@ -56,7 +65,14 @@ const facts = computed(() => {
       label: t('students.fields.studentNumber'),
       value: current.studentNumber,
     },
-    { key: 'nationality', label: t('students.fields.nationality'), value: current.nationality },
+    {
+      key: 'nationality',
+      // Nullable since the draft-student migration — `fromResource` folds a null
+      // to `''`, which would render as an empty card rather than a dash. Every
+      // other nullable fact on this page already spells its own fallback.
+      label: t('students.fields.nationality'),
+      value: current.nationality || '—',
+    },
     { key: 'email', label: t('students.fields.email'), value: current.email ?? '—' },
     { key: 'phone', label: t('students.fields.phone'), value: current.phone ?? '—' },
     {

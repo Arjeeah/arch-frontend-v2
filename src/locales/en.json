@@ -307,10 +307,11 @@
     "ocrQueue": {
       "title": "OCR Queue",
       "pending": "Pending",
+      "processing": "Processing",
       "completed": "Completed",
       "failed": "Failed",
-      "today": "Documents scanned today.",
-      "unavailable": "The server is not reporting OCR counts yet."
+      "today": "One document scanned today. | {count} documents scanned today.",
+      "none": "No documents scanned today."
     },
     "capacityWarning": {
       "title": "A drawer is {percent} full",
@@ -421,7 +422,9 @@
       "atLeastOne": "Add at least one condition, or clear the checkbox above.",
       "incomplete": "Every condition needs both a field and a value.",
       "emptyList": "A list condition needs at least one value between the commas.",
-      "tooltip": "{count} condition configured | {count} conditions configured"
+      "tooltip": "{count} condition configured | {count} conditions configured",
+      "custom": "Custom rule",
+      "customTooltip": "A requirement rule is stored that this builder cannot display. Editing this document type leaves the rule untouched."
     },
     "deleteDialog": {
       "title": "Delete Document Type",
@@ -883,6 +886,9 @@
       "successToast": "{count} document queued for processing. | {count} documents queued for processing.",
       "partialToast": "Only {queued} of the {submitted} files sent were accepted. Re-import the rest in smaller batches, and check the server's upload limits.",
       "partialWarning": "The server accepted {queued} of the {submitted} files sent. The rest were dropped before validation — usually PHP's max_file_uploads or post_max_size limit.",
+      "truncatedToast": "Files that reached the server: {received} of {declared} · discarded: {discarded} · limit per request: {max}. Nothing was imported — your selection is still here, so send it in smaller batches.",
+      "suspectedTruncationToast": "The batch hit the server’s per-request limit ({max}), so the count cannot be verified. Imported: {queued}. If you selected more, send the rest in a smaller batch.",
+      "suspectedTruncationWarning": "This batch landed exactly on the server’s per-request limit ({max}), so it may have been cut short. Imported: {queued}.",
       "errorToast": "Could not start the import.",
       "cancelled": "Upload cancelled.",
       "queuedTitle": "{count} document queued | {count} documents queued",
@@ -924,15 +930,12 @@
         "document": "Document",
         "student": "Student",
         "state": "Stage",
-        "pages": "Pages",
-        "confidence": "Confidence",
         "created": "Added",
         "actions": "Actions"
       },
       "toggleDetail": "Toggle details",
       "unnumbered": "No file number",
       "unassigned": "Not linked to a student",
-      "statusUnavailable": "Status unavailable",
       "retry": "Retry",
       "retryUnavailable": "Retry is only available for failed documents, or ones stuck after text extraction.",
       "retryToast": "Document sent back through the pipeline.",
@@ -946,12 +949,15 @@
       "ocrPages": "Pages extracted",
       "embeddedPages": "Pages indexed",
       "refinement": "AI analysis",
+      "confidence": "Extraction confidence",
       "verification": "Human review",
       "verifiedBy": "Verified by {name}",
       "notVerified": "Not reviewed yet",
       "present": "Present",
       "none": "None",
-      "unknownUser": "Unknown user"
+      "unknownUser": "Unknown user",
+      "loading": "Loading details…",
+      "loadFailed": "Could not load the details for this document."
     }
   },
   "programs": {
@@ -1179,7 +1185,8 @@
       "openInNewTab": "Open",
       "emptyTitle": "Nothing to preview",
       "noFile": "This document has no stored file.",
-      "selectRow": "Pick a document from the queue to start reviewing."
+      "selectRow": "Pick a document from the queue to start reviewing.",
+      "resolving": "Opening the scan…"
     },
     "fields": {
       "studentNumber": "Student number",
@@ -1250,7 +1257,8 @@
       "loadTitle": "Could not load the review queue",
       "save": "Could not save the corrections",
       "verify": "Could not verify this document",
-      "lookups": "Could not load the faculty and document-type lists"
+      "lookups": "Could not load the faculty and document-type lists",
+      "preview": "Could not open the scanned file"
     },
     "toasts": {
       "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
@@ -1325,6 +1333,7 @@
     },
     "error": {
       "title": "Search failed",
+      "description": "The search could not be completed. Please try again.",
       "retry": "Try again"
     }
   },
@@ -1353,7 +1362,7 @@
       "saveError": "Could not save settings.",
       "resetSuccess": "Settings reset to defaults.",
       "resetError": "Could not reset settings.",
-      "overrideCapacitySuccess": "Storage capacity threshold updated.",
+      "overrideCapacitySuccess": "Temporary override applied. The saved threshold is unchanged.",
       "overrideCapacityError": "Could not update the storage capacity threshold."
     },
     "fields": {
@@ -1399,6 +1408,7 @@
       "trigger": "Override capacity threshold",
       "title": "Override storage capacity threshold",
       "description": "Temporarily raise the warning threshold, e.g. during a large ingestion batch. This is logged for audit purposes.",
+      "activeNote": "Temporary override active: warning at {limit}% until {expires}. The saved setting is still {persisted}%.",
       "newLimitLabel": "New threshold (%)",
       "reasonLabel": "Reason",
       "reasonPlaceholder": "Why is this override needed?",
@@ -1780,6 +1790,7 @@
       "errors": {
         "nameRequired": "Full name is required",
         "emailRequired": "Email is required",
+        "emailDomain": "Email must end with @limu.edu.ly",
         "roleRequired": "Role is required",
         "passwordRequired": "Password is required",
         "facultyRequired": "Select at least one faculty"

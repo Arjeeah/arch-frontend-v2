@@ -111,17 +111,9 @@ async function confirmDelete() {
     await roomsApi.remove(deletingRoom.value.id)
     toasts.success(t('locations.rooms.toasts.deleted'))
     deleteDialogOpen.value = false
-    /**
-     * Deleting the only row on a page past the first strands the user there.
-     * `useServerTable` treats the API as the authority on the current page, but
-     * Laravel's paginator echoes the requested page back instead of clamping it
-     * to `last_page` — so the composable keeps page 3 of a now-2-page list,
-     * `isEmpty` flips true, and the empty state replaces the table *and* the
-     * pagination control, leaving no way back. Stepping back one page instead
-     * re-fetches through the `page` watcher.
-     */
-    if (rooms.value.length === 1 && page.value > 1) page.value -= 1
-    else await refresh()
+    // Deleting the last row of the last page leaves `page` past `last_page`;
+    // `useServerTable.refresh()` clamps and refetches. See the note there.
+    await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('locations.rooms.toasts.deleteFailed')))
   } finally {

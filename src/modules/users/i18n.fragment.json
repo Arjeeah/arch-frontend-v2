@@ -74,6 +74,7 @@
         "errors": {
           "nameRequired": "Full name is required",
           "emailRequired": "Email is required",
+          "emailDomain": "Email must end with @limu.edu.ly",
           "roleRequired": "Role is required",
           "passwordRequired": "Password is required",
           "facultyRequired": "Select at least one faculty"
@@ -166,6 +167,7 @@
         "errors": {
           "nameRequired": "الاسم الكامل مطلوب",
           "emailRequired": "البريد الإلكتروني مطلوب",
+          "emailDomain": "يجب أن ينتهي البريد الإلكتروني بـ ‎@limu.edu.ly",
           "roleRequired": "الدور مطلوب",
           "passwordRequired": "كلمة المرور مطلوبة",
           "facultyRequired": "اختر كلية واحدة على الأقل"

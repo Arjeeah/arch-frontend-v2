@@ -153,10 +153,8 @@ async function confirmDelete() {
     await cabinetsApi.remove(deletingCabinet.value.id)
     toasts.success(t('locations.cabinets.toasts.deleted'))
     deleteDialogOpen.value = false
-    // See RoomsPage.confirmDelete: deleting the last row on a page past the
-    // first would otherwise strand the user on an out-of-range page.
-    if (cabinets.value.length === 1 && page.value > 1) page.value -= 1
-    else await refresh()
+    // See RoomsPage.confirmDelete: `useServerTable.refresh()` clamps the page.
+    await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('locations.cabinets.toasts.deleteFailed')))
   } finally {

@@ -16,9 +16,11 @@ export type BorrowingStatus = (typeof BORROWING_STATUSES)[number]
 /**
  * The archived document being borrowed (API: `student_document`).
  *
- * verify against live API: `Borrowing`/`StudentDocument` both use `HasUuids`
- * — `id` is a UUID string, never numeric. `title` is derived client-side
- * from `file_number` (there is no `title` field on `StudentDocumentResource`).
+ * Confirmed against the live API: `id` is a UUID string, never numeric
+ * (`Borrowing`/`StudentDocument` both use `HasUuids`). `title` is derived
+ * client-side from `file_number` — `StudentDocumentResource` has no `title`
+ * field, and its `file_name` is frequently null on real rows, so
+ * `file_number` (always populated, `DOC-YYYYMMDD-XXXXXXXX`) is the label.
  */
 export interface BorrowingDocument {
   id: string
@@ -45,9 +47,12 @@ export interface Borrowing {
   createdAt: string | null
   /**
    * `is_overdue` as the SERVER computed it, or `null` when the field was
-   * absent. Authoritative — `Borrowing::isOverdue()` also treats an APPROVED
-   * request past its due date as overdue, which a naive client-side
-   * `dueDate < today` check on `borrowed` rows alone would miss.
+   * absent. Authoritative, and it does NOT track `status`: verified live, a
+   * row whose due date has passed reports `is_overdue: true` while `status`
+   * is still `borrowed` (or `approved`), because the status only flips to
+   * `overdue` when the scheduled `borrowings:overdue` command next runs.
+   * A client-side `dueDate < today` check on `borrowed` rows alone would miss
+   * the approved-but-never-collected case that `Borrowing::isOverdue()` catches.
    */
   isOverdue: boolean | null
   /** `days_until_due` as the server computed it; negative once past due. */
@@ -61,11 +66,20 @@ export interface Borrowing {
 /**
  * The subset of a borrowing the create dialog can submit.
  *
- * verify against live API: `StoreBorrowingRequest` only validates
+ * Confirmed against the live API: `StoreBorrowingRequest` only validates
  * `student_document_id` (uuid) and `notes` — there is no `purpose` or
  * `due_date` at creation time. The due date is computed server-side when an
  * archivist approves the request (`ApproveBorrowingRequest.due_days`,
- * defaulting from `BorrowingSettings` when omitted).
+ * defaulting from `BorrowingSettings` when omitted — a live approve with no
+ * `due_days` came back with `due_date` 14 days out).
+ *
+ * Two server-side rejections this input cannot pre-empt, both surfaced as a
+ * 422 whose `message` the toast already renders verbatim:
+ *   - a per-user concurrency cap (`BorrowingSettings.max_active_per_user`,
+ *     3 on the verified deployment) counting pending rows too;
+ *   - faculty scoping — a faculty-only requester gets 403, not 422, for a
+ *     document outside their faculty. The picker cannot offer one anyway:
+ *     `/v1/student-documents` is itself faculty-scoped for that role.
  */
 export interface BorrowingCreateInput {
   studentDocumentId: string

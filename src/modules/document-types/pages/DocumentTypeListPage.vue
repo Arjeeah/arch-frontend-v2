@@ -113,16 +113,12 @@ function openDelete(item: DocumentType) {
 async function confirmDelete() {
   if (!deletingItem.value) return
   try {
-    const wasLastRowOnPage = rows.value.length === 1 && page.value > 1
     await store.remove(deletingItem.value.id)
     toasts.success(t('documentTypes.toasts.deleted'))
     deleteDialogOpen.value = false
-    // Laravel does not clamp an out-of-range page — it answers page N with an
-    // empty `data` array — so deleting the last row of a page would otherwise
-    // strand the user on an empty-state screen with rows still sitting on the
-    // page before it. Stepping the page back refetches via the page watcher.
-    if (wasLastRowOnPage) page.value -= 1
-    else await refresh()
+    // Deleting the last row of the last page leaves `page` past `last_page`;
+    // `useServerTable.refresh()` clamps and refetches. See the note there.
+    await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('documentTypes.toasts.deleteFailed')))
   }
