@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppDialog from '@/shared/components/AppDialog.vue'
 import FormInput from '@/shared/components/FormInput.vue'
 import type { Faculty, FacultyInput, FacultyStatus } from '../types'
@@ -15,6 +16,8 @@ const emit = defineEmits<{
   close: []
   save: [data: FacultyInput]
 }>()
+
+const { t } = useI18n()
 
 const isEdit = computed(() => !!props.item)
 
@@ -46,9 +49,9 @@ watch(
 )
 
 function validate() {
-  errors.code = form.code.trim() ? '' : 'Code is required'
-  errors.nameAR = form.nameAR.trim() ? '' : 'Name AR is required'
-  errors.nameEN = form.nameEN.trim() ? '' : 'Name EN is required'
+  errors.code = form.code.trim() ? '' : t('faculties.dialog.errors.codeRequired')
+  errors.nameAR = form.nameAR.trim() ? '' : t('faculties.dialog.errors.nameArRequired')
+  errors.nameEN = form.nameEN.trim() ? '' : t('faculties.dialog.errors.nameEnRequired')
   return !errors.code && !errors.nameAR && !errors.nameEN
 }
 
@@ -66,39 +69,63 @@ function submit() {
 <template>
   <AppDialog
     :open="open"
-    :title="isEdit ? 'Edit Faculty' : 'Create Faculty'"
+    :title="isEdit ? t('faculties.dialog.editTitle') : t('faculties.dialog.createTitle')"
     size="md"
     @close="emit('close')"
   >
     <p class="text-sm font-sans text-[#6F6F6F] mb-5">
-      {{ isEdit ? 'Update faculty details.' : 'Add a new faculty to the system.' }}
+      {{ isEdit ? t('faculties.dialog.editSubtitle') : t('faculties.dialog.createSubtitle') }}
     </p>
 
     <div class="flex flex-col gap-4">
       <div>
-        <label class="block text-base font-sans text-text-primary mb-[7px]">Code</label>
-        <FormInput v-model="form.code" type="text" placeholder="Enter Code" />
+        <label class="block text-base font-sans text-text-primary mb-[7px]">{{
+          t('faculties.dialog.codeLabel')
+        }}</label>
+        <FormInput
+          v-model="form.code"
+          type="text"
+          :placeholder="t('faculties.dialog.codePlaceholder')"
+        />
         <p v-if="errors.code" class="mt-1 text-xs text-danger">{{ errors.code }}</p>
       </div>
 
       <div>
-        <label class="block text-base font-sans text-text-primary mb-[7px]">Name AR</label>
-        <FormInput v-model="form.nameAR" type="text" placeholder="e.g. تقنية المعلومات" />
+        <label class="block text-base font-sans text-text-primary mb-[7px]">{{
+          t('faculties.dialog.nameArLabel')
+        }}</label>
+        <FormInput
+          v-model="form.nameAR"
+          type="text"
+          :placeholder="t('faculties.dialog.nameArPlaceholder')"
+        />
         <p v-if="errors.nameAR" class="mt-1 text-xs text-danger">{{ errors.nameAR }}</p>
       </div>
 
       <div>
-        <label class="block text-base font-sans text-text-primary mb-[7px]">Name EN</label>
-        <FormInput v-model="form.nameEN" type="text" placeholder="e.g. Information Technology" />
+        <label class="block text-base font-sans text-text-primary mb-[7px]">{{
+          t('faculties.dialog.nameEnLabel')
+        }}</label>
+        <FormInput
+          v-model="form.nameEN"
+          type="text"
+          :placeholder="t('faculties.dialog.nameEnPlaceholder')"
+        />
         <p v-if="errors.nameEN" class="mt-1 text-xs text-danger">{{ errors.nameEN }}</p>
       </div>
 
       <div class="mt-4">
-        <label class="block text-base font-sans text-text-primary mb-1">Status</label>
+        <label class="block text-base font-sans text-text-primary mb-1">{{
+          t('faculties.dialog.statusLabel')
+        }}</label>
         <div class="flex items-center justify-between">
-          <p class="text-sm font-sans text-[#6F6F6F]">Set faculty status as active or inactive</p>
+          <p class="text-sm font-sans text-[#6F6F6F]">{{ t('faculties.dialog.statusHelp') }}</p>
           <div class="flex items-center gap-3 shrink-0">
-            <span class="text-sm font-sans text-text-secondary">{{ form.status }}</span>
+            <span class="text-sm font-sans text-text-secondary">{{
+              form.status === 'Active'
+                ? t('faculties.status.active')
+                : t('faculties.status.inactive')
+            }}</span>
             <button
               type="button"
               class="relative inline-flex h-[25px] w-[46px] items-center rounded-[16px] transition-colors focus:outline-none"
@@ -126,7 +153,7 @@ function submit() {
         :disabled="loading"
         @click="emit('close')"
       >
-        Cancel
+        {{ t('faculties.dialog.cancel') }}
       </button>
       <button
         type="button"
@@ -134,7 +161,7 @@ function submit() {
         :disabled="loading"
         @click="submit"
       >
-        {{ isEdit ? 'Update Faculty' : 'Save Faculty' }}
+        {{ isEdit ? t('faculties.dialog.update') : t('faculties.dialog.save') }}
       </button>
     </template>
   </AppDialog>

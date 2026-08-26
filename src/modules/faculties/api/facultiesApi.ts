@@ -1,6 +1,7 @@
 import { http } from '@/app/plugins/axios'
 import { API_ENDPOINTS } from '@/app/config/api'
 import type { Faculty, FacultyInput, FacultyStatus } from '../types'
+import type { ServerTableParams, ServerTableResponse } from '@/shared/composables/useServerTable'
 
 /** A faculty exactly as the backend sends it (Laravel resource, snake_case). */
 interface FacultyResource {
@@ -9,7 +10,6 @@ interface FacultyResource {
   name_ar: string
   name_en: string
   status: string
-  programs?: unknown[]
 }
 
 /** `show` / `store` / `update` responses are wrapped in a single `data` key. */
@@ -20,6 +20,7 @@ interface FacultyItemResponse {
 /** `index` is paginated: `{ data: [...], meta, links }`. */
 interface FacultyListResponse {
   data: FacultyResource[]
+  meta?: { current_page?: number; last_page?: number; total?: number }
 }
 
 // verify against live API: assumes the backend stores status as a lowercase
@@ -29,7 +30,15 @@ function toStatus(raw: string): FacultyStatus {
   return raw.toLowerCase() === 'active' ? 'Active' : 'Inactive'
 }
 
-/** snake_case wire format -> camelCase UI model. */
+/**
+ * snake_case wire format -> camelCase UI model.
+ *
+ * verify against live API: `App\Http\Resources\FacultyResource` never emits a
+ * `programs` relation, so there is no server-provided count to map — the
+ * dedicated `/v1/academic/programs?filter[faculty_id]=` endpoint would need
+ * an extra request per row to derive one. Mapped to `null` ("unknown"), not
+ * `0` — `0` would be a number the API never sent, displayed as fact.
+ */
 function fromResource(resource: FacultyResource): Faculty {
   return {
     id: resource.id,
@@ -37,7 +46,7 @@ function fromResource(resource: FacultyResource): Faculty {
     nameAR: resource.name_ar,
     nameEN: resource.name_en,
     status: toStatus(resource.status),
-    programsCount: resource.programs?.length ?? 0,
+    programsCount: null,
   }
 }
 
@@ -53,12 +62,20 @@ function toPayload(input: Partial<FacultyInput>): Record<string, string> {
 
 export const facultiesApi = {
   /**
-   * Returns one page of faculties. The backend paginates the index endpoint;
-   * with no params it responds with the first page.
+   * One page of faculties for `useServerTable`. Filters map to the
+   * allowlisted `Spatie\QueryBuilder` filters on
+   * `Academic\FacultyController::index` (`filter[name_ar|name_en|status]`).
+   *
+   * verify against live API: `index()` hardcodes `->paginate(10)` and ignores
+   * `per_page` — `useServerTable` trusts the response `meta` regardless, so
+   * this only matters if a page-size selector is ever added.
    */
-  list: async (params?: { page?: number; per_page?: number }): Promise<Faculty[]> => {
+  list: async (params: ServerTableParams): Promise<ServerTableResponse<Faculty>> => {
     const { data } = await http.get<FacultyListResponse>(API_ENDPOINTS.faculties.list, { params })
-    return data.data.map(fromResource)
+    return {
+      data: data.data.map(fromResource),
+      meta: data.meta ?? {},
+    }
   },
 
   show: async (id: number): Promise<Faculty> => {

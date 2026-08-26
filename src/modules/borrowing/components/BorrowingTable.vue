@@ -1,14 +1,20 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { SquarePen, Ban } from 'lucide-vue-next'
 import AppButton from '@/shared/components/AppButton.vue'
 import { formatDate } from '@/shared/utils/date'
 import BorrowingStatusBadge from './BorrowingStatusBadge.vue'
-import { canApprove, canMarkBorrowed, canReturn } from '../types'
+import { canApprove, canCancelOwn, canEditOwn, canMarkBorrowed, canReturn } from '../types'
 import type { Borrowing } from '../types'
 
-defineProps<{
+const props = defineProps<{
   items: Borrowing[]
   loading?: boolean
+  /** archivist + super_admin — gates approve/reject/mark-borrowed/return. */
+  canManageWorkflow: boolean
+  /** super_admin — `BorrowingPolicy::delete` lets them delete any request. */
+  canDeleteAny: boolean
+  currentUserId: string | null
 }>()
 
 const emit = defineEmits<{
@@ -19,6 +25,18 @@ const emit = defineEmits<{
   markBorrowed: [item: Borrowing]
   markReturned: [item: Borrowing]
 }>()
+
+const { t } = useI18n()
+
+function isOwner(item: Borrowing): boolean {
+  return !!props.currentUserId && item.borrower?.id === props.currentUserId
+}
+function showEdit(item: Borrowing): boolean {
+  return isOwner(item) && canEditOwn(item.status)
+}
+function showDelete(item: Borrowing): boolean {
+  return props.canDeleteAny || (isOwner(item) && canCancelOwn(item.status))
+}
 </script>
 
 <template>
@@ -28,28 +46,44 @@ const emit = defineEmits<{
       class="flex flex-row items-center bg-surface-table border border-border rounded-[4px] h-[48px] min-w-[1200px]"
     >
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Document</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.document')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Borrower</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.borrower')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Purpose</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.notes')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Due Date</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.dueDate')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Borrowed At</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.borrowedAt')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] flex-1 min-w-[110px] h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Returned At</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.returnedAt')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[120px] shrink-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Status</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.status')
+        }}</span>
       </div>
       <div class="flex justify-center items-center px-[13px] w-[300px] shrink-0 h-full">
-        <span class="text-[15px] font-sans font-bold text-text-secondary">Actions</span>
+        <span class="text-[15px] font-sans font-bold text-text-secondary">{{
+          t('borrowing.table.actions')
+        }}</span>
       </div>
     </div>
 
@@ -99,13 +133,20 @@ const emit = defineEmits<{
             item.borrower?.name ?? '-'
           }}</span>
         </div>
-        <!-- Purpose -->
+        <!-- Notes -->
         <div
-          class="flex items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden"
+          class="flex flex-col items-center justify-center px-[13px] flex-1 min-w-[110px] overflow-hidden py-1"
         >
-          <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            item.purpose || '-'
+          <span class="text-[15px] font-sans text-text-secondary truncate w-full text-center">{{
+            item.notes || '-'
           }}</span>
+          <span
+            v-if="item.status === 'rejected' && item.rejectionReason"
+            class="text-xs font-sans text-danger truncate w-full text-center"
+            :title="item.rejectionReason"
+          >
+            {{ t('borrowing.table.rejectionReasonPrefix') }} {{ item.rejectionReason }}
+          </span>
         </div>
         <!-- Due Date -->
         <div
@@ -138,62 +179,58 @@ const emit = defineEmits<{
 
         <!-- Actions -->
         <div class="flex justify-end items-center px-[13px] gap-2 w-[300px] shrink-0">
-          <AppButton
-            v-if="canApprove(item.status)"
-            size="sm"
-            variant="primary"
-            @click="emit('approve', item)"
-          >
-            Approve
-          </AppButton>
-          <AppButton
-            v-if="canApprove(item.status)"
-            size="sm"
-            variant="danger"
-            @click="emit('reject', item)"
-          >
-            Reject
-          </AppButton>
-          <AppButton
-            v-if="canMarkBorrowed(item.status)"
-            size="sm"
-            variant="accent"
-            @click="emit('markBorrowed', item)"
-          >
-            Mark Borrowed
-          </AppButton>
-          <AppButton
-            v-if="canReturn(item.status)"
-            size="sm"
-            variant="primary"
-            @click="emit('markReturned', item)"
-          >
-            Return
-          </AppButton>
+          <template v-if="canManageWorkflow">
+            <AppButton
+              v-if="canApprove(item.status)"
+              size="sm"
+              variant="primary"
+              @click="emit('approve', item)"
+            >
+              {{ t('borrowing.actions.approve') }}
+            </AppButton>
+            <AppButton
+              v-if="canApprove(item.status)"
+              size="sm"
+              variant="danger"
+              @click="emit('reject', item)"
+            >
+              {{ t('borrowing.actions.reject') }}
+            </AppButton>
+            <AppButton
+              v-if="canMarkBorrowed(item.status)"
+              size="sm"
+              variant="accent"
+              @click="emit('markBorrowed', item)"
+            >
+              {{ t('borrowing.actions.markBorrowed') }}
+            </AppButton>
+            <AppButton
+              v-if="canReturn(item.status)"
+              size="sm"
+              variant="primary"
+              @click="emit('markReturned', item)"
+            >
+              {{ t('borrowing.actions.markReturned') }}
+            </AppButton>
+          </template>
 
           <button
+            v-if="showEdit(item)"
             class="text-[#4285F4] hover:opacity-70 transition-opacity shrink-0"
-            title="Edit"
+            :title="t('borrowing.actions.edit')"
             @click="emit('edit', item)"
           >
             <SquarePen class="w-5 h-5" />
           </button>
           <button
+            v-if="showDelete(item)"
             class="text-danger hover:opacity-70 transition-opacity shrink-0"
-            title="Delete"
+            :title="t('borrowing.actions.delete')"
             @click="emit('delete', item)"
           >
             <Ban class="w-5 h-5" />
           </button>
         </div>
-      </div>
-
-      <!-- Empty state -->
-      <div
-        v-if="!items.length"
-        class="flex justify-center items-center bg-white border border-border rounded-[4px] py-12"
-      >
-        <span class="text-sm text-text-muted font-sans">No records found.</span>
       </div>
     </template>
   </div>

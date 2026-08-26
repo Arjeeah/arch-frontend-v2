@@ -1,0 +1,192 @@
+{
+  "en": {
+    "users": {
+      "title": "User Management",
+      "subtitle": "Manage system users and their roles",
+      "addUser": "Add User",
+      "searchPlaceholder": "Search",
+      "allRoles": "All Roles",
+      "allStatus": "All Status",
+      "allFaculties": "All Faculties",
+      "empty": {
+        "title": "No users found",
+        "description": "No users match the current filters."
+      },
+      "toast": {
+        "created": "User created successfully",
+        "updated": "User updated successfully",
+        "deleted": "User deleted successfully",
+        "saveFailed": "Failed to save user",
+        "deleteFailed": "Failed to delete user"
+      },
+      "deleteDialog": {
+        "title": "Delete User",
+        "confirm": "Delete",
+        "message": "Are you sure you want to delete {name}? This action cannot be undone."
+      },
+      "roles": {
+        "super_admin": "Super Admin",
+        "archivist": "Archivist",
+        "faculty_staff": "Faculty Staff"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "faculty": "Faculty",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions",
+        "editAction": "Edit user",
+        "deleteAction": "Delete user"
+      },
+      "detail": {
+        "loading": "Loading…",
+        "notFound": "User not found.",
+        "backToUsers": "Back to Users",
+        "role": "Role",
+        "faculties": "Faculties",
+        "createdAt": "Created At",
+        "back": "Back",
+        "edit": "Edit User"
+      },
+      "dialog": {
+        "createTitle": "Create User",
+        "editTitle": "Edit User",
+        "createSubtitle": "Add a new user to the system and assign their role and permissions.",
+        "editSubtitle": "Update user information and role assignment.",
+        "nameLabel": "Full Name",
+        "namePlaceholder": "Enter full name",
+        "emailLabel": "Email",
+        "emailPlaceholder": "User{'@'}limu.edu.ly",
+        "roleLabel": "Role",
+        "rolePlaceholder": "Select role",
+        "facultiesLabel": "Faculties",
+        "passwordLabel": "Default Password",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "statusLabel": "Status",
+        "statusHelp": "Set user account as active or inactive",
+        "cancel": "Cancel",
+        "save": "Save User",
+        "update": "Update User",
+        "errors": {
+          "nameRequired": "Full name is required",
+          "emailRequired": "Email is required",
+          "roleRequired": "Role is required",
+          "passwordRequired": "Password is required",
+          "facultyRequired": "Select at least one faculty"
+        },
+        "facultiesHintEdit": "Leave empty to keep the current faculties. Picking any replaces the whole assignment."
+      },
+      "facultyPicker": {
+        "loadError": "Could not load faculties",
+        "retry": "Retry",
+        "empty": "No faculties available"
+      },
+      "error": {
+        "title": "Could not load users",
+        "retry": "Try again"
+      }
+    }
+  },
+  "ar": {
+    "users": {
+      "title": "إدارة المستخدمين",
+      "subtitle": "إدارة مستخدمي النظام وأدوارهم",
+      "addUser": "إضافة مستخدم",
+      "searchPlaceholder": "بحث",
+      "allRoles": "جميع الأدوار",
+      "allStatus": "جميع الحالات",
+      "allFaculties": "جميع الكليات",
+      "empty": {
+        "title": "لا يوجد مستخدمون",
+        "description": "لا يوجد مستخدمون مطابقون للمرشحات الحالية."
+      },
+      "toast": {
+        "created": "تم إنشاء المستخدم بنجاح",
+        "updated": "تم تحديث المستخدم بنجاح",
+        "deleted": "تم حذف المستخدم بنجاح",
+        "saveFailed": "تعذر حفظ المستخدم",
+        "deleteFailed": "تعذر حذف المستخدم"
+      },
+      "deleteDialog": {
+        "title": "حذف المستخدم",
+        "confirm": "حذف",
+        "message": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء."
+      },
+      "roles": {
+        "super_admin": "مسؤول عام",
+        "archivist": "أمين الأرشيف",
+        "faculty_staff": "موظف كلية"
+      },
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "table": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "role": "الدور",
+        "faculty": "الكلية",
+        "status": "الحالة",
+        "createdAt": "تاريخ الإنشاء",
+        "actions": "الإجراءات",
+        "editAction": "تعديل المستخدم",
+        "deleteAction": "حذف المستخدم"
+      },
+      "detail": {
+        "loading": "جارٍ التحميل…",
+        "notFound": "المستخدم غير موجود.",
+        "backToUsers": "العودة إلى المستخدمين",
+        "role": "الدور",
+        "faculties": "الكليات",
+        "createdAt": "تاريخ الإنشاء",
+        "back": "رجوع",
+        "edit": "تعديل المستخدم"
+      },
+      "dialog": {
+        "createTitle": "إنشاء مستخدم",
+        "editTitle": "تعديل مستخدم",
+        "createSubtitle": "أضف مستخدمًا جديدًا إلى النظام وحدد دوره وصلاحياته.",
+        "editSubtitle": "تحديث بيانات المستخدم ودوره.",
+        "nameLabel": "الاسم الكامل",
+        "namePlaceholder": "أدخل الاسم الكامل",
+        "emailLabel": "البريد الإلكتروني",
+        "emailPlaceholder": "User{'@'}limu.edu.ly",
+        "roleLabel": "الدور",
+        "rolePlaceholder": "اختر الدور",
+        "facultiesLabel": "الكليات",
+        "passwordLabel": "كلمة المرور الافتراضية",
+        "showPassword": "إظهار كلمة المرور",
+        "hidePassword": "إخفاء كلمة المرور",
+        "statusLabel": "الحالة",
+        "statusHelp": "تعيين حالة حساب المستخدم كنشط أو غير نشط",
+        "cancel": "إلغاء",
+        "save": "حفظ المستخدم",
+        "update": "تحديث المستخدم",
+        "errors": {
+          "nameRequired": "الاسم الكامل مطلوب",
+          "emailRequired": "البريد الإلكتروني مطلوب",
+          "roleRequired": "الدور مطلوب",
+          "passwordRequired": "كلمة المرور مطلوبة",
+          "facultyRequired": "اختر كلية واحدة على الأقل"
+        },
+        "facultiesHintEdit": "اتركها فارغة للإبقاء على الكليات الحالية. اختيار أي كلية يستبدل التعيين بالكامل."
+      },
+      "facultyPicker": {
+        "loadError": "تعذر تحميل الكليات",
+        "retry": "إعادة المحاولة",
+        "empty": "لا توجد كليات متاحة"
+      },
+      "error": {
+        "title": "تعذر تحميل المستخدمين",
+        "retry": "إعادة المحاولة"
+      }
+    }
+  }
+}
