@@ -3,7 +3,9 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import axios from 'axios'
 import { ArrowLeft, Pencil } from 'lucide-vue-next'
+import AppErrorState from '@/shared/components/AppErrorState.vue'
 import { formatDate } from '@/shared/utils/date'
 import { useToasts } from '@/shared/composables/useToasts'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
@@ -27,14 +29,26 @@ const userId = computed(() => {
 
 const user = ref<User | null>(null)
 const notFound = ref(false)
+const loadError = ref<string | null>(null)
 
+/**
+ * A 404 and a dropped connection are different answers. `load` used to fold
+ * every failure into `notFound`, so a 500 or a timeout told the operator the
+ * record does not exist — and the only way to re-attempt was to navigate away
+ * and back, because the not-found branch offers no retry.
+ */
 async function load() {
   if (!userId.value) return
   notFound.value = false
+  loadError.value = null
   try {
     user.value = await store.fetchUser(userId.value)
-  } catch {
-    notFound.value = true
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      notFound.value = true
+    } else {
+      loadError.value = store.error ?? t('users.detail.loadError')
+    }
   }
 }
 
@@ -71,9 +85,17 @@ async function handleSave(data: UserInput) {
     <p class="text-text-secondary font-sans">{{ t('users.detail.loading') }}</p>
   </div>
 
-  <!-- Not found -->
+  <!-- Load failed for any reason other than "gone" — retryable -->
+  <AppErrorState
+    v-else-if="loadError"
+    :title="t('users.detail.loadError')"
+    :description="loadError"
+    @retry="load"
+  />
+
+  <!-- Genuinely not there -->
   <div v-else-if="!user || notFound" class="flex flex-col items-center justify-center py-24 gap-4">
-    <p class="text-text-secondary font-sans">{{ store.error ?? t('users.detail.notFound') }}</p>
+    <p class="text-text-secondary font-sans">{{ t('users.detail.notFound') }}</p>
     <button
       class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-display"
       @click="router.push('/users')"

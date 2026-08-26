@@ -585,12 +585,18 @@
       "errorsDownloaded": "Error file download started",
       "errorsFailed": "Could not download the error file",
       "historyCleared": "Import history cleared from this browser",
-      "refreshFailed": "Could not refresh the import status"
+      "refreshFailed": "Could not refresh the import status",
+      "jobRemoved": "Import removed from this list"
     },
     "confirmClear": {
       "title": "Clear the import history?",
       "message": "This only clears the list in your browser. Nothing that was already imported is affected.",
       "confirm": "Clear list"
+    },
+    "confirmRemove": {
+      "title": "Remove this job from the history?",
+      "message": "This only removes the row from your browser. Nothing that was already imported is affected.",
+      "confirm": "Remove"
     }
   },
   "locations": {
@@ -1098,7 +1104,8 @@
       "downloaded": "Download started",
       "downloadFailed": "Could not download the report",
       "historyCleared": "Report list cleared from this browser",
-      "refreshFailed": "Could not refresh the report status"
+      "refreshFailed": "Could not refresh the report status",
+      "jobRemoved": "Report removed from this list"
     },
     "confirmClear": {
       "title": "Clear the report list?",
@@ -1108,6 +1115,11 @@
     "emptyTypes": {
       "title": "No report types available",
       "description": "This account is not allowed to generate any of the system reports. Ask a super admin if you think that is wrong."
+    },
+    "confirmRemove": {
+      "title": "Remove this report from the list?",
+      "message": "The generated file stays on the server, but this browser is the only place holding a link to it — the API has no report index to find it again.",
+      "confirm": "Remove"
     }
   },
   "review": {
@@ -1677,7 +1689,8 @@
       "updated": "User updated successfully",
       "deleted": "User deleted successfully",
       "saveFailed": "Failed to save user",
-      "deleteFailed": "Failed to delete user"
+      "deleteFailed": "Failed to delete user",
+      "loadFailed": "Failed to load user"
     },
     "deleteDialog": {
       "title": "Delete User",
@@ -1707,7 +1720,8 @@
       "faculties": "Faculties",
       "createdAt": "Created At",
       "back": "Back",
-      "edit": "Edit User"
+      "edit": "Edit User",
+      "loadError": "Could not load this user"
     },
     "dialog": {
       "createTitle": "Create User",

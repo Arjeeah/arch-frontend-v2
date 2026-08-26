@@ -83,8 +83,24 @@ async function handleRefresh(jobId: string): Promise<void> {
   }
 }
 
+/**
+ * `routes/api/v1.php` exposes no report index, so this localStorage row is the
+ * only handle a completed report has — remove it and the generated file is
+ * still on the server but unreachable. The sibling "clear history" action on
+ * this page already confirms; a single misclick should not be cheaper.
+ */
+const pendingRemoveId = ref<string | null>(null)
+
 function handleRemove(jobId: string): void {
+  pendingRemoveId.value = jobId
+}
+
+function confirmRemove(): void {
+  const jobId = pendingRemoveId.value
+  if (!jobId) return
   store.removeJob(jobId)
+  pendingRemoveId.value = null
+  toasts.info(t('reports.toasts.jobRemoved'))
 }
 
 function confirmClear(): void {
@@ -189,6 +205,16 @@ function confirmClear(): void {
         @remove="handleRemove"
       />
     </section>
+
+    <AppConfirmDialog
+      :open="pendingRemoveId !== null"
+      :title="t('reports.confirmRemove.title')"
+      :message="t('reports.confirmRemove.message')"
+      :confirm-label="t('reports.confirmRemove.confirm')"
+      confirm-class="bg-danger text-white hover:opacity-80"
+      @close="pendingRemoveId = null"
+      @confirm="confirmRemove"
+    />
 
     <AppConfirmDialog
       :open="confirmClearOpen"

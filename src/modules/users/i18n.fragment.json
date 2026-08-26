@@ -17,7 +17,8 @@
         "updated": "User updated successfully",
         "deleted": "User deleted successfully",
         "saveFailed": "Failed to save user",
-        "deleteFailed": "Failed to delete user"
+        "deleteFailed": "Failed to delete user",
+        "loadFailed": "Failed to load user"
       },
       "deleteDialog": {
         "title": "Delete User",
@@ -47,7 +48,8 @@
         "faculties": "Faculties",
         "createdAt": "Created At",
         "back": "Back",
-        "edit": "Edit User"
+        "edit": "Edit User",
+        "loadError": "Could not load this user"
       },
       "dialog": {
         "createTitle": "Create User",
@@ -107,7 +109,8 @@
         "updated": "تم تحديث المستخدم بنجاح",
         "deleted": "تم حذف المستخدم بنجاح",
         "saveFailed": "تعذر حفظ المستخدم",
-        "deleteFailed": "تعذر حذف المستخدم"
+        "deleteFailed": "تعذر حذف المستخدم",
+        "loadFailed": "تعذر تحميل المستخدم"
       },
       "deleteDialog": {
         "title": "حذف المستخدم",
@@ -137,7 +140,8 @@
         "faculties": "الكليات",
         "createdAt": "تاريخ الإنشاء",
         "back": "رجوع",
-        "edit": "تعديل المستخدم"
+        "edit": "تعديل المستخدم",
+        "loadError": "تعذر تحميل هذا المستخدم"
       },
       "dialog": {
         "createTitle": "إنشاء مستخدم",

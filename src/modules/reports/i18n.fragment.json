@@ -115,7 +115,8 @@
         "downloaded": "Download started",
         "downloadFailed": "Could not download the report",
         "historyCleared": "Report list cleared from this browser",
-        "refreshFailed": "Could not refresh the report status"
+        "refreshFailed": "Could not refresh the report status",
+        "jobRemoved": "Report removed from this list"
       },
       "confirmClear": {
         "title": "Clear the report list?",
@@ -125,6 +126,11 @@
       "emptyTypes": {
         "title": "No report types available",
         "description": "This account is not allowed to generate any of the system reports. Ask a super admin if you think that is wrong."
+      },
+      "confirmRemove": {
+        "title": "Remove this report from the list?",
+        "message": "The generated file stays on the server, but this browser is the only place holding a link to it — the API has no report index to find it again.",
+        "confirm": "Remove"
       }
     }
   },
@@ -244,7 +250,8 @@
         "downloaded": "بدأ التنزيل",
         "downloadFailed": "تعذّر تنزيل التقرير",
         "historyCleared": "تم مسح قائمة التقارير من هذا المتصفح",
-        "refreshFailed": "تعذّر تحديث حالة التقرير"
+        "refreshFailed": "تعذّر تحديث حالة التقرير",
+        "jobRemoved": "تمت إزالة التقرير من هذه القائمة"
       },
       "confirmClear": {
         "title": "مسح قائمة التقارير؟",
@@ -254,6 +261,11 @@
       "emptyTypes": {
         "title": "لا توجد أنواع تقارير متاحة",
         "description": "لا يملك هذا الحساب صلاحية إنشاء أي من تقارير النظام. راجع المدير العام إن كنت ترى أن هذا غير صحيح."
+      },
+      "confirmRemove": {
+        "title": "إزالة هذا التقرير من القائمة؟",
+        "message": "يبقى الملف على الخادم، لكن هذا المتصفح هو المكان الوحيد الذي يحتفظ برابطه — ولا توفّر الواجهة البرمجية قائمة تقارير للعثور عليه مرة أخرى.",
+        "confirm": "إزالة"
       }
     }
   }

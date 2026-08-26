@@ -114,8 +114,22 @@ async function handleRefresh(jobId: string): Promise<void> {
   }
 }
 
+/**
+ * `removeJob` filters the row out and persists immediately — irreversible, and
+ * the sibling "clear history" action on this page already confirms.
+ */
+const pendingRemoveId = ref<string | null>(null)
+
 function handleRemove(jobId: string): void {
+  pendingRemoveId.value = jobId
+}
+
+function confirmRemove(): void {
+  const jobId = pendingRemoveId.value
+  if (!jobId) return
   store.removeJob(jobId)
+  pendingRemoveId.value = null
+  toasts.info(t('imports.toasts.jobRemoved'))
 }
 
 function confirmClear(): void {
@@ -210,6 +224,16 @@ function confirmClear(): void {
       @retry="reloadOpenErrors"
       @download="downloadOpenErrors"
       @close="store.clearErrorRows()"
+    />
+
+    <AppConfirmDialog
+      :open="pendingRemoveId !== null"
+      :title="t('imports.confirmRemove.title')"
+      :message="t('imports.confirmRemove.message')"
+      :confirm-label="t('imports.confirmRemove.confirm')"
+      confirm-class="bg-danger text-white hover:opacity-80"
+      @close="pendingRemoveId = null"
+      @confirm="confirmRemove"
     />
 
     <AppConfirmDialog

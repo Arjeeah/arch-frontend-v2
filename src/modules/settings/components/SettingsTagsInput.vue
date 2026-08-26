@@ -74,7 +74,7 @@ function remove(value: string): void {
       v-model="draft"
       type="text"
       :placeholder="t('settings.tagsInput.placeholder')"
-      class="w-full h-[38px] px-3 bg-white border border-border-dropdown rounded-lg text-xs font-display text-[#313144] placeholder:text-text-muted focus:outline-none focus:border-primary"
+      class="w-full h-[38px] px-3 bg-white border border-border-dropdown rounded-lg text-xs font-display text-text-input placeholder:text-text-muted focus:outline-none focus:border-primary"
       style="border-width: 1.3px"
       @keydown.enter.prevent="addFreeform"
       @keydown.,.prevent="addFreeform"

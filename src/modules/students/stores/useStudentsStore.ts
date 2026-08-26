@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { i18n } from '@/app/plugins/i18n'
 import { studentsApi } from '../api/studentsApi'
 import type { Student, StudentInput } from '../types'
 
@@ -11,6 +12,17 @@ import type { Student, StudentInput } from '../types'
  * `useServerTable`, which owns page/filter state and refetches on demand.
  * Mutations throw so the calling page can decide what to toast.
  */
+/**
+ * Store-level copy. These fallbacks land in `error`, which the pages render
+ * verbatim, so they have to be translated — an Arabic operator whose
+ * connection dropped mid-delete read an English sentence inside an otherwise
+ * Arabic dialog. A store is not a component, so it goes through the i18n
+ * instance directly, the way `useImportsStore` does.
+ */
+function tr(key: string): string {
+  return i18n.global.t(key)
+}
+
 export const useStudentsStore = defineStore('students', () => {
   const current = ref<Student | null>(null)
   const requiredDocumentTypes = ref<Array<{ id: string; name: string }>>([])
@@ -28,7 +40,7 @@ export const useStudentsStore = defineStore('students', () => {
     } catch (err) {
       current.value = null
       requiredDocumentTypes.value = []
-      error.value = getApiErrorMessage(err, 'Failed to load this student')
+      error.value = getApiErrorMessage(err, tr('students.errors.detailFailed'))
     } finally {
       loading.value = false
     }

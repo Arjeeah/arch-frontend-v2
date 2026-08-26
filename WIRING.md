@@ -2,21 +2,21 @@
 
 Ten module streams (`fc/s1` … `fc/s10`) each shipped a `WIRING.md` at the repo
 root describing the work they could not do from inside their own territory.
-They are preserved verbatim as `WIRING-s1.md` … `WIRING-s10.md`; this file
+They are preserved verbatim under `docs/wiring/`; this file
 records what was applied centrally and what is still outstanding.
 
-| file            | stream | modules                                       |
-| --------------- | ------ | --------------------------------------------- |
-| `WIRING-s1.md`  | S1     | `search`                                      |
-| `WIRING-s2.md`  | S2     | `pipeline` (bulk import + monitor)            |
-| `WIRING-s3.md`  | S3     | `review`                                      |
-| `WIRING-s4.md`  | S4     | `students`, `student-documents`               |
-| `WIRING-s5.md`  | S5     | `dashboard` (role landings)                   |
-| `WIRING-s6.md`  | S6     | `locations` (rooms/cabinets/drawers)          |
-| `WIRING-s7.md`  | S7     | `document-types`, `programs`                  |
-| `WIRING-s8.md`  | S8     | `notifications`, `settings`                   |
-| `WIRING-s9.md`  | S9     | `reports`, `imports`                          |
-| `WIRING-s10.md` | S10    | upgrades to `faculties`, `users`, `borrowing` |
+| file                        | stream | modules                                       |
+| --------------------------- | ------ | --------------------------------------------- |
+| `docs/wiring/WIRING-s1.md`  | S1     | `search`                                      |
+| `docs/wiring/WIRING-s2.md`  | S2     | `pipeline` (bulk import + monitor)            |
+| `docs/wiring/WIRING-s3.md`  | S3     | `review`                                      |
+| `docs/wiring/WIRING-s4.md`  | S4     | `students`, `student-documents`               |
+| `docs/wiring/WIRING-s5.md`  | S5     | `dashboard` (role landings)                   |
+| `docs/wiring/WIRING-s6.md`  | S6     | `locations` (rooms/cabinets/drawers)          |
+| `docs/wiring/WIRING-s7.md`  | S7     | `document-types`, `programs`                  |
+| `docs/wiring/WIRING-s8.md`  | S8     | `notifications`, `settings`                   |
+| `docs/wiring/WIRING-s9.md`  | S9     | `reports`, `imports`                          |
+| `docs/wiring/WIRING-s10.md` | S10    | upgrades to `faculties`, `users`, `borrowing` |
 
 ## Applied
 

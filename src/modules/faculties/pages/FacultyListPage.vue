@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Search } from 'lucide-vue-next'
 import { useFacultiesStore } from '../stores/useFacultiesStore'
 import FacultiesTable from '../components/FacultiesTable.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import CreateFacultyDialog from '../components/CreateFacultyDialog.vue'
+import AppSearchInput from '@/shared/components/AppSearchInput.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
@@ -134,16 +134,7 @@ async function confirmDelete() {
 
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
-      <div class="relative flex-1 min-w-[200px]">
-        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-        <input
-          v-model="search"
-          type="text"
-          :placeholder="t('faculties.searchPlaceholder')"
-          class="w-full h-[42px] ps-9 pe-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
-          style="border-width: 1.3px"
-        />
-      </div>
+      <AppSearchInput v-model="search" :placeholder="t('faculties.searchPlaceholder')" />
       <AppSelect
         v-model="statusFilter"
         :options="statusOptions"

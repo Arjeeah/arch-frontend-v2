@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { i18n } from '@/app/plugins/i18n'
 import { borrowingApi } from '../api/borrowingApi'
 import type { BorrowingCreateInput, BorrowingUpdateInput } from '../types'
 
@@ -11,6 +12,17 @@ import type { BorrowingCreateInput, BorrowingUpdateInput } from '../types'
  * table afterwards so server-derived state (status, borrowed_at, overdue
  * flags, …) stays authoritative.
  */
+/**
+ * Store-level copy. These fallbacks land in `error`, which the pages render
+ * verbatim, so they have to be translated — an Arabic operator whose
+ * connection dropped mid-delete read an English sentence inside an otherwise
+ * Arabic dialog. A store is not a component, so it goes through the i18n
+ * instance directly, the way `useImportsStore` does.
+ */
+function tr(key: string): string {
+  return i18n.global.t(key)
+}
+
 export const useBorrowingStore = defineStore('borrowing', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -29,23 +41,25 @@ export const useBorrowingStore = defineStore('borrowing', () => {
   }
 
   const create = (input: BorrowingCreateInput) =>
-    run(() => borrowingApi.create(input), 'Failed to create borrowing')
+    run(() => borrowingApi.create(input), tr('borrowing.toast.saveFailed'))
 
   const update = (id: string, input: BorrowingUpdateInput) =>
-    run(() => borrowingApi.update(id, input), 'Failed to update borrowing')
+    run(() => borrowingApi.update(id, input), tr('borrowing.toast.saveFailed'))
 
-  const remove = (id: string) => run(() => borrowingApi.delete(id), 'Failed to delete borrowing')
+  const remove = (id: string) =>
+    run(() => borrowingApi.delete(id), tr('borrowing.toast.actionFailed'))
 
-  const approve = (id: string) => run(() => borrowingApi.approve(id), 'Failed to approve borrowing')
+  const approve = (id: string) =>
+    run(() => borrowingApi.approve(id), tr('borrowing.toast.actionFailed'))
 
   const reject = (id: string, rejectionReason: string) =>
-    run(() => borrowingApi.reject(id, rejectionReason), 'Failed to reject borrowing')
+    run(() => borrowingApi.reject(id, rejectionReason), tr('borrowing.toast.actionFailed'))
 
   const markBorrowed = (id: string) =>
-    run(() => borrowingApi.markBorrowed(id), 'Failed to mark as borrowed')
+    run(() => borrowingApi.markBorrowed(id), tr('borrowing.toast.actionFailed'))
 
   const markReturned = (id: string) =>
-    run(() => borrowingApi.markReturned(id), 'Failed to mark as returned')
+    run(() => borrowingApi.markReturned(id), tr('borrowing.toast.actionFailed'))
 
   return {
     loading,

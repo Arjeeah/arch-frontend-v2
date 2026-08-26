@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Search, BookOpen, AlertCircle, Clock, CheckCircle } from 'lucide-vue-next'
+import { BookOpen, AlertCircle, Clock, CheckCircle } from 'lucide-vue-next'
 import AppStatCard from '@/shared/components/AppStatCard.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
+import AppSearchInput from '@/shared/components/AppSearchInput.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
@@ -282,16 +283,7 @@ async function handleMarkBorrowed(item: Borrowing) {
 
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
-      <div class="relative flex-1 min-w-[200px]">
-        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-        <input
-          v-model="search"
-          type="text"
-          :placeholder="t('borrowing.searchPlaceholder')"
-          class="w-full h-[42px] ps-9 pe-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
-          style="border-width: 1.3px"
-        />
-      </div>
+      <AppSearchInput v-model="search" :placeholder="t('borrowing.searchPlaceholder')" />
       <AppSelect
         v-model="statusFilter"
         :options="statusOptions"

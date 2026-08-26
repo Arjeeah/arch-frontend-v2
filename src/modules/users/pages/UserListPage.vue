@@ -2,9 +2,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Search, UserPlus } from 'lucide-vue-next'
+import { UserPlus } from 'lucide-vue-next'
 import UserTable from '../components/UserTable.vue'
 import CreateUserDialog from '../components/CreateUserDialog.vue'
+import AppSearchInput from '@/shared/components/AppSearchInput.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import AppPagination from '@/shared/components/AppPagination.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
@@ -171,16 +172,7 @@ const statusOptions = computed(() => [
     <!-- Filters -->
     <div class="flex items-center gap-[15px] flex-wrap">
       <!-- Search -->
-      <div class="relative flex-1 min-w-[200px]">
-        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-        <input
-          v-model="search"
-          type="text"
-          :placeholder="t('users.searchPlaceholder')"
-          class="w-full h-[42px] ps-9 pe-4 bg-white border border-border-dropdown rounded-lg text-xs font-display font-medium text-[#313144] placeholder:text-text-muted placeholder:font-display placeholder:font-light focus:outline-none focus:border-primary"
-          style="border-width: 1.3px"
-        />
-      </div>
+      <AppSearchInput v-model="search" :placeholder="t('users.searchPlaceholder')" />
 
       <AppSelect v-model="roleFilter" :options="roleOptions" :placeholder="t('users.allRoles')" />
       <AppSelect
