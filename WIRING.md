@@ -97,7 +97,13 @@ The eight `pipeline.status.*` Arabic values are copied verbatim from
    `DataTable.vue` emits physical `text-left` / `text-center` / `text-right` on its `<th>`s and a
    hard-coded English `Loading…` / `No data`. In RTL the headers align opposite to the cells, which
    use logical `text-start`. Worth switching to `text-start`/`text-end` and `t()` in a shared pass.
-   `AppSelect.vue` and `AppPagination.vue` likewise use `pl-`/`pr-`/`right-3` internally.
+   `AppSelect.vue` and `AppPagination.vue` likewise use `pl-`/`pr-`/`right-3` internally, and
+   `AppConfirmDialog.vue` hard-codes an English `Cancel`.
+
+   **Worked around for the loading string only:** `PipelineDocumentsTable.vue` renders its own
+   translated skeleton rows in the `#rows` slot instead of passing `:loading` to `DataTable`, so the
+   untranslatable `Loading…` never reaches this screen — it was the string an operator sees most
+   often here. The `<th>` alignment issue still stands and still needs the shared pass.
 
 4. **Response-shape deviation from the phase-2 spec.** `POST /v1/bulk-import` returns
    `{ documents_queued, document_ids }` — the key is `documents_queued`, not `count`

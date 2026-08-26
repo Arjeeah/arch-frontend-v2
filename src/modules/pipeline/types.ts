@@ -76,8 +76,14 @@ export interface BulkImportResult {
   documentIds: string[]
 }
 
-/** Server-side filters `/v1/student-documents` actually supports. */
-export interface PipelineDocumentFilters {
+/**
+ * Server-side filters `/v1/student-documents` actually supports.
+ *
+ * A `type` rather than an `interface` on purpose: only type aliases get an
+ * implicit index signature, and without one this is not assignable to the
+ * `Record<string, unknown>` that `useServerTable`'s `setFilters` takes.
+ */
+export type PipelineDocumentFilters = {
   /** Partial match on `file_number`. */
   fileNumber?: string
   /** Exact match: `complete` | `incomplete` | `draft`. */

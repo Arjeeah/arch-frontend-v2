@@ -29,6 +29,7 @@ import {
   FILE_STATUSES,
   type DocumentPipelineStatus,
   type PipelineDocument,
+  type PipelineDocumentFilters,
   type PipelineStatusCounts,
 } from '../types'
 import PipelineStatusBreakdown from '../components/PipelineStatusBreakdown.vue'
@@ -84,8 +85,18 @@ const search = ref('')
 const debouncedSearch = useDebouncedRef(search)
 const fileStatus = ref('')
 
-watch(debouncedSearch, (value) => table.setFilters({ fileNumber: value }))
-watch(fileStatus, (value) => table.setFilters({ fileStatus: value }))
+/**
+ * `setFilters` takes a bare `Record<string, unknown>`, so a misspelt key would
+ * be accepted and then silently dropped by `toDocumentQuery` — the filter would
+ * just stop working. Going through the module's own filter type makes the two
+ * ends fail to compile instead.
+ */
+function applyFilters(next: PipelineDocumentFilters): void {
+  table.setFilters(next)
+}
+
+watch(debouncedSearch, (value) => applyFilters({ fileNumber: value }))
+watch(fileStatus, (value) => applyFilters({ fileStatus: value }))
 
 const fileStatusOptions = computed(() => [
   { value: '', label: t('pipeline.monitor.allFileStatuses') },

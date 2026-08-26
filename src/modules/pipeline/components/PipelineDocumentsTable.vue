@@ -6,7 +6,7 @@ import DataTable from '@/shared/components/DataTable.vue'
 import AppButton from '@/shared/components/AppButton.vue'
 import { relativeTime } from '@/shared/utils/date'
 import { isRetryableStatus } from '../status'
-import { formatConfidence, formatCount } from '../format'
+import { formatConfidence, formatCount, intlLocale } from '../format'
 import type { DocumentPipelineStatus, PipelineDocument } from '../types'
 import PipelineStatusChip from './PipelineStatusChip.vue'
 
@@ -33,14 +33,37 @@ const expanded = ref<Set<string>>(new Set())
 const viewRows = computed(() =>
   props.rows.map((document) => {
     const status = props.statuses.get(document.id)
+    const canRetry = status !== undefined && isRetryableStatus(status.status)
     return {
       document,
       status,
-      canRetry: status !== undefined && isRetryableStatus(status.status),
+      canRetry,
+      // A row whose state never loaded is disabled for a different reason than
+      // one in a non-retryable state; saying "only failed documents" there
+      // sends the operator looking for a problem that is not the one they have.
+      retryHint:
+        status === undefined
+          ? t('pipeline.monitor.statusUnavailable')
+          : canRetry
+            ? t('pipeline.monitor.retry')
+            : t('pipeline.monitor.retryUnavailable'),
       isExpanded: expanded.value.has(document.id),
     }
   }),
 )
+
+/**
+ * Placeholder rows shown while a page loads.
+ *
+ * `DataTable`'s own `loading` state is deliberately not used: it renders a
+ * hard-coded English "Loading…" with no way to translate it, which on an
+ * Arabic-first operations screen is the one string an operator sees most often.
+ * Rendering the placeholder here keeps it inside the module's i18n.
+ */
+const SKELETON_ROWS = 5
+
+/** Skeletons replace the rows while a page loads, rather than sitting under them. */
+const renderRows = computed(() => (props.loading ? [] : viewRows.value))
 
 // A row that scrolls off the page should not come back expanded when a
 // different document later lands in the same position.
@@ -110,9 +133,27 @@ function detailEntries(status: DocumentPipelineStatus): Array<{ label: string; v
 </script>
 
 <template>
-  <DataTable :columns="columns" :loading="loading" variant="plain" class="min-w-[900px]">
+  <DataTable :columns="columns" variant="plain" class="min-w-[900px]">
     <template #rows>
-      <template v-for="row in viewRows" :key="row.document.id">
+      <tr
+        v-for="n in loading ? SKELETON_ROWS : 0"
+        :key="`skeleton-${n}`"
+        class="border-t border-border"
+      >
+        <td v-for="(col, index) in columns" :key="col.key" class="px-4 py-3">
+          <!-- An explicit width, not `w-full`: the table lays out automatically,
+               so a block with `width:auto` contributes no intrinsic width and
+               the columns collapse while the page is loading. -->
+          <span
+            class="block h-4 w-[120px] animate-pulse rounded bg-surface-input"
+            :role="index === 0 ? 'status' : undefined"
+            :aria-label="index === 0 ? t('pipeline.monitor.loading') : undefined"
+            :aria-hidden="index === 0 ? undefined : 'true'"
+          />
+        </td>
+      </tr>
+
+      <template v-for="row in renderRows" :key="row.document.id">
         <tr class="border-t border-border transition-colors hover:bg-surface">
           <!-- Document -->
           <td class="px-4 py-3 align-top text-start">
@@ -191,7 +232,7 @@ function detailEntries(status: DocumentPipelineStatus): Array<{ label: string; v
           <td
             class="whitespace-nowrap px-4 py-3 align-top font-sans text-xs text-text-secondary text-start"
           >
-            {{ relativeTime(row.document.createdAt, locale) }}
+            {{ relativeTime(row.document.createdAt, intlLocale(locale)) }}
           </td>
 
           <!-- Actions -->
@@ -202,11 +243,7 @@ function detailEntries(status: DocumentPipelineStatus): Array<{ label: string; v
                 size="sm"
                 :disabled="!row.canRetry"
                 :loading="retryingId === row.document.id"
-                :title="
-                  row.canRetry
-                    ? t('pipeline.monitor.retry')
-                    : t('pipeline.monitor.retryUnavailable')
-                "
+                :title="row.retryHint"
                 @click="emit('retry', row.document.id)"
               >
                 <RefreshCw v-if="retryingId !== row.document.id" class="h-3.5 w-3.5" />

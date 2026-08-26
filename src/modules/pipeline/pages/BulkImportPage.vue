@@ -45,6 +45,19 @@ const rules = computed(() => [
 ])
 
 /**
+ * The same limits again, condensed for inside the drop zone. Interpolated
+ * rather than spelled out in the locale files so the two constants stay the
+ * single source of the numbers — a translation that hard-codes "20 MB" goes
+ * stale silently the day the backend rule changes.
+ */
+const dropHint = computed(() =>
+  t('pipeline.upload.dropHint', {
+    size: BULK_IMPORT_MAX_SIZE_MB,
+    max: formatCount(BULK_IMPORT_MAX_FILES, locale.value),
+  }),
+)
+
+/**
  * `AppFileUpload` already lists every rejection under the drop zone, so the
  * toast only says how many were turned away — repeating each reason twice on
  * a 500-file drop would bury the screen.
@@ -160,7 +173,7 @@ function clearSelection(): void {
           multiple
           :label="t('pipeline.upload.dropLabel')"
           :browse-label="t('pipeline.upload.browse')"
-          :hint="t('pipeline.upload.dropHint')"
+          :hint="dropHint"
           :remove-label="t('pipeline.upload.removeFile')"
           @error="onRejected"
         />

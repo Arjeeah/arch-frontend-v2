@@ -7,21 +7,26 @@
  */
 
 /**
- * The locale tag numbers are formatted with.
+ * The locale tag every `Intl` formatter in this module is given.
  *
  * Arabic is pinned to the Latin numbering system (`-u-nu-latn`) rather than the
  * Eastern Arabic digits `Intl` would otherwise pick. This is an operations
  * screen: it sits beside file numbers, UUIDs and page counts that are Latin
  * whatever the interface language, and mixing the two numeral systems in one
  * table makes the figures harder, not easier, to scan.
+ *
+ * Exported because the same rule has to reach the shared formatters this module
+ * calls — `relativeTime()` takes a locale tag, and passing a bare `ar` would put
+ * Eastern Arabic digits in the "Added" column next to Latin page counts and
+ * percentages in the very same row.
  */
-function numberLocale(locale: string): string {
+export function intlLocale(locale: string): string {
   return locale === 'ar' ? 'ar-u-nu-latn' : locale
 }
 
 /** Thousands-separated integer, e.g. `1,204`. */
 export function formatCount(value: number, locale: string): string {
-  return new Intl.NumberFormat(numberLocale(locale)).format(value)
+  return new Intl.NumberFormat(intlLocale(locale)).format(value)
 }
 
 /**
@@ -39,7 +44,7 @@ export function formatCount(value: number, locale: string): string {
  */
 export function formatConfidence(value: number | null | undefined, locale: string): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return '-'
-  return new Intl.NumberFormat(numberLocale(locale), {
+  return new Intl.NumberFormat(intlLocale(locale), {
     style: 'percent',
     maximumFractionDigits: 0,
   }).format(value / 100)
@@ -47,7 +52,7 @@ export function formatConfidence(value: number | null | undefined, locale: strin
 
 /** Human-readable file size for the upload screen's selection summary. */
 export function formatBytes(bytes: number, locale: string): string {
-  const formatter = new Intl.NumberFormat(numberLocale(locale), { maximumFractionDigits: 1 })
+  const formatter = new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 1 })
   if (bytes < 1024) return `${formatter.format(bytes)} B`
   if (bytes < 1024 * 1024) return `${formatter.format(bytes / 1024)} KB`
   return `${formatter.format(bytes / (1024 * 1024))} MB`
