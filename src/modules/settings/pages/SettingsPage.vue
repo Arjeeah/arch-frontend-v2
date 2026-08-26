@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { RotateCcw, Save, ShieldAlert } from 'lucide-vue-next'
 import AppButton from '@/shared/components/AppButton.vue'
@@ -18,6 +18,7 @@ import type { OverrideCapacityInput, SettingsGroupKey } from '../types'
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 const toasts = useToasts()
 const store = useSettingsStore()
 
@@ -36,6 +37,24 @@ function initialGroup(): SettingsGroupKey {
 }
 
 const activeGroup = ref<SettingsGroupKey>(initialGroup())
+
+/**
+ * Kept in step with the URL for the life of the component, not just seeded at
+ * setup. `/settings` → `/settings/storage` is a param-only change on the same
+ * route record, so `<RouterView>` reuses this instance and setup never re-runs
+ * — the storage-capacity notification landed on the General tab whenever the
+ * user was already sitting on Settings, which is the likeliest case.
+ */
+watch(
+  () => route.params.group,
+  () => (activeGroup.value = initialGroup()),
+)
+
+/** Mirror the tab back into the URL so the deep link and the screen agree. */
+function selectGroup(group: SettingsGroupKey): void {
+  activeGroup.value = group
+  void router.replace({ path: `/settings/${group}` })
+}
 const draft = ref<Record<string, unknown>>({})
 const resetConfirmOpen = ref(false)
 const overrideDialogOpen = ref(false)
@@ -125,7 +144,7 @@ async function handleOverrideCapacity(input: OverrideCapacityInput): Promise<voi
               ? 'bg-primary text-white font-medium'
               : 'text-text-secondary hover:bg-surface'
           "
-          @click="activeGroup = tab.key"
+          @click="selectGroup(tab.key)"
         >
           {{ tab.label }}
         </button>

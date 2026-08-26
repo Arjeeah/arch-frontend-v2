@@ -39,8 +39,14 @@ const ROLE_LANDING: Record<UserRole, string> = {
   faculty_staff: '/dashboard',
 }
 
-/** Landing path for the signed-in user, falling back to the shared dashboard. */
-function landingFor(role?: UserRole | null): string {
+/**
+ * Landing path for the signed-in user, falling back to the shared dashboard.
+ *
+ * Exported because the login page needs it too: it used to hardcode
+ * `'/dashboard'` as its post-login fallback, so repointing a role's landing
+ * here would have changed `/` and left the login flow behind.
+ */
+export function landingFor(role?: UserRole | null): string {
   return role ? ROLE_LANDING[role] : HOME_PATH
 }
 
@@ -194,6 +200,12 @@ const router = createRouter({
 
         // ── Oversight ─────────────────────────────────────────────────────
         {
+          // Narrower than `AuditLogPolicy::viewAny`, which returns true for
+          // every role and scopes faculty staff to their own rows server-side
+          // (`AuditLogService::isFacultyOnly`). The allowlist matches
+          // `viewStats`/`export` instead, because the page leads with the stat
+          // cards and the CSV export, both of which 403 for `faculty_staff`.
+          // Opening it up means hiding those two for that role first.
           path: 'audit',
           component: () => import('@/modules/audit/pages/AuditPage.vue'),
           meta: { roles: ['super_admin', 'archivist'] },

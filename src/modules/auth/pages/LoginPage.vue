@@ -3,6 +3,7 @@ import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Eye, EyeOff } from 'lucide-vue-next'
+import { landingFor } from '@/app/router'
 import { useAuthStore } from '../store/useAuthStore'
 import pattern from '@/assets/login-pattern.png'
 
@@ -49,7 +50,11 @@ async function handleLogin() {
   if (!validate()) return
   const { success } = await authStore.login(credentials)
   if (success) {
-    const redirect = (router.currentRoute.value.query.redirect as string) || '/dashboard'
+    // `ROLE_LANDING` is the single source of truth for where a role starts —
+    // hardcoding `/dashboard` here made `/` and the login flow disagree the
+    // moment a role's landing moved.
+    const redirect =
+      (router.currentRoute.value.query.redirect as string) || landingFor(authStore.role)
     router.push(redirect)
   }
 }

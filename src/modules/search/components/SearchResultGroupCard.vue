@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ArrowRight, ChevronDown, FileStack, GraduationCap, Hash, User } from 'lucide-vue-next'
+import { roleAllowed } from '@/app/config/sessionRole'
 import SearchResultCard from './SearchResultCard.vue'
 import { documentPath, studentPath } from '../utils/resultLinks'
 import type { SearchMode, SearchResultGroup } from '../types'
@@ -21,6 +23,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const router = useRouter()
 
 /** Pages shown before the "show all" toggle appears. */
 const COLLAPSED_HITS = 3
@@ -46,13 +49,29 @@ const linkLabel = computed(() =>
 )
 
 const title = computed(() => props.group.studentName ?? t('search.results.unassigned'))
+
+/**
+ * `/search` is open to every role (`PipelinePolicy::search()` returns true) but
+ * both destinations are `['super_admin', 'archivist']`, so for faculty staff
+ * every result used to be a live-looking link that the guard bounced straight
+ * back to `/dashboard`. Asked of the router rather than hardcoded, so opening
+ * either route to another role lights these links up on its own — the same
+ * check `DashboardLinkButton` makes.
+ */
+const canOpen = computed(() => {
+  const resolved = router.resolve(target.value)
+  if (resolved.name === 'not-found') return false
+  return roleAllowed(resolved.meta.roles)
+})
 </script>
 
 <template>
   <article class="overflow-hidden rounded-xl border border-border bg-surface-card">
-    <RouterLink
-      :to="target"
-      class="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-surface p-4 transition-colors hover:bg-surface-input"
+    <component
+      :is="canOpen ? RouterLink : 'div'"
+      :to="canOpen ? target : undefined"
+      class="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-surface p-4"
+      :class="canOpen ? 'transition-colors hover:bg-surface-input' : ''"
     >
       <div class="flex min-w-0 items-start gap-3">
         <span
@@ -98,12 +117,15 @@ const title = computed(() => props.group.studentName ?? t('search.results.unassi
         <span class="font-sans text-xs text-text-secondary">
           {{ t('search.results.matchingPages', { count: props.group.hits.length }) }}
         </span>
-        <span class="inline-flex items-center gap-1 font-sans text-xs font-medium text-primary">
+        <span
+          v-if="canOpen"
+          class="inline-flex items-center gap-1 font-sans text-xs font-medium text-primary"
+        >
           {{ linkLabel }}
           <ArrowRight class="h-3.5 w-3.5 rtl:rotate-180" />
         </span>
       </div>
-    </RouterLink>
+    </component>
 
     <ul class="flex flex-col gap-2 p-4">
       <SearchResultCard

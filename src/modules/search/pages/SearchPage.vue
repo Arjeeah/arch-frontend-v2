@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { SearchX, Telescope } from 'lucide-vue-next'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
@@ -14,12 +15,33 @@ import { useSearchStore } from '../stores/useSearchStore'
 import type { StudentStatus } from '../types'
 
 const { t } = useI18n()
+const route = useRoute()
 const toasts = useToasts()
 const store = useSearchStore()
 
 onMounted(() => {
   void store.loadLookups()
+  void applyQueryParam()
 })
+
+/**
+ * `?q=` is how the shell's header search box hands a query over — the box is on
+ * every screen and had nowhere to send one before. Also makes a search
+ * shareable as a URL. Re-running is guarded on the query actually changing, so
+ * a filter navigation does not fire a second embedding call.
+ */
+async function applyQueryParam(): Promise<void> {
+  const raw = Array.isArray(route.query.q) ? route.query.q[0] : route.query.q
+  const incoming = (raw ?? '').trim()
+  if (!incoming || incoming === store.query.trim()) return
+  store.query = incoming
+  if (store.isQueryValid) await runSearch()
+}
+
+watch(
+  () => route.query.q,
+  () => void applyQueryParam(),
+)
 
 /**
  * The query the results on screen belong to — not the box's current contents,

@@ -12,6 +12,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   logout: []
   /**
+   * The header search box was submitted. `shared` cannot reach the router's
+   * route table, so the layout decides where a query goes — today `/search`.
+   */
+  search: [query: string]
+  /**
    * A locale was picked. Persisting it and flipping `<html dir>` happens in the
    * app layer (`setLocale` in `src/app/plugins/i18n.ts`) — shared components
    * may not import from `src/app/`.
@@ -36,6 +41,11 @@ function selectLocale(next: string) {
   if (next !== locale.value) emit('locale-change', next)
 }
 
+function submitSearch(value: string) {
+  const query = value.trim()
+  if (query) emit('search', query)
+}
+
 function logout() {
   menuOpen.value = false
   emit('logout')
@@ -47,7 +57,11 @@ function logout() {
     <div class="flex items-center justify-between w-full gap-8">
       <!-- Search -->
       <div class="flex-1 max-w-2xl">
-        <SearchBar v-model="search" :placeholder="t('header.searchPlaceholder')" />
+        <SearchBar
+          v-model="search"
+          :placeholder="t('header.searchPlaceholder')"
+          @submit="submitSearch"
+        />
       </div>
 
       <!-- Right: language, notifications, profile -->

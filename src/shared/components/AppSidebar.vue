@@ -3,7 +3,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import SidebarNavItem from './SidebarNavItem.vue'
 import logo from '@/assets/logo.svg'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { Component } from 'vue'
 import {
   Archive,
@@ -197,8 +197,35 @@ const visibleNavItems = computed<NavItem[]>(() =>
     .filter((item) => Boolean(item.to) || (item.children?.length ?? 0) > 0),
 )
 
-// sub-menu drop down
-const openDropdown = ref<string | null>(null)
+/**
+ * Sub-menu disclosure.
+ *
+ * Seeded from the current route and kept in step with it, so a hard refresh, a
+ * bookmark or an in-app cross-link (Bulk import ↔ Monitor, Faculties ↔
+ * Programs) opens the group it landed in. It used to start `null` and only
+ * ever change on click, which rendered the parent highlighted-but-closed with
+ * no way to reach the sibling page.
+ */
+const openDropdown = ref<string | null>(groupForPath(route.path))
+
+function groupForPath(path: string): string | null {
+  return (
+    navItems.find((item) =>
+      item.children?.some((child) => path === child.to || path.startsWith(child.to + '/')),
+    )?.key ?? null
+  )
+}
+
+watch(
+  () => route.path,
+  (path) => {
+    const group = groupForPath(path)
+    // Only force it open — a user who collapsed the group they are standing in
+    // should not have it spring back on the next navigation inside it.
+    if (group && openDropdown.value !== group) openDropdown.value = group
+  },
+)
+
 function toggleDropdown(key: string) {
   openDropdown.value = openDropdown.value === key ? null : key
 }
@@ -217,7 +244,7 @@ function isActive(item: NavItem): boolean {
     <!-- Logo -->
 
     <div class="flex items-center py-2">
-      <img :src="logo" alt="ARCH system" class="h-14 w-auto" />
+      <img :src="logo" :alt="t('common.logoAlt')" class="h-14 w-auto" />
     </div>
 
     <!-- Nav -->

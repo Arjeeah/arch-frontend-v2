@@ -16,6 +16,14 @@ async function handleLogout() {
   router.push('/login')
 }
 
+/**
+ * The shell's search box now has somewhere to go. `SearchPage` reads `?q=` and
+ * runs the search on mount, so this is a plain navigation.
+ */
+function handleSearch(query: string) {
+  void router.push({ path: '/search', query: { q: query } })
+}
+
 // The header can't reach `src/app/` itself, so the layout does the persisting.
 function handleLocaleChange(locale: string) {
   if (isSupportedLocale(locale)) setLocale(locale)
@@ -34,6 +42,7 @@ function handleLocaleChange(locale: string) {
         :user-name="authStore.userName ?? undefined"
         @logout="handleLogout"
         @locale-change="handleLocaleChange"
+        @search="handleSearch"
       >
         <template #notifications>
           <NotificationsBell />

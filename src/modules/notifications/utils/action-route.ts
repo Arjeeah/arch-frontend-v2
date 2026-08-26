@@ -1,4 +1,5 @@
 import type { Router, RouteLocationRaw } from 'vue-router'
+import { roleAllowed } from '@/app/config/sessionRole'
 
 /**
  * Resolves a notification's `action_url` to a route this frontend actually
@@ -16,6 +17,13 @@ import type { Router, RouteLocationRaw } from 'vue-router'
  * The catch-all is a *child* of the layout route, so an unserved path still
  * reports `matched.length > 0`; the route name is what distinguishes it.
  *
+ * A resolved path is not enough on its own: the route's `meta.roles` has to
+ * admit the signed-in role too, or the guard bounces the click to `/dashboard`
+ * with no explanation. `StorageCapacityWarningNotification` is sent to
+ * super_admin *and* archivist but deep-links to `/settings/storage`, which is
+ * super_admin only — so every archivist who clicked it dead-ended. Returning
+ * `null` here is what routes them to the "no destination" toast instead.
+ *
  * Returning the location (rather than a boolean) keeps the caller cast-free:
  * a truthy result is already a valid `router.push` argument.
  */
@@ -27,6 +35,7 @@ export function resolveActionRoute(
   try {
     const resolved = router.resolve(actionUrl)
     if (!resolved.matched.length || resolved.name === 'not-found') return null
+    if (!roleAllowed(resolved.meta.roles)) return null
     return resolved
   } catch {
     // `resolve` throws on a malformed path. `action_url` is untrusted wire
