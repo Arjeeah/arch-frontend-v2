@@ -18,7 +18,7 @@ import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { ROLES } from '../types'
 import type { User, UserInput } from '../types'
 import type { FacultyOption } from '../api/usersApi'
-import { usersApi } from '../api/usersApi'
+import { toUpdateInput, usersApi } from '../api/usersApi'
 import { useUsersStore } from '../stores/useUsersStore'
 
 const { t } = useI18n()
@@ -105,7 +105,9 @@ function openEdit(user: User) {
 async function handleSave(data: UserInput) {
   try {
     if (editingUser.value) {
-      await store.updateUser(editingUser.value.id, data)
+      // `toUpdateInput` drops an email the operator did not change — the
+      // backend re-validates `ends_with:@limu.edu.ly` on whatever is sent.
+      await store.updateUser(editingUser.value.id, toUpdateInput(data, editingUser.value))
       toasts.success(t('users.toast.updated'))
     } else {
       await store.createUser(data)

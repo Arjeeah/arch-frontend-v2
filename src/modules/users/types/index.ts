@@ -22,8 +22,9 @@ export interface UserFaculty {
 }
 
 export interface User {
-  // verify against live API: `users`/`user_faculties` tables use UUID primary
-  // keys (`HasUuids` on the `User` model) — never parse this as a number.
+  // Verified against the running API: an id off the wire looks like
+  // `01a03de0-775c-7004-b340-88a0f53663b5` — a UUID string (`HasUuids` on the
+  // `User` model), never an integer. Do not parse it as a number.
   id: string
   name: string
   email: string
@@ -34,11 +35,14 @@ export interface User {
    * Users belong to many faculties. Read-only in the UI — see `UserInput.facultyIds`
    * for the write side.
    *
-   * verify against live API: `UserResource::toArray()` does not emit a
-   * `faculties` key at all today, even though the controller loads the
-   * relation before returning — so this is always `[]` against the real
-   * backend until that resource is fixed. Kept typed and mapped so the UI
-   * starts rendering faculty names the moment the backend catches up.
+   * Verified against the running API: `UserResource::toArray()` emits exactly
+   * `id, name, email, roles, status, created_at, updated_at, last_login` — no
+   * `faculties` key on index, show, store or update, even though the controller
+   * calls `->load(['roles', 'faculties'])` first. So this is `[]` for every row
+   * until `UserResource` is fixed server-side. Kept typed and mapped so the UI
+   * starts rendering faculty names the moment the backend catches up; the
+   * consequence today is that the edit dialog always opens with an empty
+   * selection, which is why `usersApi.toPayload` drops an empty one.
    */
   faculties: UserFaculty[]
 }

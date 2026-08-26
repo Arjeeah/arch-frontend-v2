@@ -16,11 +16,15 @@ interface ProgramResource {
   code: string
   /**
    * `whenLoaded('faculty')` — present on `index` (the controller calls
-   * `->with('faculty')`), but `store`/`update` return the model straight
-   * from `Program::create()`/`update()` with no eager load, so this key can
-   * be entirely absent there rather than `null`.
-   * // verify against live API: confirm store/update responses either omit
-   * // the key or resolve it consistently once the backend is reachable.
+   * `->with('faculty')`), absent everywhere else.
+   *
+   * Verified against the running API: `show`, `store`, `update` and `restore`
+   * all return the model straight from Eloquent with no eager load, and the key
+   * is **omitted entirely** rather than sent as `null` — Laravel strips a
+   * `MissingValue` from the payload. `index` sends the full nested
+   * `FacultyResource` (`id, code, name_ar, name_en, status, created_at,
+   * updated_at`). Hence the optional-and-nullable type, and hence
+   * `fromResource` mapping the absence to `null` instead of inventing an id.
    */
   faculty?: FacultyResourceLite | null
   name_ar: string
@@ -164,10 +168,12 @@ export const programsApi = {
   /**
    * `POST /v1/academic/programs/{id}/restore` — not in the shared
    * `API_ENDPOINTS` map (that file is outside this module's territory), so
-   * the path is hardcoded here, same pattern as `facultiesApi.restore`. Not
-   * surfaced in the UI yet: the index endpoint never returns trashed rows,
-   * so there is nothing to restore from — kept for parity with the faculties
-   * module and for the day a "trashed" view exists.
+   * the path is hardcoded here, same pattern as `facultiesApi.restore`.
+   * Verified against the running API: the route resolves and answers
+   * `200 { data, message }` after a 204 `DELETE`. Not surfaced in the UI yet —
+   * the index endpoint never returns trashed rows, so there is nothing to
+   * restore *from*; kept for parity with the faculties module and for the day a
+   * "trashed" view exists.
    */
   restore: async (id: number): Promise<Program> => {
     const { data } = await http.post<ProgramItemResponse>(`/v1/academic/programs/${id}/restore`)
