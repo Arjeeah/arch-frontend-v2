@@ -45,9 +45,16 @@ const rows = computed(() =>
 )
 
 /**
- * Extra keys the prompt returned. `RefinementData::fromArray` sweeps anything
- * it does not recognise in here, so the shape is prompt-driven and open-ended.
- * // verify against live API
+ * Extra keys the prompt returned. `RefinementData::fromArray` sweeps every key
+ * outside its eight known ones into `additional_fields`, so the shape is
+ * prompt-driven and open-ended.
+ *
+ * Confirmed against a refined document on the live API: `structured_data` came
+ * back as the six fixed fields plus `confidence` plus a nested
+ * `additional_fields`, and `DocumentPipelineStatusResource` publishes that
+ * nested map again as a sibling key — which is the one this reads. The fixed
+ * six above are therefore never duplicated down here, and `confidence` (owned
+ * by the pipeline panel) never leaks in either.
  */
 const extraRows = computed(() =>
   Object.entries(props.additionalFields ?? {}).map(([key, value]) => ({

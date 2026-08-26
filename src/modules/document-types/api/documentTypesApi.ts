@@ -1,5 +1,6 @@
 import { http } from '@/app/plugins/axios'
 import type {
+  ConditionOperator,
   DocumentType,
   DocumentTypeInput,
   DocumentTypeStatus,
@@ -15,24 +16,33 @@ const BASE_PATH = '/v1/document-types'
 
 /** Wire shape of one condition inside `requirement_conditions.conditions`. */
 interface RequirementConditionResource {
-  field: string
-  op: string
-  value: unknown
+  field?: unknown
+  op?: unknown
+  value?: unknown
 }
 
-/** Wire shape of `requirement_conditions` exactly as `DocumentType::$casts` stores it. */
+/** The `{ operator, conditions[] }` group the builder — and the API — expect. */
 interface RequirementConditionsResource {
-  operator: string
+  operator?: unknown
   conditions: RequirementConditionResource[]
 }
 
-/** A document type exactly as `DocumentTypeResource` sends it (snake_case). */
+/**
+ * A document type exactly as `DocumentTypeResource` sends it (snake_case).
+ *
+ * `requirement_conditions` is typed `unknown` rather than a group, because the
+ * column is a bare `array` cast with no server-side normalisation: seeded rows
+ * hold `{"applies_to":"international_students"}`, which has no `conditions`
+ * array at all. Typing it as a group made `resource.conditions.map(...)` in the
+ * mapper below a `TypeError` on those rows, and one such row took the whole
+ * list page down with it.
+ */
 interface DocumentTypeResource {
   id: string
   name: string
   description: string | null
   is_required: boolean
-  requirement_conditions: RequirementConditionsResource | null
+  requirement_conditions: unknown
   status: string
   created_at: string
   updated_at: string
@@ -87,28 +97,61 @@ function toStatus(raw: string): DocumentTypeStatus {
 /** `requirement_conditions.conditions.*.op` is a fixed enum; anything else falls back to `'='`. */
 const CONDITION_OPS = ['=', '!=', 'in', 'not_in', '>', '<', '>=', '<='] as const
 
-function toConditions(
-  resource: RequirementConditionsResource | null,
-): RequirementConditions | null {
-  if (!resource) return null
+/**
+ * Whether the stored JSON is a group the builder can render and re-submit.
+ *
+ * Only the `conditions` array is required to be present: `operator` defaults to
+ * `AND` server-side too (`RequirementConditionService::evaluate`).
+ */
+function isConditionGroup(value: unknown): value is RequirementConditionsResource {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
+  return Array.isArray((value as { conditions?: unknown }).conditions)
+}
+
+/** A JSON scalar or array rendered for the builder's single-line text input. */
+function toConditionValue(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  // `in`/`not_in` arrive as arrays; join them for the comma-separated input.
+  if (Array.isArray(value)) return value.join(', ')
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
+}
+
+function toConditions(value: unknown): RequirementConditions | null {
+  if (!isConditionGroup(value)) return null
   return {
-    operator: resource.operator === 'OR' ? 'OR' : 'AND',
-    conditions: resource.conditions.map((condition) => ({
-      field: condition.field,
-      op: (CONDITION_OPS as readonly string[]).includes(condition.op)
-        ? (condition.op as RequirementConditions['conditions'][number]['op'])
-        : '=',
-      // `value` is untyped on the wire (any JSON scalar or array). Render it
-      // as a string; `in`/`not_in` arrays are joined for the comma-separated
-      // builder input, everything else is stringified as-is.
-      value: Array.isArray(condition.value) ? condition.value.join(', ') : String(condition.value),
-    })),
+    operator: value.operator === 'OR' ? 'OR' : 'AND',
+    // A row that is not an object cannot carry a field/op/value at all; drop it
+    // rather than emitting `{ field: undefined }` and rendering blank inputs the
+    // backend would then reject as `required`.
+    conditions: value.conditions
+      .filter(
+        (condition): condition is RequirementConditionResource =>
+          typeof condition === 'object' && condition !== null && !Array.isArray(condition),
+      )
+      .map((condition) => ({
+        field: typeof condition.field === 'string' ? condition.field : '',
+        op: (CONDITION_OPS as readonly string[]).includes(String(condition.op))
+          ? (String(condition.op) as RequirementConditions['conditions'][number]['op'])
+          : '=',
+        value: toConditionValue(condition.value),
+      })),
   }
+}
+
+/**
+ * `requirement_conditions` as the request body wants it back: `value` is a
+ * plain string except for `in`/`not_in`, which the backend compares with
+ * `in_array`, so those go out as a real JSON array.
+ */
+interface RequirementConditionsPayload {
+  operator: 'AND' | 'OR'
+  conditions: Array<{ field: string; op: ConditionOperator; value: string | string[] }>
 }
 
 function fromConditionsInput(
   input: RequirementConditions | null,
-): RequirementConditionsResource | null {
+): RequirementConditionsPayload | null {
   if (!input || input.conditions.length === 0) return null
   return {
     operator: input.operator,
@@ -134,13 +177,22 @@ function fromResource(resource: DocumentTypeResource): DocumentType {
     description: resource.description,
     isRequired: resource.is_required,
     requirementConditions: toConditions(resource.requirement_conditions),
+    hasUnsupportedConditions:
+      resource.requirement_conditions != null && !isConditionGroup(resource.requirement_conditions),
     status: toStatus(resource.status),
     createdAt: resource.created_at,
     updatedAt: resource.updated_at,
   }
 }
 
-/** camelCase UI model -> snake_case request payload. */
+/**
+ * camelCase UI model -> snake_case request payload.
+ *
+ * `requirement_conditions` is only written when the caller actually passed the
+ * key. Leaving it out is what preserves a stored rule the builder cannot
+ * express — echoing such a value back is a 422, and sending `null` would erase
+ * it (verified against the live API on a `{"applies_to":…}` row).
+ */
 function toPayload(input: Partial<DocumentTypeInput>): Record<string, unknown> {
   const payload: Record<string, unknown> = {}
   if (input.name !== undefined) payload.name = input.name

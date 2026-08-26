@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ArrowLeft, Eye, EyeOff, FileText, Pencil, Trash2 } from 'lucide-vue-next'
-import { authStorage } from '@/app/config/authStorage'
+import { readSessionRole } from '@/app/config/sessionRole'
 import AppButton from '@/shared/components/AppButton.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
@@ -29,7 +29,16 @@ const router = useRouter()
 const { t } = useI18n()
 const toasts = useToasts()
 
-const role = authStorage.getUser()?.role ?? null
+/**
+ * `readSessionRole()` rather than reading `role` off the stored user: the
+ * backend's `UserResource` reports Spatie's hierarchical role names as a
+ * `roles` **array** — a super admin literally holds all three — so a session
+ * persisted in that shape has no scalar `role` at all and every control here
+ * would silently disappear. `readSessionRole` accepts both shapes and reduces
+ * an array by `AUTH_ROLES` precedence, which is also what the router guard
+ * decides on, so a hidden control and a refused navigation cannot disagree.
+ */
+const role = readSessionRole()
 const canManage = computed(() => role === 'super_admin' || role === 'archivist')
 
 const documentId = computed(() => {

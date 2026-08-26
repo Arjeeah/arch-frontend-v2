@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plus, UsersRound } from 'lucide-vue-next'
-import { authStorage } from '@/app/config/authStorage'
+import { readSessionRole } from '@/app/config/sessionRole'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import SearchBar from '@/shared/components/SearchBar.vue'
 import AppButton from '@/shared/components/AppButton.vue'
@@ -26,11 +26,20 @@ const toasts = useToasts()
 const store = useStudentsStore()
 
 /**
- * Faculty staff may read the register but not change it, so every mutating
- * control and the detail route are gated on the stored role. The router
- * enforces the same list server-side of the guard.
+ * Faculty staff may read the register but not change it (verified: the API
+ * answers 403 on create/update/delete and scopes `index` to their own
+ * faculties), so every mutating control and the detail route are gated here.
+ * The router enforces the same list on `/students/:id`.
+ *
+ * `readSessionRole()` rather than reading `role` off the stored user: the
+ * backend's `UserResource` reports Spatie's hierarchical role names as a
+ * `roles` **array** — a super admin literally holds all three — so a session
+ * persisted in that shape has no scalar `role` at all and every control here
+ * would silently disappear. `readSessionRole` accepts both shapes and reduces
+ * an array by `AUTH_ROLES` precedence, which is also what the router guard
+ * decides on, so a hidden control and a refused navigation cannot disagree.
  */
-const role = authStorage.getUser()?.role ?? null
+const role = readSessionRole()
 const canManage = computed(() => role === 'super_admin' || role === 'archivist')
 
 const table = useServerTable((params) => studentsApi.list(params), {
