@@ -143,6 +143,24 @@ export interface DocumentMetaEdit {
   replacement: File | null
 }
 
-/** Upload limits mirrored from `TempUploadRequest` and the pipeline's inputs. */
-export const UPLOAD_MAX_SIZE_MB = 10
-export const UPLOAD_ACCEPT = '.pdf,.png,.jpg,.jpeg,.tiff'
+/**
+ * Upload limits, mirrored from what `POST /v1/uploads` actually enforces.
+ *
+ * `TempUploadRequest` resolves both from `StorageSettings` (the administrator
+ * -managed `storage` settings group), falling back to `config/uploads.php`.
+ * The shipped setting is **20 MB**, not the 10 MB this constant used to claim —
+ * `config('uploads.max_size_kb')` is 10240 but only applies when the setting is
+ * unusable, and the settings migration populates it. `GET /v1/settings/storage`
+ * is super_admin-only (verified: 403 for archivist), and archivists are the
+ * people who upload, so the values cannot be read at runtime — they are pinned
+ * here and have to be kept in step with that settings group by hand.
+ *
+ * `.tif` matters as much as `.tiff`: Laravel's `mimes`/`extensions` rules both
+ * check the client filename, so a scanner that writes `scan.tif` was refused by
+ * this list alone — the server accepts it (verified: 201). The server whitelist
+ * is wider still (`bmp`, `gif`, `doc`, `docx`, `odt`, `rtf`, which the OCR
+ * parsers can read); this screen deliberately offers only the scan formats its
+ * copy names, so widening further is a product decision, not a bug fix.
+ */
+export const UPLOAD_MAX_SIZE_MB = 20
+export const UPLOAD_ACCEPT = '.pdf,.png,.jpg,.jpeg,.tiff,.tif'
