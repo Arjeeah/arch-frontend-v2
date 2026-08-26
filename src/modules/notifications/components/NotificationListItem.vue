@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { MailOpen, Trash2 } from 'lucide-vue-next'
 import { relativeTime } from '@/shared/utils/date'
 import { resolveNotificationIcon } from '../utils/notification-icon'
+import { notificationBodyParams, notificationTypeSlug } from '../utils/notification-copy'
 import type { AppNotification } from '../types'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     notification: AppNotification
     /** Compact rendering for the header bell dropdown: no row actions, body truncates. */
@@ -16,7 +18,24 @@ withDefaults(
 
 const emit = defineEmits<{ click: []; markRead: []; delete: [] }>()
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
+
+/**
+ * Our own copy when we have it, the server's English string otherwise — the
+ * pattern `RecentActivityTable` uses for audit actions.
+ */
+const slug = computed(() => notificationTypeSlug(props.notification.type))
+
+const titleText = computed(() => {
+  const key = `notifications.types.${slug.value}.title`
+  return te(key) ? t(key) : props.notification.title
+})
+
+const bodyText = computed(() => {
+  const key = `notifications.types.${slug.value}.body`
+  if (!te(key)) return props.notification.body
+  return t(key, notificationBodyParams(props.notification.data))
+})
 
 const severityClasses: Record<AppNotification['severity'], string> = {
   info: 'bg-primary/10 text-primary',
@@ -42,7 +61,7 @@ const severityClasses: Record<AppNotification['severity'], string> = {
     <div class="min-w-0 flex-1">
       <div class="flex items-start justify-between gap-2">
         <p class="text-sm font-display font-medium text-text-primary truncate">
-          {{ notification.title }}
+          {{ titleText }}
         </p>
         <span
           v-if="!notification.readAt"
@@ -50,7 +69,7 @@ const severityClasses: Record<AppNotification['severity'], string> = {
         />
       </div>
       <p class="text-xs text-text-secondary mt-0.5" :class="{ truncate: compact }">
-        {{ notification.body }}
+        {{ bodyText }}
       </p>
       <p class="text-[11px] text-text-muted mt-1">
         {{ relativeTime(notification.createdAt, locale) }}

@@ -28,6 +28,11 @@ export interface AppNotification {
   icon: string | null
   severity: NotificationSeverity
   referenceId: string | null
+  /**
+   * The backend's raw `toDatabase()` payload. Used to fill the runtime values
+   * in a translated body — see `utils/notification-copy.ts`.
+   */
+  data: Record<string, unknown>
   /** `null` while unread. */
   readAt: string | null
   createdAt: string | null

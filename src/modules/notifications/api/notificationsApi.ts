@@ -28,6 +28,13 @@ interface NotificationResource {
   icon: string | null
   severity: string
   reference_id: string | null
+  /**
+   * The whole `toDatabase()` payload. `title`/`body` above are two of its keys;
+   * the rest carry the runtime values the backend interpolated into `body`
+   * (`failure_count`, `current_percent`, …), which is what lets the UI render
+   * its own translated copy instead of the server's English sentence.
+   */
+  data?: Record<string, unknown> | null
   read_at: string | null
   created_at: string | null
 }
@@ -58,6 +65,7 @@ function fromResource(resource: NotificationResource): AppNotification {
     icon: resource.icon,
     severity: toSeverity(resource.severity),
     referenceId: resource.reference_id,
+    data: resource.data ?? {},
     readAt: resource.read_at,
     createdAt: resource.created_at,
   }

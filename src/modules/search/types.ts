@@ -113,6 +113,13 @@ export interface LookupOption {
 }
 
 /** Query validation bounds, mirrored from `SearchRequest::rules()`. */
+/**
+ * Changing this means editing `search.form.tooShort` in both locales.
+ * `count` selects a plural form there, and the Arabic writes the numbers into
+ * the forms themselves ("حرفًا واحدًا" / "حرفين") because Arabic uses a dual —
+ * raising the minimum to 3 would silently leave the message saying "at least
+ * two characters".
+ */
 export const QUERY_MIN_LENGTH = 2
 export const QUERY_MAX_LENGTH = 500
 
