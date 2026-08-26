@@ -1,6 +1,11 @@
 import { http } from '@/app/plugins/axios'
 import { keysToCamel, keysToSnake } from '@/shared/utils/casing'
-import type { OverrideCapacityInput, SettingsGroupKey, SettingsGroupModelMap } from '../types'
+import type {
+  CapacityOverrideResult,
+  OverrideCapacityInput,
+  SettingsGroupKey,
+  SettingsGroupModelMap,
+} from '../types'
 
 /**
  * Endpoint prefix for this module. `settings` postdates the shared
@@ -22,7 +27,13 @@ interface SettingsGroupResponse {
   data: Record<string, unknown>
 }
 interface OverrideCapacityResponse {
-  data: { capacity_warning_threshold: number }
+  data: {
+    /** The temporary override, NOT the persisted setting. */
+    capacity_warning_threshold: number
+    expires_at?: string | null
+    /** `storage.capacity_warning_threshold` as stored — untouched by this call. */
+    persisted_threshold?: number | null
+  }
 }
 
 /**
@@ -87,12 +98,30 @@ export const settingsApi = {
     return fromResource(data.data) as unknown as SettingsGroupModelMap[G]
   },
 
-  /** Returns the new `capacityWarningThreshold` so the storage group can be patched locally. */
-  overrideCapacity: async (input: OverrideCapacityInput): Promise<number> => {
+  /**
+   * Raises the capacity warning threshold **temporarily**.
+   *
+   * The response carries all three numbers that matter — see
+   * `CapacityOverrideResult` — and they are kept apart on purpose: the
+   * persisted setting is what the storage form binds to, and the override is
+   * separate, expiring state shown beside it.
+   *
+   * `persisted_threshold` is defensively defaulted rather than assumed: it is
+   * the value the form falls back to, and reading `undefined` there would blank
+   * the field and let a Save write nothing sensible.
+   */
+  overrideCapacity: async (input: OverrideCapacityInput): Promise<CapacityOverrideResult> => {
     const { data } = await http.post<OverrideCapacityResponse>(
       `${SETTINGS_BASE}/storage/override-capacity`,
       { reason: input.reason, new_limit: input.newLimit },
     )
-    return data.data.capacity_warning_threshold
+    const persisted = Number(data.data.persisted_threshold)
+    return {
+      threshold: Number(data.data.capacity_warning_threshold),
+      expiresAt: data.data.expires_at ?? null,
+      persistedThreshold: Number.isFinite(persisted)
+        ? persisted
+        : Number(data.data.capacity_warning_threshold),
+    }
   },
 }

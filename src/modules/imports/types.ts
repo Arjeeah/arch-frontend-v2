@@ -17,6 +17,37 @@ export const IMPORT_ENTITIES = [
 
 export type ImportEntity = (typeof IMPORT_ENTITIES)[number]
 
+/**
+ * Sheets only a super admin may import — `ImportPolicy::SUPER_ADMIN_ONLY_TYPES`.
+ *
+ * `users` creates accounts and assigns roles; `faculties` and `programs` write
+ * the same tables as `POST /v1/academic/{faculties,programs}`, which
+ * `FacultyPolicy::create`/`ProgramPolicy::create` reserve for the super admin —
+ * so the import path follows the CRUD path rather than routing around it.
+ * `downloadTemplate` obeys the same rule, because the template leaks the shape
+ * of the sheet.
+ */
+const SUPER_ADMIN_ONLY_ENTITIES: readonly ImportEntity[] = ['users', 'faculties', 'programs']
+
+/**
+ * The entities this role may actually import.
+ *
+ * Verified live: as the archivist, `GET /v1/imports/templates/{faculties,
+ * programs,users}` and `POST /v1/imports/faculties` all answer 403, while
+ * `students` and `student_documents` answer 200. The page used to offer all
+ * five to everyone and open on `faculties`, so an archivist landed on a screen
+ * whose every control 403s.
+ *
+ * A role that cannot be read falls back to the full list: the route already
+ * restricts this page to super_admin and archivist, and the server is the real
+ * gate — a UI that hides a control it should not is worse than one that shows
+ * a control the API refuses with a toast.
+ */
+export function allowedImportEntities(role: string | null): readonly ImportEntity[] {
+  if (role !== 'archivist') return IMPORT_ENTITIES
+  return IMPORT_ENTITIES.filter((entity) => !SUPER_ADMIN_ONLY_ENTITIES.includes(entity))
+}
+
 /** `import_jobs.status` — a plain string column, written only by the queue worker. */
 export const IMPORT_JOB_STATUSES = ['pending', 'processing', 'completed', 'failed'] as const
 

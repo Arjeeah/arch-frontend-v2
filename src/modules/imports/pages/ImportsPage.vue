@@ -15,21 +15,30 @@ import ImportErrorsTable from '../components/ImportErrorsTable.vue'
 import { useImportsStore } from '../stores/useImportsStore'
 import { importsApi } from '../api/importsApi'
 import { saveBlob } from '@/shared/utils/saveBlob'
-import { IMPORT_ENTITIES } from '../types'
+import { readSessionRole } from '@/app/config/sessionRole'
+import { allowedImportEntities } from '../types'
 import type { ImportEntity } from '../types'
 
 const { t } = useI18n()
 const toasts = useToasts()
 const store = useImportsStore()
 
-const entity = ref<ImportEntity>('faculties')
+/**
+ * Import rights are per *type*, not per screen: an archivist may import
+ * students and their documents but not users, faculties or programs (see
+ * `allowedImportEntities`). Read once at setup, the same way the router guard
+ * reads it, so the select and the API agree.
+ */
+const entities = allowedImportEntities(readSessionRole())
+
+const entity = ref<ImportEntity>(entities[0] ?? 'students')
 const files = ref<File[]>([])
 const downloadingTemplate = ref(false)
 const downloadingErrorsId = ref<string | null>(null)
 const confirmClearOpen = ref(false)
 
 const entityOptions = computed(() =>
-  IMPORT_ENTITIES.map((value) => ({ value, label: t(`imports.entities.${value}`) })),
+  entities.map((value) => ({ value, label: t(`imports.entities.${value}`) })),
 )
 
 onMounted(() => {
@@ -45,7 +54,7 @@ onMounted(() => {
 onBeforeUnmount(() => store.stopPolling())
 
 function onEntityChange(value: string): void {
-  const next = IMPORT_ENTITIES.find((candidate) => candidate === value)
+  const next = entities.find((candidate) => candidate === value)
   if (next) entity.value = next
 }
 

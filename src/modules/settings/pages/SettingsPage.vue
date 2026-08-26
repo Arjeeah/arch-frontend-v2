@@ -8,6 +8,7 @@ import AppErrorState from '@/shared/components/AppErrorState.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
 import { useToasts } from '@/shared/composables/useToasts'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { formatDateTime } from '@/shared/utils/date'
 import { useSettingsStore } from '../stores/useSettingsStore'
 import SettingsGroupForm from '../components/SettingsGroupForm.vue'
 import RoleEnableMapField from '../components/RoleEnableMapField.vue'
@@ -171,6 +172,23 @@ async function handleOverrideCapacity(input: OverrideCapacityInput): Promise<voi
               <ShieldAlert class="w-4 h-4" />
               {{ t('settings.overrideCapacity.trigger') }}
             </AppButton>
+
+            <!-- The override does not change the field above it, so the two
+                 numbers are shown together rather than one silently replacing
+                 the other. -->
+            <p
+              v-if="store.capacityOverride"
+              class="mt-3 text-xs font-sans text-warning"
+              role="status"
+            >
+              {{
+                t('settings.overrideCapacity.activeNote', {
+                  limit: store.capacityOverride.threshold,
+                  persisted: store.capacityOverride.persistedThreshold,
+                  expires: formatDateTime(store.capacityOverride.expiresAt),
+                })
+              }}
+            </p>
           </div>
 
           <div class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-border">

@@ -108,9 +108,12 @@ function toFormat(raw: string, fallback: ReportFormat = 'xlsx'): ReportFormat {
 }
 
 /**
- * verify against live API: an unknown status is treated as `pending` on
- * purpose — the job list keeps polling it instead of freezing a row that the
- * server may still be working on.
+ * Verified against `App\Enums\ReportJobStatus`, whose four cases —
+ * `pending`, `processing`, `completed`, `failed` — are exactly
+ * `REPORT_JOB_STATUSES`, and against live `generate`/`{id}/status` responses.
+ * The fallback is therefore unreachable today; it is kept because degrading to
+ * `pending` keeps the job list polling a row the server may still be working
+ * on, which is the safe way to be wrong about a status the backend added.
  */
 function toJobStatus(raw: string): ReportJobStatus {
   return (REPORT_JOB_STATUSES as readonly string[]).includes(raw)
@@ -279,7 +282,12 @@ export interface DownloadedFile {
 /* ── Public API ─────────────────────────────────────────────────────────── */
 
 export const reportsApi = {
-  /** Report types the signed-in user is allowed to generate (filtered server-side). */
+  /**
+   * Report types the signed-in user is allowed to generate (filtered
+   * server-side). Verified live: super_admin sees all six, archivist sees five
+   * (no `users`) and faculty_staff four (no `users`, no `weekly_digest`), so
+   * the catalog is a safe basis for what the form offers.
+   */
   types: async (): Promise<ReportTypeOption[]> => {
     const { data } = await http.get<ReportTypesResponse>(REPORTS_ENDPOINTS.types)
     return (data.data ?? [])
@@ -301,6 +309,7 @@ export const reportsApi = {
     return jobFromResource(data.data)
   },
 
+  /** super_admin + archivist only — verified live: `faculty_staff` gets 403. */
   weeklyDigest: async (): Promise<WeeklyDigest> => {
     const { data } = await http.get<WeeklyDigestResponse>(REPORTS_ENDPOINTS.weeklyDigest)
     return digestFromResource(data.data)

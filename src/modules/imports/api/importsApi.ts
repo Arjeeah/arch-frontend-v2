@@ -51,8 +51,12 @@ interface ImportStatusResource {
 /* ── Wire → UI mappers ──────────────────────────────────────────────────── */
 
 /**
- * verify against live API: an unrecognised status is treated as `pending` so
- * the page keeps polling rather than freezing a job that is still running.
+ * Verified against the only writers of `import_jobs.status` — `ImportController`
+ * seeds `pending`, `ProcessImportJob` sets `processing`, and
+ * `TracksImportProgress` writes `completed`/`failed` — and against a live
+ * upload → status round-trip. The fallback is unreachable today; it is kept
+ * because degrading to `pending` keeps the page polling rather than freezing a
+ * job that is still running.
  */
 function toJobStatus(raw: string): ImportJobStatus {
   return (IMPORT_JOB_STATUSES as readonly string[]).includes(raw)
