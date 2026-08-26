@@ -41,6 +41,20 @@ const toasts = useToasts()
 const role = readSessionRole()
 const canManage = computed(() => role === 'super_admin' || role === 'archivist')
 
+/**
+ * The segment card is fed by `GET /v1/ai-console/documents/{id}/segments`,
+ * which opens with `$this->authorize('ai-console.access')` — a **permission**,
+ * not a role. No row in `role_has_permissions` holds an `ai-console*`
+ * permission at all, so only the super admin gets through, via Spatie's
+ * `Gate::before`. This route admits archivists too (`meta.roles`), so every
+ * archivist was firing a guaranteed 403 on load and again on every 10s poll,
+ * and the card then explained that the breakdown "is unavailable for this
+ * document" — which is false: it is unavailable for their role, on every
+ * document, permanently. Same shape as `AuditPage`'s super-admin-only
+ * timeline: don't ask, and don't show the card.
+ */
+const canSeeSegments = computed(() => role === 'super_admin')
+
 const documentId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
   return raw ?? null
@@ -106,6 +120,7 @@ async function loadSnapshot(id: string, quiet = false): Promise<void> {
 
 /** Best-effort: the segment view is an AI-console extra, not a contract. */
 async function loadSegments(id: string): Promise<void> {
+  if (!canSeeSegments.value) return
   segmentsLoading.value = true
   segmentsUnavailable.value = false
   try {
@@ -343,6 +358,7 @@ async function confirmDelete(): Promise<void> {
       />
 
       <DocumentSegmentsCard
+        v-if="canSeeSegments"
         :segments="segments"
         :loading="segmentsLoading"
         :unavailable="segmentsUnavailable"

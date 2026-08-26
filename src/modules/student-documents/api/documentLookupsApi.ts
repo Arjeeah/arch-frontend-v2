@@ -218,6 +218,14 @@ export const documentLookupsApi = {
    *
    * The field list below is `AiConsoleController@storedSegments`' own `map`,
    * key for key — it hand-rolls the response rather than using a Resource.
+   *
+   * **Super admin only, in practice.** The controller opens with
+   * `$this->authorize('ai-console.access')` — a permission, not a role — and no
+   * row in `role_has_permissions` grants any `ai-console*` permission, so
+   * Spatie's `Gate::before` is the only way through. Verified live: admin 200
+   * `{"data":[]}`, archivist 403, faculty_staff 403. Callers must gate on the
+   * session role rather than letting an archivist fire a guaranteed 403 on
+   * every load and every poll tick; see `StudentDocumentDetailPage`.
    */
   segments: async (documentId: string): Promise<DocumentSegment[]> => {
     const { data } = await http.get<SegmentResponse>(SEGMENTS_URL(documentId))
