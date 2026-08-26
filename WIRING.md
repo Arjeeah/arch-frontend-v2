@@ -107,12 +107,39 @@ The eight `pipeline.status.*` Arabic values are copied verbatim from
    use `HasUuids`. Typed as `string` throughout this module; any route param or lookup added later
    should do the same.
 
-6. **Verify against a live API once the backend is up:**
+6. **`confidence_score` is 0–100 and arrives as a string.** `RefinementData::fromArray()`
+   multiplies the model's 0.0–1.0 answer by 100 before storage (which is why
+   `config('ai.pipeline.confidence_threshold')` is `85`, not `0.85`), and the column is
+   `decimal(5,2)` behind Laravel's `decimal:2` cast, so the wire value is `"92.00"`. The api
+   mapper coerces it (`toConfidence`) and `formatConfidence` divides by 100. Anything that
+   changes that scale server-side has to change both.
+
+7. **Deployment: PHP's own upload limits cap a bulk import long before Laravel's `max:500` does.**
+   `max_file_uploads` defaults to **20**, and files past it are discarded by PHP before the
+   request reaches validation — so a 500-file batch returns an ordinary `202` reporting 20
+   queued. The UI now compares `documents_queued` against the number of files it sent and shows
+   a sticky warning when they differ, but the real fix is server config: raise
+   `max_file_uploads`, `post_max_size` and `upload_max_filesize` (500 × 20 MB is 10 GB, so the
+   practical batch size is far smaller than the validation rule suggests) or have the operator
+   import in smaller batches.
+
+8. **Verify against a live API once the backend is up:**
    - `GET /v1/pipeline/status` is assumed to be `{ data: { "<status>": <count> } }` (a bare
      `pluck()` through `ApiResponse::success`). States with no rows are absent and are filled in
-     as `0` by `countsFromResource`.
+     as `0` by `countsFromResource`. An archive with no documents at all serialises the empty
+     collection as `[]`; `countsFromResource` handles that too.
    - `DocumentPipelineStatusResource.has_embeddings` is filled with `->count()` despite the
      boolean-sounding name; mapped to `embeddedPageCount: number`.
    - `.tif` files: `BULK_IMPORT_ACCEPT` matches on `image/tiff` as well as `.tiff`, on the
      assumption that Laravel's `mimes:tiff` accepts the extension it guesses from the MIME type.
      If the backend rejects `.tif` in practice, drop `image/tiff` from that constant.
+
+9. **Known debt, deliberately not fixed here:**
+   - **No plural agreement in either locale.** Strings like `pipeline.upload.selectionSummary`
+     read "1 files selected". Correct handling needs vue-i18n plural messages plus a custom
+     Arabic pluralization rule registered on the i18n instance — `src/app/plugins/i18n.ts`,
+     outside this stream's territory. Worth a shared pass once one locale file owns it.
+   - **`ocr_completed` is excluded from the auto-poll's in-flight set** (`status.ts`). It is a
+     transient state in a healthy run but also the state the backend calls retryable, i.e.
+     stuck. Excluding it means the poll settles instead of running forever against a stuck
+     archive; the cost is that a document parked there needs a manual Refresh to update.
