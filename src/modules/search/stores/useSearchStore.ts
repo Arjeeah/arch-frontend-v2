@@ -87,6 +87,15 @@ export const useSearchStore = defineStore('search', () => {
   /** Discards responses from a slower request that a newer one has overtaken. */
   let requestId = 0
 
+  /**
+   * Same guard for the lookup calls. Switching faculty twice in quick succession
+   * fires two `programs()` requests, and without this the slower one can land
+   * last and leave the *previous* faculty's programs under the new selection —
+   * pick one from that stale list and the search sends a `program_id` the
+   * backend ANDs against the faculty, silently returning nothing.
+   */
+  let lookupId = 0
+
   const groups = computed<SearchResultGroup[]>(() => groupResults(results.value))
 
   const trimmedQuery = computed(() => query.value.trim())
@@ -148,6 +157,7 @@ export const useSearchStore = defineStore('search', () => {
 
   /** Loads the faculty list, and the programs for whichever faculty is selected. */
   async function loadLookups(): Promise<void> {
+    const currentLookup = ++lookupId
     lookupsLoading.value = true
     lookupsError.value = null
     try {
@@ -155,17 +165,34 @@ export const useSearchStore = defineStore('search', () => {
         searchApi.faculties(),
         searchApi.programs(filters.value.facultyId),
       ])
+      if (currentLookup !== lookupId) return
       faculties.value = facultyRows
       programs.value = programRows
     } catch (err) {
       // Filters are an optional narrowing, not a precondition for searching, so
       // a failed lookup never blocks the page — but it does have to say so, or
       // empty selects look like an empty archive.
+      if (currentLookup !== lookupId) return
       faculties.value = []
       programs.value = []
       lookupsError.value = getApiErrorMessage(err, 'Could not load filters')
     } finally {
-      lookupsLoading.value = false
+      if (currentLookup === lookupId) lookupsLoading.value = false
+    }
+  }
+
+  /** Refills the program select for one faculty (or every faculty when null). */
+  async function loadPrograms(facultyId: number | null): Promise<void> {
+    const currentLookup = ++lookupId
+    try {
+      const rows = await searchApi.programs(facultyId)
+      if (currentLookup !== lookupId) return
+      programs.value = rows
+      lookupsError.value = null
+    } catch (err) {
+      if (currentLookup !== lookupId) return
+      programs.value = []
+      lookupsError.value = getApiErrorMessage(err, 'Could not load filters')
     }
   }
 
@@ -176,14 +203,7 @@ export const useSearchStore = defineStore('search', () => {
   async function setFacultyFilter(facultyId: number | null): Promise<void> {
     filters.value.facultyId = facultyId
     filters.value.programId = null
-
-    try {
-      programs.value = await searchApi.programs(facultyId)
-      lookupsError.value = null
-    } catch (err) {
-      programs.value = []
-      lookupsError.value = getApiErrorMessage(err, 'Could not load filters')
-    }
+    await loadPrograms(facultyId)
   }
 
   function setProgramFilter(programId: number | null): void {
@@ -196,14 +216,10 @@ export const useSearchStore = defineStore('search', () => {
 
   /** Clears the filter selects (and reloads the unfiltered program list). */
   async function resetFilters(): Promise<void> {
+    const hadFaculty = filters.value.facultyId !== null
     filters.value = { facultyId: null, programId: null, studentStatus: null }
-    try {
-      programs.value = await searchApi.programs(null)
-      lookupsError.value = null
-    } catch (err) {
-      programs.value = []
-      lookupsError.value = getApiErrorMessage(err, 'Could not load filters')
-    }
+    // The program list only needs refilling if it was narrowed to a faculty.
+    if (hadFaculty) await loadPrograms(null)
   }
 
   /** Wipes the query and every result — the "start over" action. */

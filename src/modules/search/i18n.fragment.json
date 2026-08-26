@@ -12,7 +12,7 @@
         "submit": "Search",
         "clear": "Clear",
         "hint": "Press Enter to search. Documents are Arabic, so the box types right-to-left.",
-        "tooShort": "Enter at least {min} characters",
+        "tooShort": "Enter at least {count} character | Enter at least {count} characters",
         "tooLong": "Keep the query under {max} characters"
       },
       "filters": {
@@ -47,8 +47,8 @@
         "reasonLabel": "Reason reported by the server"
       },
       "results": {
-        "summary": "{results} matching pages across {documents} documents",
-        "matchingPages": "{count} pages",
+        "summary": "Matching pages: {results} · Documents: {documents}",
+        "matchingPages": "{count} page | {count} pages",
         "page": "Page {page}",
         "pageUnknown": "Page unknown",
         "fileNumber": "File {number}",
@@ -56,8 +56,8 @@
         "openStudent": "Open student",
         "openDocument": "Open document",
         "match": "{percent}% match",
-        "rank": "Rank {score}",
-        "showMore": "Show {count} more pages",
+        "rank": "Relevance {score}",
+        "showMore": "Show {count} more page | Show {count} more pages",
         "showLess": "Show fewer pages"
       },
       "empty": {
@@ -86,8 +86,8 @@
         "placeholder": "طالب صيدلة رقم 1625",
         "submit": "بحث",
         "clear": "مسح",
-        "hint": "اضغط Enter للبحث. المستندات باللغة العربية، لذلك يكتب الحقل من اليمين إلى اليسار.",
-        "tooShort": "أدخل {min} حرفين على الأقل",
+        "hint": "اضغط Enter للبحث. المستندات باللغة العربية، لذلك تُكتب العبارة من اليمين إلى اليسار.",
+        "tooShort": "أدخل حرفًا واحدًا على الأقل | أدخل حرفين على الأقل",
         "tooLong": "يجب ألا تتجاوز عبارة البحث {max} حرف"
       },
       "filters": {
@@ -122,8 +122,8 @@
         "reasonLabel": "السبب كما أبلغ عنه الخادم"
       },
       "results": {
-        "summary": "{results} صفحة مطابقة ضمن {documents} مستند",
-        "matchingPages": "{count} صفحة",
+        "summary": "الصفحات المطابقة: {results} · المستندات: {documents}",
+        "matchingPages": "صفحة واحدة | {count} صفحة",
         "page": "صفحة {page}",
         "pageUnknown": "رقم الصفحة غير معروف",
         "fileNumber": "ملف {number}",
@@ -131,9 +131,9 @@
         "openStudent": "فتح ملف الطالب",
         "openDocument": "فتح المستند",
         "match": "تطابق {percent}%",
-        "rank": "الترتيب {score}",
-        "showMore": "عرض {count} صفحات أخرى",
-        "showLess": "عرض عدد أقل من الصفحات"
+        "rank": "درجة الصلة {score}",
+        "showMore": "عرض صفحة إضافية | عرض {count} صفحات إضافية",
+        "showLess": "إخفاء الصفحات الإضافية"
       },
       "empty": {
         "title": "لا توجد نتائج",

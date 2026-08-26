@@ -65,6 +65,12 @@ are identical, and neither collides with an existing key in the locale files.
 A **deep** merge is required — `nav` already exists in both files and must not be
 replaced wholesale.
 
+Three keys carry a `|` in both locales and are **vue-i18n plural forms**, not
+literal text: `search.form.tooShort`, `search.results.matchingPages` and
+`search.results.showMore`. Their call sites pass a named `count`, which vue-i18n
+reads as the plural index. Do not "clean up" the pipes, and keep the forms in
+that order (singular first) — Arabic relies on it for the dual ("حرفين").
+
 ## Notes
 
 1. **Result links point at stream S4's routes.** A hit links to
@@ -88,5 +94,34 @@ replaced wholesale.
    the faculty/program selects. If those controllers ever start honouring
    `per_page`, `fetchAllPages` in `api/searchApi.ts` can collapse to one request.
 
-4. **Nothing else.** No shared component, store, plugin or config file was
+4. **`useServerTable` is deliberately not used here**, and this is the one place
+   in phase 2 where that is correct. `POST /v1/search` is not a Laravel
+   paginator: it returns at most `limit` rows (1–100, default 20) in a single
+   response with no `page` / `per_page` / `last_page`. There is no page 2 to
+   fetch, so there is no client-side-pagination shortcut being taken — the
+   result count is bounded by the request itself, and the "Results per search"
+   select is how the user asks for more.
+
+5. **`gen:module` was not used.** The generator emits a CRUD module — typed
+   entity, table, create/edit dialog, list page wired to `fetchAll`/`create`/
+   `update`/`remove`. Search has no entity and no mutations; every generated
+   file would have been deleted. The module still follows the generated layout
+   (`index.ts` / `types.ts` / `api/` / `stores/` / `components/` / `pages/`) and
+   the same api-mapper shape, so nothing about it is unfamiliar.
+
+6. **Accepted debt**, none of it blocking:
+   - `index.ts` is an empty `export {}`. The router lazy-imports the page
+     directly and no other layer needs the module's internals, so there is
+     nothing to re-export yet.
+   - `search.form.tooLong` cannot currently fire: the input carries
+     `maxlength="500"`, so the trimmed query can never exceed the backend's
+     `max:500`. Kept as the belt-and-braces half of the same bound.
+   - `utils/resultLinks.ts` is camelCase where CLAUDE.md's table says
+     kebab-case. It matches the existing precedent (`shared/utils/apiError.ts`);
+     renaming was judged more churn than value.
+   - A failed search reports twice — the `AppErrorState` in the results area
+     plus a toast. Kept on purpose: on a long result page the error state can be
+     scrolled out of view when a re-filter fails.
+
+7. **Nothing else.** No shared component, store, plugin or config file was
    changed or needs changing.

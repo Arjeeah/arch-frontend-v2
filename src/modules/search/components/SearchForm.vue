@@ -27,10 +27,16 @@ const { t } = useI18n()
 
 const length = computed(() => props.modelValue.trim().length)
 
-/** Only complain once there is something to complain about. */
+/**
+ * Only complain once there is something to complain about.
+ *
+ * The minimum is passed as `count` rather than `min` on purpose: vue-i18n reads
+ * a named `count` as the plural index, which is what lets Arabic answer with the
+ * dual ("حرفين") instead of a numeral glued to a plural noun.
+ */
 const hint = computed(() => {
   if (length.value === 0) return null
-  if (length.value < QUERY_MIN_LENGTH) return t('search.form.tooShort', { min: QUERY_MIN_LENGTH })
+  if (length.value < QUERY_MIN_LENGTH) return t('search.form.tooShort', { count: QUERY_MIN_LENGTH })
   if (length.value > QUERY_MAX_LENGTH) return t('search.form.tooLong', { max: QUERY_MAX_LENGTH })
   return null
 })
