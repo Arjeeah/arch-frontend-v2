@@ -46,6 +46,31 @@ function str(value: unknown): string | null {
   return typeof value === 'string' && value.trim() !== '' ? value : null
 }
 
+/**
+ * Marks a zone-less wire datetime as the UTC instant it actually is.
+ *
+ * `FacultyStaffDashboardService` formats its datetimes with
+ * `->format('Y-m-d H:i:s')`, and the backend runs `app.timezone = 'UTC'`, so
+ * the value is a UTC wall-clock reading carrying no zone marker. ECMAScript
+ * parses that space-separated form as **local** time, so in Tripoli (UTC+2)
+ * `new Date('2026-08-26 11:41:56')` lands two hours early: a borrowing made
+ * moments ago rendered as "2 hours ago", and every timestamp on this dashboard
+ * sat two hours behind the same event shown on the archivist's. The audit,
+ * notification and archivist-activity payloads were always right, because
+ * those go through `toIso8601String()` / Carbon's serializer and carry `+00:00`
+ * or `Z`.
+ *
+ * Only the exact zone-less `Y-m-d H:i:s` (or `…T…`) shape is rewritten.
+ * Anything already carrying a zone, and any date-only value, is passed through
+ * untouched — so this stays correct if the endpoint moves to ISO-8601.
+ */
+function utcDateTime(value: unknown): string | null {
+  const raw = str(value)
+  if (raw === null) return null
+  const match = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2}(?:\.\d+)?)$/.exec(raw)
+  return match ? `${match[1]}T${match[2]}Z` : raw
+}
+
 /** Narrows a wire status onto the borrowing union; unknown values become `null`. */
 function toBorrowStatus(value: unknown): BorrowStatus | null {
   if (typeof value !== 'string') return null
@@ -256,7 +281,7 @@ function facultyRowFromResource(
       typeof resource.days_overdue === 'number'
         ? Math.round(Math.abs(resource.days_overdue))
         : null,
-    timestamp: str(resource.borrowed_at) ?? str(resource.created_at),
+    timestamp: utcDateTime(resource.borrowed_at) ?? utcDateTime(resource.created_at),
   }
 }
 
