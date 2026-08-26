@@ -12,6 +12,7 @@ import {
   BULK_IMPORT_ACCEPT,
   BULK_IMPORT_MAX_FILES,
   BULK_IMPORT_MAX_SIZE_MB,
+  BulkImportTruncatedError,
   pipelineApi,
 } from '../api/pipelineApi'
 import { formatBytes, formatCount } from '../format'
@@ -89,7 +90,18 @@ async function submit(): Promise<void> {
     // (`max_file_uploads` / `post_max_size`). The request still succeeded, so
     // nothing else would tell the operator that part of the batch is missing —
     // this toast stays up until it is dismissed.
-    if (queued.documentsQueued < queued.submittedCount) {
+    if (queued.truncation && !queued.truncation.confirmed) {
+      // The batch landed exactly on the server's per-request cap, so it is
+      // indistinguishable from a truncated one. The files went in; say so, and
+      // say why the count cannot be trusted. Stays up until dismissed.
+      toasts.error(
+        t('pipeline.upload.suspectedTruncationToast', {
+          queued: formatCount(queued.documentsQueued, locale.value),
+          max: formatCount(queued.truncation.maxFileUploads, locale.value),
+        }),
+        0,
+      )
+    } else if (queued.documentsQueued < queued.submittedCount) {
       toasts.error(
         t('pipeline.upload.partialToast', {
           queued: formatCount(queued.documentsQueued, locale.value),
@@ -113,8 +125,27 @@ async function submit(): Promise<void> {
     }
   } catch (err: unknown) {
     // An operator-initiated cancel is not a failure to report as one.
-    if (controller?.signal.aborted) toasts.info(t('pipeline.upload.cancelled'))
-    else toasts.error(getApiErrorMessage(err, t('pipeline.upload.errorToast')))
+    if (controller?.signal.aborted) {
+      toasts.info(t('pipeline.upload.cancelled'))
+    } else if (err instanceof BulkImportTruncatedError) {
+      // The server proved the batch was cut short before it arrived and
+      // imported nothing, so the selection is kept — the operator can re-send
+      // it in smaller batches without picking every file again. Four
+      // independent counts, so the message cannot be pluralised (see CLAUDE.md).
+      const { receivedFileCount, declaredFileCount, discardedFileCount, maxFileUploads } =
+        err.truncation
+      toasts.error(
+        t('pipeline.upload.truncatedToast', {
+          received: formatCount(receivedFileCount, locale.value),
+          declared: formatCount(declaredFileCount ?? files.value.length, locale.value),
+          discarded: formatCount(discardedFileCount ?? 0, locale.value),
+          max: formatCount(maxFileUploads, locale.value),
+        }),
+        0,
+      )
+    } else {
+      toasts.error(getApiErrorMessage(err, t('pipeline.upload.errorToast')))
+    }
   } finally {
     uploading.value = false
     progress.value = 0

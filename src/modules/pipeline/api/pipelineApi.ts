@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { http } from '@/app/plugins/axios'
 import type { ServerTableParams, ServerTableResponse } from '@/shared/composables/useServerTable'
 import { PIPELINE_STATUSES, isPipelineStatus, type PipelineStatus } from '../status'
@@ -6,6 +7,7 @@ import type {
   DocumentPipelineStatus,
   PipelineDocument,
   PipelineStatusCounts,
+  UploadTruncation,
 } from '../types'
 
 /**
@@ -26,32 +28,82 @@ const ENDPOINTS = {
 /** Backend cap on one bulk-import request — `BulkImportRequest::rules()`. */
 export const BULK_IMPORT_MAX_FILES = 500
 
-/** Per-file size cap in MB. The wire rule is `max:20480` KB, i.e. exactly 20 MB. */
+/**
+ * Per-file size cap in MB.
+ *
+ * The wire rule is no longer a literal: `ResolvesUploadWhitelist` derives it
+ * from the administrator-managed `storage.max_file_size` setting, whose shipped
+ * value is 20 MB — verified live against `GET /v1/settings/storage`. Restating
+ * it here keeps the client from uploading a file the server will refuse; an
+ * administrator who lowers the setting makes this optimistic, and the server's
+ * 422 is still the backstop.
+ */
 export const BULK_IMPORT_MAX_SIZE_MB = 20
 
 /**
- * Accepted file types, mirroring `mimes:pdf,png,jpg,jpeg,tiff`.
+ * Accepted file types.
  *
- * `image/tiff` is listed alongside `.tiff` on purpose: a scanner that writes
- * `.tif` still carries the `image/tiff` MIME type, and Laravel's `mimes` rule
- * validates the extension it guesses from that type — so the backend accepts
- * `.tif` even though the rule does not spell it out. Matching on MIME here
- * keeps the client from rejecting a file the server would have taken.
+ * Also derived server-side now, from `storage.allowed_extensions` — which ships
+ * wider than this list (it includes `bmp`, `gif` and several office formats).
+ * This stays deliberately narrow: bulk import feeds an OCR/vision pipeline, and
+ * offering `.docx` on a scanner intake screen invites a file the pipeline can
+ * do nothing useful with. Narrower than the server is always safe; wider is not.
+ *
+ * `.tif` is spelled out alongside `.tiff` because a scanner writing the short
+ * extension is ordinary, and `image/tiff` covers the pickers that filter by
+ * MIME rather than by suffix.
  */
-export const BULK_IMPORT_ACCEPT = '.pdf,.png,.jpg,.jpeg,.tiff,image/tiff'
+export const BULK_IMPORT_ACCEPT = '.pdf,.png,.jpg,.jpeg,.tif,.tiff,image/tiff'
+
+/**
+ * Header `BulkImportRequest` reads to learn how many files the client attached.
+ *
+ * PHP enforces `max_file_uploads` (20 by default) inside the multipart parser,
+ * dropping the surplus *before* Laravel sees the request — so a 500-file batch
+ * would otherwise come back as an ordinary 202 for 20 documents and the other
+ * 480 scans would be gone with no error anywhere. A header is immune to that,
+ * because it is not part of the multipart payload the limit applies to.
+ *
+ * With the count declared, the server can prove a truncation and refuses the
+ * whole batch (422 + `upload_truncation`) instead of importing a fragment.
+ * Verified live: two files declared as five answers 422 with
+ * `{ declared_file_count: 5, received_file_count: 2, discarded_file_count: 3,
+ * max_file_uploads: 20, confirmed: true }`.
+ */
+const EXPECTED_COUNT_HEADER = 'X-Expected-File-Count'
 
 // ---------------------------------------------------------------------------
 // Wire shapes (snake_case, exactly as Laravel sends them)
 // ---------------------------------------------------------------------------
 
+/** `BulkImportRequest::truncationPayload()`, on both the 202 and the 422 body. */
+interface UploadTruncationResource {
+  declared_file_count: number | null
+  received_file_count: number
+  discarded_file_count: number | null
+  max_file_uploads: number
+  confirmed: boolean
+}
+
 /** `BulkImportController::store` — note the key is `documents_queued`, not `count`. */
 interface BulkImportResource {
   documents_queued: number
   document_ids: string[]
+  /**
+   * Present only when the batch landed *exactly* on `max_file_uploads`, which
+   * is indistinguishable from a truncated one. The files were imported and the
+   * caller is told the count could not be verified — `confirmed: false`.
+   */
+  upload_truncation?: UploadTruncationResource | null
 }
 
 interface BulkImportResponse {
   data: BulkImportResource
+}
+
+/** The 422 body a *confirmed* truncation produces — note it sits beside `errors`. */
+interface BulkImportTruncationBody {
+  upload_truncation?: UploadTruncationResource | null
 }
 
 /**
@@ -238,6 +290,33 @@ function toDocumentQuery(params: ServerTableParams): Record<string, string | num
 
 // ---------------------------------------------------------------------------
 
+function truncationFromResource(
+  resource: UploadTruncationResource | null | undefined,
+): UploadTruncation | null {
+  if (!resource) return null
+  return {
+    declaredFileCount: resource.declared_file_count ?? null,
+    receivedFileCount: Number(resource.received_file_count) || 0,
+    discardedFileCount: resource.discarded_file_count ?? null,
+    maxFileUploads: Number(resource.max_file_uploads) || 0,
+    confirmed: Boolean(resource.confirmed),
+  }
+}
+
+/**
+ * Thrown when the server proves the batch was cut short and imported nothing.
+ *
+ * A distinct error type rather than a message: the page has to render four
+ * numbers in the operator's own language, and `getApiErrorMessage` can only
+ * pass the server's English sentence through.
+ */
+export class BulkImportTruncatedError extends Error {
+  constructor(readonly truncation: UploadTruncation) {
+    super('Bulk import was truncated before it reached the server.')
+    this.name = 'BulkImportTruncatedError'
+  }
+}
+
 export interface BulkImportOptions {
   /** Called with 0–100 as the multipart body goes up. */
   onProgress?: (percent: number) => void
@@ -253,16 +332,31 @@ export const pipelineApi = {
     const form = new FormData()
     for (const file of files) form.append('files[]', file)
 
-    const { data } = await http.post<BulkImportResponse>(ENDPOINTS.bulkImport, form, {
-      // A 500-file batch is far past the client's default 15s budget, and the
-      // browser sets its own multipart Content-Type boundary — leave both alone.
-      timeout: 0,
-      signal: options.signal,
-      onUploadProgress: (event) => {
-        if (!options.onProgress || !event.total) return
-        options.onProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)))
-      },
-    })
+    let data: BulkImportResponse
+    try {
+      const response = await http.post<BulkImportResponse>(ENDPOINTS.bulkImport, form, {
+        // A 500-file batch is far past the client's default 15s budget, and the
+        // browser sets its own multipart Content-Type boundary — leave both alone.
+        timeout: 0,
+        signal: options.signal,
+        // Declared out of band so PHP's multipart limit cannot swallow it too.
+        headers: { [EXPECTED_COUNT_HEADER]: String(files.length) },
+        onUploadProgress: (event) => {
+          if (!options.onProgress || !event.total) return
+          options.onProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)))
+        },
+      })
+      data = response.data
+    } catch (err: unknown) {
+      // A confirmed truncation is a 422 whose body carries the counts beside
+      // the usual `errors` bag. Nothing was imported, so this is not a partial
+      // success to report as one.
+      if (axios.isAxiosError<BulkImportTruncationBody>(err)) {
+        const truncation = truncationFromResource(err.response?.data?.upload_truncation)
+        if (truncation?.confirmed) throw new BulkImportTruncatedError(truncation)
+      }
+      throw err
+    }
 
     return {
       // Carried through so the caller can compare it with the server's tally —
@@ -270,6 +364,7 @@ export const pipelineApi = {
       submittedCount: files.length,
       documentsQueued: data.data.documents_queued,
       documentIds: data.data.document_ids ?? [],
+      truncation: truncationFromResource(data.data.upload_truncation),
     }
   },
 
