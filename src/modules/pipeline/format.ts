@@ -25,15 +25,24 @@ export function formatCount(value: number, locale: string): string {
 }
 
 /**
- * A 0–1 confidence score as a whole percentage. Returns a dash for a document
- * that has not been refined yet, matching `formatDate`'s treatment of nulls.
+ * A refinement confidence as a whole percentage.
+ *
+ * The wire value is **already on a 0–100 scale**: `RefinementData::fromArray()`
+ * multiplies the model's 0.0–1.0 answer by 100 before it is stored, which is
+ * why the backend's auto-classify threshold is `85` rather than `0.85`
+ * (`config('ai.pipeline.confidence_threshold')`). Dividing by 100 here is what
+ * makes `style: 'percent'` print `92%` instead of `9,200%`.
+ *
+ * Anything that is not a finite number — including the raw `"92.00"` string
+ * Laravel's `decimal:2` cast puts on the wire, which the api mapper is
+ * responsible for coercing — returns a dash rather than a nonsense figure.
  */
 export function formatConfidence(value: number | null | undefined, locale: string): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '-'
+  if (value === null || value === undefined || !Number.isFinite(value)) return '-'
   return new Intl.NumberFormat(numberLocale(locale), {
     style: 'percent',
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(value / 100)
 }
 
 /** Human-readable file size for the upload screen's selection summary. */

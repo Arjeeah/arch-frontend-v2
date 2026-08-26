@@ -70,7 +70,11 @@ interface DocumentPipelineStatusResource {
   has_ocr_content: boolean
   page_count: number
   has_refinement: boolean
-  confidence_score: number | null
+  /**
+   * `decimal(5,2)` behind Laravel's `decimal:2` cast, so it arrives as a
+   * **string** (`"92.00"`), not a number — and on a 0–100 scale, not 0–1.
+   */
+  confidence_score: number | string | null
   structured_data: Record<string, unknown> | null
   additional_fields: Record<string, unknown> | null
   /** Misleading name on the wire: the resource fills it with `->count()`. */
@@ -133,6 +137,20 @@ function toStatus(raw: string): PipelineStatus {
   return isPipelineStatus(raw) ? raw : 'pending'
 }
 
+/**
+ * Narrows `confidence_score` onto a plain number.
+ *
+ * Laravel's `decimal:2` cast serialises the column as a string, so this is the
+ * one place the app has to stop treating it as one. The scale is left alone:
+ * the stored value is already 0–100 (`RefinementData::fromArray()` multiplies
+ * the model's 0–1 answer), and `formatConfidence` expects it that way.
+ */
+function toConfidence(raw: number | string | null): number | null {
+  if (raw === null) return null
+  const value = typeof raw === 'number' ? raw : Number(raw)
+  return Number.isFinite(value) ? value : null
+}
+
 function countsFromResource(resource: Record<string, number> | undefined): PipelineStatusCounts {
   const counts = Object.fromEntries(
     PIPELINE_STATUSES.map((status) => [status, 0]),
@@ -153,7 +171,7 @@ function statusFromResource(resource: DocumentPipelineStatusResource): DocumentP
     hasOcrContent: resource.has_ocr_content,
     pageCount: resource.page_count ?? 0,
     hasRefinement: resource.has_refinement,
-    confidenceScore: resource.confidence_score,
+    confidenceScore: toConfidence(resource.confidence_score),
     structuredData: resource.structured_data,
     additionalFields: resource.additional_fields,
     embeddedPageCount: resource.has_embeddings ?? 0,
@@ -235,6 +253,9 @@ export const pipelineApi = {
     })
 
     return {
+      // Carried through so the caller can compare it with the server's tally —
+      // see `BulkImportResult.submittedCount`.
+      submittedCount: files.length,
       documentsQueued: data.data.documents_queued,
       documentIds: data.data.document_ids ?? [],
     }

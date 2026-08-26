@@ -21,7 +21,10 @@ export interface DocumentPipelineStatus {
   /** Pages OCR produced for this document. */
   pageCount: number
   hasRefinement: boolean
-  /** 0–1 from the AI refinement, or null before one exists. */
+  /**
+   * 0–100 from the AI refinement, or null before one exists. The backend's
+   * auto-classify threshold sits on the same scale (`85`).
+   */
   confidenceScore: number | null
   /** Whatever the refinement extracted; shape varies by document type. */
   structuredData: Record<string, unknown> | null
@@ -59,6 +62,16 @@ export interface PipelineDocument {
 
 /** Result of a bulk import — `BulkImportResponseResource`. */
 export interface BulkImportResult {
+  /**
+   * How many files this client put on the wire.
+   *
+   * Not part of the response — recorded by the api mapper so the screen can
+   * check the server's tally against it. PHP drops uploads past
+   * `max_file_uploads` (20 by default) *before* Laravel validates, so a
+   * truncated batch comes back as a perfectly ordinary 202 and the missing
+   * files would otherwise vanish without a word.
+   */
+  submittedCount: number
   documentsQueued: number
   documentIds: string[]
 }
