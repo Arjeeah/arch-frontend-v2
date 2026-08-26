@@ -1,0 +1,166 @@
+{
+  "en": {
+    "documentTypes": {
+      "title": "Document Types",
+      "subtitle": "Manage the document types students can submit and when they're required",
+      "addNew": "Add Document Type",
+      "searchPlaceholder": "Search by name…",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "status": "Status",
+        "isRequired": "Required by default",
+        "required": "Required",
+        "optional": "Optional"
+      },
+      "filters": {
+        "allStatuses": "All statuses",
+        "allTypes": "All types"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "empty": {
+        "title": "No document types yet",
+        "description": "Add a document type so students can start submitting it.",
+        "filteredTitle": "No matching document types",
+        "filteredDescription": "No document type matches the current search and filters."
+      },
+      "errorState": {
+        "title": "Could not load document types",
+        "retry": "Try again"
+      },
+      "dialog": {
+        "createTitle": "Add Document Type",
+        "editTitle": "Edit Document Type",
+        "createSubtitle": "Fill in the details to create a new document type.",
+        "editSubtitle": "Update the document type's details.",
+        "namePlaceholder": "e.g. National ID copy",
+        "descriptionPlaceholder": "Optional notes shown to staff reviewing this document",
+        "nameRequired": "Name is required",
+        "cancel": "Cancel",
+        "save": "Save",
+        "update": "Update"
+      },
+      "conditions": {
+        "label": "Conditions",
+        "enable": "Only required under certain conditions",
+        "matchLabel": "Match",
+        "and": "all",
+        "or": "any",
+        "ofTheFollowing": "of the following conditions",
+        "fieldPlaceholder": "Field (e.g. faculty_id)",
+        "opIn": "is one of",
+        "opNotIn": "is not one of",
+        "valuePlaceholder": "Value",
+        "valueListPlaceholder": "Comma-separated values",
+        "remove": "Remove condition",
+        "addCondition": "Add condition",
+        "atLeastOne": "Add at least one condition, or clear the checkbox above.",
+        "incomplete": "Every condition needs both a field and a value.",
+        "emptyList": "A list condition needs at least one value between the commas.",
+        "tooltip": "{count} condition(s) configured"
+      },
+      "deleteDialog": {
+        "title": "Delete Document Type",
+        "confirm": "Delete",
+        "message": "Are you sure you want to delete \"{name}\"? This cannot be undone."
+      },
+      "toasts": {
+        "created": "Document type created.",
+        "updated": "Document type updated.",
+        "deleted": "Document type deleted.",
+        "saveFailed": "Failed to save document type",
+        "deleteFailed": "Failed to delete document type"
+      }
+    }
+  },
+  "ar": {
+    "documentTypes": {
+      "title": "أنواع الوثائق",
+      "subtitle": "إدارة أنواع الوثائق التي يمكن للطلاب تقديمها ومتى تكون مطلوبة",
+      "addNew": "إضافة نوع وثيقة",
+      "searchPlaceholder": "البحث بالاسم…",
+      "fields": {
+        "name": "الاسم",
+        "description": "الوصف",
+        "status": "الحالة",
+        "isRequired": "مطلوبة افتراضيًا",
+        "required": "مطلوبة",
+        "optional": "اختيارية"
+      },
+      "filters": {
+        "allStatuses": "كل الحالات",
+        "allTypes": "كل الأنواع"
+      },
+      "status": {
+        "active": "نشطة",
+        "inactive": "غير نشطة"
+      },
+      "table": {
+        "actions": "الإجراءات",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "empty": {
+        "title": "لا توجد أنواع وثائق بعد",
+        "description": "أضف نوع وثيقة ليتمكن الطلاب من تقديمها.",
+        "filteredTitle": "لا توجد نتائج مطابقة",
+        "filteredDescription": "لا يوجد نوع وثيقة يطابق البحث والفلاتر الحالية."
+      },
+      "errorState": {
+        "title": "تعذر تحميل أنواع الوثائق",
+        "retry": "إعادة المحاولة"
+      },
+      "dialog": {
+        "createTitle": "إضافة نوع وثيقة",
+        "editTitle": "تعديل نوع الوثيقة",
+        "createSubtitle": "املأ التفاصيل لإنشاء نوع وثيقة جديد.",
+        "editSubtitle": "قم بتحديث تفاصيل نوع الوثيقة.",
+        "namePlaceholder": "مثال: نسخة البطاقة الشخصية",
+        "descriptionPlaceholder": "ملاحظات اختيارية تظهر للموظفين عند مراجعة هذه الوثيقة",
+        "nameRequired": "الاسم مطلوب",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "update": "تحديث"
+      },
+      "conditions": {
+        "label": "الشروط",
+        "enable": "مطلوبة فقط ضمن شروط معينة",
+        "matchLabel": "مطابقة",
+        "and": "كل",
+        "or": "أي",
+        "ofTheFollowing": "من الشروط التالية",
+        "fieldPlaceholder": "الحقل (مثال: faculty_id)",
+        "opIn": "من ضمن",
+        "opNotIn": "ليست من ضمن",
+        "valuePlaceholder": "القيمة",
+        "valueListPlaceholder": "قيم مفصولة بفواصل",
+        "remove": "إزالة الشرط",
+        "addCondition": "إضافة شرط",
+        "atLeastOne": "أضف شرطًا واحدًا على الأقل، أو ألغِ تحديد الخيار أعلاه.",
+        "incomplete": "كل شرط يحتاج إلى حقل وقيمة معًا.",
+        "emptyList": "شرط القائمة يحتاج إلى قيمة واحدة على الأقل بين الفواصل.",
+        "tooltip": "تم إعداد {count} شرط"
+      },
+      "deleteDialog": {
+        "title": "حذف نوع الوثيقة",
+        "confirm": "حذف",
+        "message": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء."
+      },
+      "toasts": {
+        "created": "تم إنشاء نوع الوثيقة.",
+        "updated": "تم تحديث نوع الوثيقة.",
+        "deleted": "تم حذف نوع الوثيقة.",
+        "saveFailed": "تعذر حفظ نوع الوثيقة",
+        "deleteFailed": "تعذر حذف نوع الوثيقة"
+      }
+    }
+  }
+}
