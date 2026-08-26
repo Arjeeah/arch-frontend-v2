@@ -104,6 +104,14 @@ export const drawersApi = {
    * reconciled back to 4 on every cabinet update), so this only matters for
    * the edge case of a drawer that got deleted individually and needs
    * re-adding — a later cabinet edit would otherwise just recreate it anyway.
+   *
+   * CAUTION on the returned `Drawer` when `capacity` was omitted: its
+   * `capacity` is `null`, which is NOT what was stored. `DrawerController::store`
+   * responds with the un-refreshed model, so a column-default value the insert
+   * applied is missing from the 201 body — verified live, the create said
+   * `capacity: null` while an immediate GET of the same drawer said `100`.
+   * Callers must re-read rather than trust this field; `CabinetDrawersPage`
+   * discards the return value and refreshes the table, so nothing renders it.
    */
   create: async (cabinetId: string, input: DrawerInput): Promise<Drawer> => {
     const payload = toPayload(input)
@@ -111,8 +119,9 @@ export const drawersApi = {
     // `DrawerStoreRequest` marks `capacity` as `nullable`, but the column is
     // `integer NOT NULL DEFAULT 100` (create_drawers_table migration), so an
     // explicit null clears validation and then dies on the NOT NULL constraint
-    // with a 500. Omitting the key instead is what "leave it blank" has to mean:
-    // the column default applies.
+    // — confirmed live, that request answers 500 with an SQLSTATE[23000]
+    // "NOT NULL constraint failed: drawers.capacity". Omitting the key instead
+    // is what "leave it blank" has to mean: the column default is applied.
     if (payload.capacity === null) delete payload.capacity
 
     const { data } = await http.post<DrawerItemResponse>(BASE_PATH, {
@@ -122,7 +131,19 @@ export const drawersApi = {
     return fromResource(data.data)
   },
 
-  /** Never sends `cabinet_id` — the backend 422s an update that tries to change it. */
+  /**
+   * Never sends `cabinet_id` — confirmed live, `DrawerController::update`
+   * answers 422 "Changing cabinet_id is not supported via update() without
+   * move logic." for a different id (the same id passes, but there is no
+   * reason to send it).
+   *
+   * `capacity` is stricter here than on create: `DrawerUpdateRequest` rules it
+   * `sometimes|required|integer|min:1`, so null 422s ("The capacity field is
+   * required.") and 0 422s ("must be at least 1.") — both verified — whereas
+   * create allows `nullable|min:0`. `DrawerFormDialog` enforces the tighter
+   * rule whenever it is editing, which is why the null-stripping that `create`
+   * needs has no counterpart here.
+   */
   update: async (id: string, input: Partial<DrawerInput>): Promise<Drawer> => {
     const { data } = await http.put<DrawerItemResponse>(`${BASE_PATH}/${id}`, toPayload(input))
     return fromResource(data.data)

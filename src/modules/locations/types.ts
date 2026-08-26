@@ -71,11 +71,20 @@ export interface Drawer {
   capacity: number | null
   status: LocationStatus
   /**
-   * `capacityStatus` / `capacityColor` are computed server-side against a
-   * hardcoded `currentCount = 0` for now (no document-assignment tracking
-   * yet), so every drawer currently reports "normal" / "green" regardless of
-   * how full it actually is. Rendered as-is — do not compute a percentage
-   * client-side, there is no `current_count` on the wire to compute it from.
+   * `capacityStatus` / `capacityColor` are computed server-side from REAL
+   * occupancy — `Drawer::currentCount()` counts the students whose physical
+   * file sits in the drawer (eager-loaded via `$withCount = ['students']`),
+   * and the thresholds are >=80% "warning"/yellow and >=95% "critical"/red.
+   *
+   * Do not be misled by a seeded database in which every drawer reads
+   * "normal"/"green": that is low occupancy, not a stub. Verified live by
+   * filling a capacity-4 drawer — at 3 students it stayed normal/green, at 4
+   * it returned "critical"/"red". (The stale `// uses default currentCount = 0`
+   * comment in the backend's `DrawerResource` predates that implementation.)
+   *
+   * Still rendered as-is rather than recomputed: `DrawerResource` emits no
+   * occupancy count, so there is no `current_count` on the wire to derive a
+   * percentage from client-side.
    */
   capacityStatus: CapacityStatus
   capacityColor: CapacityColor
