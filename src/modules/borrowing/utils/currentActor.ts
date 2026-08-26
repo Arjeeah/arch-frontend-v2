@@ -51,7 +51,7 @@ function readSession(): { id: string | null; role: ActorRole | null } {
  * Role-gating for the borrowing workflow buttons, straight from
  * `BorrowingPolicy.php`:
  *   - approve / reject / mark-borrowed / return: archivist + super_admin
- *   - create (request-new): faculty_staff only
+ *   - create (request-new): ANY archive role, not faculty_staff alone
  *   - update / delete a pending request: its own requester only
  *
  * The session is read through `authStorage` (from `app/config`, not the auth
@@ -66,6 +66,19 @@ function readSession(): { id: string | null; role: ActorRole | null } {
 export function currentActor(): {
   id: string | null
   canManageWorkflow: boolean
+  /**
+   * `BorrowingPolicy::create` admits every archive role, not faculty_staff
+   * alone. Gating on `faculty_staff` looked right against the old
+   * `hasRole(faculty_staff)` check, but `readSession()` collapses the role
+   * array to the HIGHEST role held — and `assignRoleWithHierarchy()` gives an
+   * archivist and a super_admin `faculty_staff` too. So the equality test
+   * resolved to `super_admin` / `archivist` and hid "Add Borrowing" from
+   * exactly the two roles the backend was happy to accept a request from.
+   *
+   * Confirmed against the live API: an archivist token POSTing /v1/borrowings
+   * gets 201, and a super_admin token clears `StoreBorrowingRequest::authorize()`
+   * (it fails later, at 422, only on the per-user concurrency cap).
+   */
   canRequest: boolean
   /** `BorrowingPolicy::delete` lets a super_admin delete *any* borrowing, not just archivist+admin. */
   canDeleteAny: boolean
@@ -74,7 +87,7 @@ export function currentActor(): {
   return {
     id,
     canManageWorkflow: role === 'archivist' || role === 'super_admin',
-    canRequest: role === 'faculty_staff',
+    canRequest: role !== null,
     canDeleteAny: role === 'super_admin',
   }
 }

@@ -174,7 +174,7 @@ function showDelete(item: Borrowing): boolean {
         </div>
         <!-- Status -->
         <div class="flex justify-center items-center px-[13px] w-[120px] shrink-0">
-          <BorrowingStatusBadge :status="item.status" />
+          <BorrowingStatusBadge :status="item.status" :overdue="item.isOverdue" />
         </div>
 
         <!-- Actions -->
