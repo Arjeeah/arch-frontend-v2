@@ -62,15 +62,17 @@ watch(
 )
 
 /**
- * `RefinementData::fromArray` rescales the model's 0.0–1.0 confidence to
- * 0–100 before it reaches `confidence_score`, so the stored value is already a
- * percentage. Values of 1 or less are treated as the raw 0–1 form, which is
- * what an un-rescaled path (or a genuinely hopeless 1% score) would look like.
+ * `confidence_score` is already a 0–100 percentage —
+ * `RefinementData::fromArray` rescales the model's 0.0–1.0 answer before the
+ * value ever reaches the column.
+ *
+ * Treating "1 or less" as an un-rescaled score turned a genuinely hopeless 1%
+ * into a reassuring 100% in the green band, on the one screen an archivist
+ * uses to decide whether a document needs review. Clamp only.
  */
 function confidencePercent(score: number | null | undefined): number | null {
   if (score === null || score === undefined) return null
-  const percent = score > 1 ? score : score * 100
-  return Math.max(0, Math.min(100, Math.round(percent)))
+  return Math.max(0, Math.min(100, Math.round(score)))
 }
 
 function confidenceTone(percent: number): string {

@@ -16,15 +16,19 @@ const props = defineProps<{
 const { t, locale } = useI18n()
 
 /**
- * `RefinementData::fromArray` rescales the model's 0.0–1.0 confidence to 0–100
- * before it is stored, so `confidence_score` is already a percentage. A value
- * of 1 or less is read as the raw 0–1 form instead.
+ * `confidence_score` is `decimal(5,2)` on a **0–100** scale — the rescale from
+ * the model's 0.0–1.0 answer already happened in `RefinementData::fromArray()`.
+ *
+ * There used to be a `score > 1 ? score : score * 100` branch here "in case"
+ * an un-rescaled value arrived. That band is exactly what the backend produces
+ * from a *near-zero* model answer, so a document the extractor was 1% sure
+ * about rendered as 100%, in the green band — while the pipeline monitor and
+ * the review queue correctly read the same row as 1%. Clamp only.
  */
 const confidencePercent = computed(() => {
   const score = props.snapshot?.confidenceScore
   if (score === null || score === undefined) return null
-  const percent = score > 1 ? score : score * 100
-  return Math.max(0, Math.min(100, Math.round(percent)))
+  return Math.max(0, Math.min(100, Math.round(score)))
 })
 
 const counters = computed(() => {

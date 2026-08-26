@@ -49,7 +49,8 @@ export interface StudentRef {
 
 export interface StudentDocument {
   id: string
-  studentId: string
+  /** Null until the pipeline links a bulk-imported scan to a student. */
+  studentId: string | null
   student: StudentRef | null
   documentTypeId: string | null
   documentType: DocumentTypeRef | null

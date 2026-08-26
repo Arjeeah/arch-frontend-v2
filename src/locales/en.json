@@ -1218,7 +1218,8 @@
     "toasts": {
       "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
       "verified": "Document verified"
-    }
+    },
+    "writeUnavailable": "Saving is unavailable: the API does not send this document’s refinement id yet, so corrections cannot be addressed to it."
   },
   "search": {
     "title": "Archive Search",

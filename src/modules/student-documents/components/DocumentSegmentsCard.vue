@@ -27,16 +27,18 @@ const columns = computed(() => [
 ])
 
 /**
- * Already a percentage. `SegmentDocumentBundle` writes `confidence_score` from
- * `AiRefiner::refineWith()`, which returns a `RefinementData` — and
- * `RefinementData::fromArray` rescales the model's 0.0–1.0 answer to 0–100
- * before the DTO is built. The `<= 1` branch below is only a guard for a value
- * that reached the column by some other route.
+ * Already a percentage on a 0–100 scale: `SegmentDocumentBundle` writes
+ * `confidence_score` from `AiRefiner::refineWith()`, which returns a
+ * `RefinementData`, and `RefinementData::fromArray` does the 0.0–1.0 → 0–100
+ * rescale before the DTO is built.
+ *
+ * The old `<= 1` "guard" re-applied that rescale to the one band it must not:
+ * a genuine 0.5% score came out as 50%. Clamp only, matching `formatConfidence`
+ * and `ConfidenceMeter`.
  */
 function percent(score: number | null): number | null {
   if (score === null) return null
-  const value = score > 1 ? score : score * 100
-  return Math.max(0, Math.min(100, Math.round(value)))
+  return Math.max(0, Math.min(100, Math.round(score)))
 }
 
 function pageRange(segment: DocumentSegment): string {

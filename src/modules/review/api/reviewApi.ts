@@ -43,18 +43,18 @@ interface RefinementDataResource {
 interface ReviewQueueItemResource {
   document_id: string
   /**
-   * NOT sent by `ReviewQueueResource` today. `PATCH /v1/refinements/{refinement}`
-   * and its verify sibling bind by `document_refinements.id`, but the queue
-   * resource only exposes `document_id` (`student_documents.id`) — so the queue
-   * gives the UI no way to name the row it wants to write to.
+   * NOT sent by `ReviewQueueResource` today — confirmed against the source, not
+   * assumed. `PATCH /v1/refinements/{refinement}` and its verify sibling bind
+   * `DocumentRefinement` by `document_refinements.id`, and no endpoint in the
+   * API emits that id: the queue resource exposes only `document_id`
+   * (`student_documents.id`).
    *
-   * The mapper below reads this key when present and falls back to
-   * `document_id` otherwise, so the screen starts working the moment the
-   * backend closes the gap either way (adding `refinement_id` to the resource,
-   * or rebinding the route to the student document). Until then, the two write
-   * calls will 404. Tracked in WIRING.md → Notes.
-   *
-   * // verify against live API
+   * The mapper used to substitute `document_id` here, which guaranteed a 404 on
+   * every save and every verify. It maps to `null` instead, and the page
+   * disables both write actions with an explanation rather than issuing a
+   * request that cannot succeed. Adding `'refinement_id' => $refinement?->id`
+   * to the resource is a one-line backend change and lights the screen up with
+   * no further edit here. Tracked in WIRING.md → Still outstanding.
    */
   refinement_id?: string | null
   file_number?: string | null
@@ -162,8 +162,9 @@ function fromResource(resource: ReviewQueueItemResource): ReviewQueueItem {
 
   return {
     documentId: resource.document_id,
-    // See the `refinement_id` note above — this fallback is deliberate.
-    refinementId: resource.refinement_id ?? resource.document_id,
+    // No fallback to `document_id`: see the note above — it addressed the
+    // wrong table and turned every write into a 404.
+    refinementId: resource.refinement_id ?? null,
     fileNumber: resource.file_number ?? null,
     fileName: resource.file_name ?? null,
     fileUrl: fileUrl === '' ? null : fileUrl,

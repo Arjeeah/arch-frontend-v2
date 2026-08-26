@@ -25,7 +25,12 @@ interface DocumentTypeResource {
 /** `App\Http\Resources\StudentDocumentResource`. */
 interface StudentDocumentResource {
   id: string
-  student_id: string
+  /**
+   * Nullable since `make_student_document_fks_nullable`: `BulkImportController`
+   * creates a document with only a `pipeline_status`, and the AI pipeline links
+   * the student afterwards. `pipelineApi` types the same field correctly.
+   */
+  student_id: string | null
   student?: StudentResource | null
   document_type_id: string | null
   document_type?: DocumentTypeResource | null
@@ -56,7 +61,7 @@ function toFileStatus(raw: string | null): FileStatus {
 function fromResource(resource: StudentDocumentResource): StudentDocument {
   return {
     id: resource.id,
-    studentId: resource.student_id,
+    studentId: resource.student_id ?? null,
     student: resource.student
       ? {
           id: resource.student.id,

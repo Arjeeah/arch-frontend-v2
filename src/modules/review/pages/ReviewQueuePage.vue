@@ -204,6 +204,15 @@ const isSettled = computed(
   () => alreadyVerified.value && !isDirty.value && correctionCount.value === 0,
 )
 
+/**
+ * Both write endpoints bind `document_refinements.id`, and
+ * `ReviewQueueResource` does not send it (see `api/reviewApi.ts`). Without it
+ * there is no id to address, so the actions are disabled and explained rather
+ * than firing a request that 404s every time. The moment the resource carries
+ * `refinement_id`, this turns true on its own.
+ */
+const canWrite = computed(() => Boolean(selected.value?.refinementId))
+
 function resetForm(): void {
   // Drop the draft first — `loadForm` would otherwise restore what we are
   // being asked to throw away.
@@ -221,7 +230,8 @@ function patchRow(documentId: string, patch: Partial<ReviewQueueItem>): void {
 
 async function saveCorrections(then: 'stay' | 'advance' = 'stay'): Promise<void> {
   const item = selected.value
-  if (!item || saving.value || correctionCount.value === 0 || !hasPendingWork.value) return
+  if (!item?.refinementId || saving.value || correctionCount.value === 0 || !hasPendingWork.value)
+    return
 
   // Snapshot before awaiting — the row is patched in place on success, and the
   // count is what the toast reports.
@@ -251,7 +261,7 @@ async function saveCorrections(then: 'stay' | 'advance' = 'stay'): Promise<void>
 
 async function verifyAsIs(then: 'stay' | 'advance' = 'stay'): Promise<void> {
   const item = selected.value
-  if (!item || saving.value || isSettled.value) return
+  if (!item?.refinementId || saving.value || isSettled.value) return
 
   saving.value = true
   try {
@@ -284,6 +294,7 @@ async function commitAndAdvance(): Promise<void> {
     advance()
     return
   }
+  if (!canWrite.value) return
   if (correctionCount.value > 0) {
     await saveCorrections('advance')
     return
@@ -602,7 +613,12 @@ const positionLabel = computed(() => {
           <!-- Actions -->
           <footer v-if="selected" class="flex flex-col gap-3 border-t border-border pt-4">
             <div class="flex flex-wrap items-center gap-2">
-              <AppButton variant="primary" :loading="saving" @click="commitAndAdvance">
+              <AppButton
+                variant="primary"
+                :loading="saving"
+                :disabled="hasPendingWork && !canWrite"
+                @click="commitAndAdvance"
+              >
                 <CheckCheck v-if="hasPendingWork" class="h-4 w-4" />
                 <ChevronRight v-else class="h-4 w-4 rtl:rotate-180" />
                 {{
@@ -615,12 +631,16 @@ const positionLabel = computed(() => {
               </AppButton>
               <AppButton
                 variant="accent"
-                :disabled="saving || correctionCount === 0 || !hasPendingWork"
+                :disabled="saving || !canWrite || correctionCount === 0 || !hasPendingWork"
                 @click="saveCorrections('stay')"
               >
                 {{ t('review.actions.saveCorrections', correctionCount) }}
               </AppButton>
-              <AppButton variant="ghost" :disabled="saving || isSettled" @click="requestVerifyAsIs">
+              <AppButton
+                variant="ghost"
+                :disabled="saving || !canWrite || isSettled"
+                @click="requestVerifyAsIs"
+              >
                 {{ t('review.actions.verifyAsIs') }}
               </AppButton>
               <AppButton variant="ghost" :disabled="saving || !isDirty" @click="resetForm">
@@ -628,6 +648,9 @@ const positionLabel = computed(() => {
               </AppButton>
             </div>
 
+            <p v-if="!canWrite" class="font-sans text-xs text-danger">
+              {{ t('review.writeUnavailable') }}
+            </p>
             <p class="font-sans text-xs text-text-muted">
               {{ t('review.shortcuts.hint') }}
             </p>

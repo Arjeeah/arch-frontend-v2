@@ -99,7 +99,8 @@
       "toasts": {
         "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
         "verified": "Document verified"
-      }
+      },
+      "writeUnavailable": "Saving is unavailable: the API does not send this document’s refinement id yet, so corrections cannot be addressed to it."
     }
   },
   "ar": {
@@ -202,7 +203,8 @@
       "toasts": {
         "saved": "لا شيء للحفظ | حُفظ تصحيح واحد | حُفظت التصحيحات ({count})",
         "verified": "تم تأكيد المستند"
-      }
+      },
+      "writeUnavailable": "الحفظ غير متاح: لا ترسل الواجهة البرمجية معرّف التحسين لهذا المستند بعد، لذا لا يمكن إرسال التصحيحات إليه."
     }
   }
 }

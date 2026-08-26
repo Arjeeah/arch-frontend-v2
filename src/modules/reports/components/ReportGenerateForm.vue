@@ -42,6 +42,25 @@ const formatOptions = computed(() =>
   })),
 )
 
+/**
+ * Filters the catalog advertises but the exporter cannot execute.
+ *
+ * `StudentDocumentsExport::query()` casts `document_type_id` with `(int)`,
+ * while `document_types.id` is a `uuid`: `(int)'0f3a…'` is `0`, PostgreSQL has
+ * no `uuid = integer` operator, and the queued `GenerateReportJob` throws — the
+ * report lands in `failed` with a raw SQL error in `error_message`. Rendering
+ * the control would only offer a guaranteed-broken report, so it is withheld
+ * until the cast is dropped server-side (WIRING.md → Still outstanding).
+ */
+const UNSUPPORTED_FILTER_KEYS: readonly string[] = ['document_type_id']
+
+/** The filters actually offered — and therefore the only ones ever sent. */
+const activeFilterSchema = computed(() =>
+  (selectedType.value?.filterSchema ?? []).filter(
+    (field) => !UNSUPPORTED_FILTER_KEYS.includes(field.key),
+  ),
+)
+
 function clearErrors(): void {
   typeError.value = ''
   formatError.value = ''
@@ -56,7 +75,7 @@ watch(selectedType, (option) => {
     format.value = ''
     return
   }
-  for (const field of option.filterSchema) filterValues[field.key] = ''
+  for (const field of activeFilterSchema.value) filterValues[field.key] = ''
   format.value = option.formats.includes(option.defaultFormat)
     ? option.defaultFormat
     : (option.formats[0] ?? '')
@@ -101,7 +120,7 @@ function validate(): GenerateReportInput | null {
   const filters: Record<string, ReportFilterValue> = {}
   let valid = true
 
-  for (const field of option.filterSchema) {
+  for (const field of activeFilterSchema.value) {
     const raw = (filterValues[field.key] ?? '').trim()
     if (raw === '') continue
 
@@ -169,13 +188,13 @@ function onSubmit(): void {
       {{ t('reports.form.facultyScopedHint') }}
     </p>
 
-    <div v-if="selectedType && selectedType.filterSchema.length" class="flex flex-col gap-3">
+    <div v-if="activeFilterSchema.length" class="flex flex-col gap-3">
       <h3 class="font-display text-sm font-semibold text-text-primary">
         {{ t('reports.form.filters') }}
       </h3>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <ReportFilterField
-          v-for="field in selectedType.filterSchema"
+          v-for="field in activeFilterSchema"
           :key="field.key"
           :field="field"
           :model-value="filterValues[field.key] ?? ''"

@@ -31,11 +31,12 @@ export interface ReviewQueueItem {
   documentId: string
   /**
    * `document_refinements.id` (UUID) — what `PATCH /v1/refinements/{id}` is
-   * keyed by. See the note on `refinement_id` in `api/reviewApi.ts`: the
-   * current backend resource does not send it, so this may fall back to
-   * `documentId`.
+   * keyed by, or `null` when the API did not send one. See the note on
+   * `refinement_id` in `api/reviewApi.ts`: `ReviewQueueResource` does not emit
+   * it today, and the page disables both write actions while it is null rather
+   * than PATCHing a `student_documents.id` at a `document_refinements` route.
    */
-  refinementId: string
+  refinementId: string | null
   fileNumber: string | null
   fileName: string | null
   /** Absolute media URL, or `null` when the document has no stored file. */
