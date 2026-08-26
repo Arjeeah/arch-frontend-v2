@@ -1,0 +1,258 @@
+{
+  "en": {
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Queue a system report and download it once the server has built it.",
+      "generate": {
+        "title": "Generate a report"
+      },
+      "form": {
+        "type": "Report type",
+        "typePlaceholder": "Choose a report type",
+        "format": "Format",
+        "formatPlaceholder": "Choose a format",
+        "filters": "Filters",
+        "facultyScopedHint": "This report is faculty-scoped — faculty staff only ever see their own faculty's rows.",
+        "submit": "Generate report"
+      },
+      "types": {
+        "audit_logs": "Audit logs",
+        "borrowings": "Borrowings",
+        "student_documents": "Student documents",
+        "users": "Users",
+        "weekly_digest": "Weekly digest",
+        "faculty_report": "Faculty report"
+      },
+      "formats": {
+        "csv": "CSV",
+        "xlsx": "Excel (XLSX)",
+        "pdf": "PDF"
+      },
+      "filters": {
+        "any": "Any",
+        "action": "Action",
+        "user_id": "User ID",
+        "role": "Role",
+        "reference_id": "Reference ID",
+        "date_from": "From date",
+        "date_to": "To date",
+        "status": "Status",
+        "faculty_id": "Faculty ID",
+        "program_id": "Program ID",
+        "document_type_id": "Document type",
+        "file_status": "File status",
+        "week_start": "Week starting",
+        "faculty_ids": "Faculties"
+      },
+      "filterValues": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "borrowed": "Borrowed",
+        "returned": "Returned",
+        "overdue": "Overdue",
+        "super_admin": "Super admin",
+        "archivist": "Archivist",
+        "faculty_staff": "Faculty staff",
+        "system": "System",
+        "complete": "Complete",
+        "incomplete": "Incomplete",
+        "draft": "Draft",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "hints": {
+        "idList": "Comma-separated numbers, e.g. 1, 2, 3",
+        "uuid": "A UUID"
+      },
+      "status": {
+        "pending": "Queued",
+        "processing": "Building",
+        "completed": "Ready",
+        "failed": "Failed"
+      },
+      "table": {
+        "type": "Type",
+        "format": "Format",
+        "status": "Status",
+        "rows": "Rows",
+        "created": "Requested",
+        "expires": "Expires",
+        "expired": "Expired",
+        "actions": "Actions"
+      },
+      "jobs": {
+        "title": "Report queue",
+        "polling": "Updating {count} job(s)…",
+        "retentionNote": "Generated files are kept for 7 days. This queue is tracked in your browser — the API has no endpoint that lists past report jobs."
+      },
+      "empty": {
+        "title": "No reports yet",
+        "description": "Generate one above and it will appear here until the file is ready to download."
+      },
+      "actions": {
+        "download": "Download",
+        "refresh": "Refresh status",
+        "remove": "Remove from list",
+        "retry": "Try again",
+        "clearHistory": "Clear list"
+      },
+      "digest": {
+        "title": "Weekly digest",
+        "description": "The same numbers the weekly digest report is built from, calculated right now.",
+        "overdue": "Overdue files",
+        "dueSoon": "Due within 7 days",
+        "weeklyBorrowings": "Borrowings this week",
+        "storage": "Storage used",
+        "errorTitle": "Could not load the weekly digest"
+      },
+      "errors": {
+        "typeRequired": "Choose a report type",
+        "formatRequired": "Choose a format this report type supports",
+        "idList": "Enter whole numbers separated by commas",
+        "dateOrder": "The end date must be on or after the start date",
+        "typesTitle": "Could not load the report types"
+      },
+      "toasts": {
+        "queued": "Report queued — it will appear in the list when it is ready.",
+        "queueFailed": "Could not queue the report",
+        "downloaded": "Download started",
+        "downloadFailed": "Could not download the report",
+        "historyCleared": "Report list cleared from this browser"
+      },
+      "confirmClear": {
+        "title": "Clear the report list?",
+        "message": "This only clears the list in your browser. No generated file is deleted from the server.",
+        "confirm": "Clear list"
+      }
+    }
+  },
+  "ar": {
+    "reports": {
+      "title": "التقارير",
+      "subtitle": "اطلب تقريرًا من النظام ثم نزّله بعد أن ينتهي الخادم من إنشائه.",
+      "generate": {
+        "title": "إنشاء تقرير"
+      },
+      "form": {
+        "type": "نوع التقرير",
+        "typePlaceholder": "اختر نوع التقرير",
+        "format": "الصيغة",
+        "formatPlaceholder": "اختر الصيغة",
+        "filters": "عوامل التصفية",
+        "facultyScopedHint": "هذا التقرير مرتبط بالكلية، فموظف الكلية لا يرى إلا بيانات كليته.",
+        "submit": "إنشاء التقرير"
+      },
+      "types": {
+        "audit_logs": "سجلات التدقيق",
+        "borrowings": "الإعارات",
+        "student_documents": "مستندات الطلبة",
+        "users": "المستخدمون",
+        "weekly_digest": "الملخص الأسبوعي",
+        "faculty_report": "تقرير الكليات"
+      },
+      "formats": {
+        "csv": "CSV",
+        "xlsx": "Excel (XLSX)",
+        "pdf": "PDF"
+      },
+      "filters": {
+        "any": "الكل",
+        "action": "الإجراء",
+        "user_id": "معرّف المستخدم",
+        "role": "الدور",
+        "reference_id": "الرقم المرجعي",
+        "date_from": "من تاريخ",
+        "date_to": "إلى تاريخ",
+        "status": "الحالة",
+        "faculty_id": "معرّف الكلية",
+        "program_id": "معرّف البرنامج",
+        "document_type_id": "نوع المستند",
+        "file_status": "حالة الملف",
+        "week_start": "بداية الأسبوع",
+        "faculty_ids": "الكليات"
+      },
+      "filterValues": {
+        "pending": "قيد الانتظار",
+        "approved": "موافق عليها",
+        "rejected": "مرفوضة",
+        "borrowed": "معارة",
+        "returned": "مُعادة",
+        "overdue": "متأخرة",
+        "super_admin": "مدير عام",
+        "archivist": "أمين الأرشيف",
+        "faculty_staff": "موظف كلية",
+        "system": "النظام",
+        "complete": "مكتمل",
+        "incomplete": "غير مكتمل",
+        "draft": "مسودة",
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "hints": {
+        "idList": "أرقام مفصولة بفواصل، مثل: 1، 2، 3",
+        "uuid": "معرّف فريد (UUID)"
+      },
+      "status": {
+        "pending": "في الانتظار",
+        "processing": "قيد الإنشاء",
+        "completed": "جاهز",
+        "failed": "فشل"
+      },
+      "table": {
+        "type": "النوع",
+        "format": "الصيغة",
+        "status": "الحالة",
+        "rows": "عدد الصفوف",
+        "created": "وقت الطلب",
+        "expires": "ينتهي في",
+        "expired": "منتهي الصلاحية",
+        "actions": "إجراءات"
+      },
+      "jobs": {
+        "title": "طلبات التقارير",
+        "polling": "يجري تحديث {count} من الطلبات…",
+        "retentionNote": "تُحفظ الملفات المُنشأة سبعة أيام. تُتابَع هذه القائمة من هذا المتصفح وحده، إذ لا توفّر الواجهة البرمجية قائمة بالطلبات السابقة."
+      },
+      "empty": {
+        "title": "لا توجد تقارير بعد",
+        "description": "أنشئ تقريرًا من النموذج أعلاه وسيظهر هنا حتى يصبح جاهزًا للتنزيل."
+      },
+      "actions": {
+        "download": "تنزيل",
+        "refresh": "تحديث الحالة",
+        "remove": "إزالة من القائمة",
+        "retry": "إعادة المحاولة",
+        "clearHistory": "مسح القائمة"
+      },
+      "digest": {
+        "title": "الملخص الأسبوعي",
+        "description": "الأرقام نفسها التي يُبنى عليها تقرير الملخص الأسبوعي، محسوبة الآن.",
+        "overdue": "ملفات متأخرة",
+        "dueSoon": "مستحقة خلال سبعة أيام",
+        "weeklyBorrowings": "إعارات هذا الأسبوع",
+        "storage": "استهلاك التخزين",
+        "errorTitle": "تعذّر تحميل الملخص الأسبوعي"
+      },
+      "errors": {
+        "typeRequired": "اختر نوع التقرير",
+        "formatRequired": "اختر صيغة يدعمها هذا النوع من التقارير",
+        "idList": "أدخل أرقامًا صحيحة مفصولة بفواصل",
+        "dateOrder": "يجب أن يكون تاريخ النهاية مساويًا لتاريخ البداية أو بعده",
+        "typesTitle": "تعذّر تحميل أنواع التقارير"
+      },
+      "toasts": {
+        "queued": "تمت جدولة التقرير، وسيظهر في القائمة عند اكتماله.",
+        "queueFailed": "تعذّرت جدولة التقرير",
+        "downloaded": "بدأ التنزيل",
+        "downloadFailed": "تعذّر تنزيل التقرير",
+        "historyCleared": "تم مسح قائمة التقارير من هذا المتصفح"
+      },
+      "confirmClear": {
+        "title": "مسح قائمة التقارير؟",
+        "message": "سيُمسح ما في هذا المتصفح فقط، ولن يُحذف أي ملف من الخادم.",
+        "confirm": "مسح القائمة"
+      }
+    }
+  }
+}
