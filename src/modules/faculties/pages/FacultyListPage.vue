@@ -10,6 +10,7 @@ import AppSearchInput from '@/shared/components/AppSearchInput.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
+import { readSessionRole } from '@/app/config/sessionRole'
 import { useServerTable } from '@/shared/composables/useServerTable'
 import { useDebouncedRef } from '@/shared/composables/useDebouncedRef'
 import { useToasts } from '@/shared/composables/useToasts'
@@ -34,6 +35,19 @@ const {
   perPage: 10,
   errorFallback: t('faculties.error.title'),
 })
+
+/**
+ * Who may actually change the catalogue.
+ *
+ * The route admits `super_admin` and `archivist` (`FacultyPolicy::viewAny`
+ * returns true for everyone, and the list endpoint answers 200 for both), but
+ * create/update/delete/restore are `isSuperAdmin` only — verified against the
+ * running API, where an archivist token posting a faculty gets
+ * `403 { message: 'This action is unauthorized.' }`. Rendering the buttons for
+ * an archivist promises an action the API will refuse, so they are hidden
+ * instead, the same way the sidebar hides a route the guard would bounce.
+ */
+const canWrite = computed(() => readSessionRole() === 'super_admin')
 
 const search = ref('')
 const debouncedSearch = useDebouncedRef(search, 300)
@@ -125,6 +139,7 @@ async function confirmDelete() {
         </p>
       </div>
       <button
+        v-if="canWrite"
         class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-display font-medium hover:bg-primary-mid transition-colors"
         @click="openCreate"
       >
@@ -153,7 +168,13 @@ async function confirmDelete() {
 
     <template v-else>
       <!-- Table -->
-      <FacultiesTable :items="items" :loading="loading" @edit="openEdit" @delete="openDelete" />
+      <FacultiesTable
+        :items="items"
+        :loading="loading"
+        :can-write="canWrite"
+        @edit="openEdit"
+        @delete="openDelete"
+      />
 
       <AppEmptyState
         v-if="isEmpty"

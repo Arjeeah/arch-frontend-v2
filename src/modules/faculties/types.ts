@@ -14,12 +14,13 @@ export interface Faculty {
    * Number of programs attached to this faculty, or `null` when the backend
    * did not tell us.
    *
-   * verify against live API: `FacultyResource` never serialises a `programs`
-   * relation or a count, so this is `null` for every row today. It is
-   * deliberately NOT `0` — a hard zero renders as "this faculty has no
-   * programs", which is a claim the API never made and which is false for
-   * every seeded faculty. `null` renders as an em dash instead.
-   * See `facultiesApi.ts`.
+   * Verified against the running API: `FacultyResource` emits exactly
+   * `id, code, name_ar, name_en, status, created_at, updated_at` — no `programs`
+   * relation and no count, on index, show, store, update or restore. So this is
+   * `null` for every row today. It is deliberately NOT `0` — a hard zero renders
+   * as "this faculty has no programs", a claim the API never made and one that
+   * is false for most seeded faculties (18 programs across 9 faculties).
+   * `null` renders as an em dash instead. See `facultiesApi.ts`.
    */
   programsCount: number | null
 }

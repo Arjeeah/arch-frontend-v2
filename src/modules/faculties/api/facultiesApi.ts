@@ -23,9 +23,11 @@ interface FacultyListResponse {
   meta?: { current_page?: number; last_page?: number; total?: number }
 }
 
-// verify against live API: assumes the backend stores status as a lowercase
-// string ('active' / 'inactive'). Comparison is case-insensitive so a
-// capitalised value would still map correctly.
+// Verified: `status` is a lowercase string on the wire ('active' / 'inactive'),
+// and the write side is just as strict — `StoreFacultyRequest` validates
+// `in:active,inactive`, so posting a capitalised 'Active' answers
+// `422 {"status":["The selected status is invalid."]}`. `toPayload` lowercases
+// for exactly that reason. The read comparison stays case-insensitive anyway.
 function toStatus(raw: string): FacultyStatus {
   return raw.toLowerCase() === 'active' ? 'Active' : 'Inactive'
 }
@@ -33,11 +35,12 @@ function toStatus(raw: string): FacultyStatus {
 /**
  * snake_case wire format -> camelCase UI model.
  *
- * verify against live API: `App\Http\Resources\FacultyResource` never emits a
- * `programs` relation, so there is no server-provided count to map — the
- * dedicated `/v1/academic/programs?filter[faculty_id]=` endpoint would need
- * an extra request per row to derive one. Mapped to `null` ("unknown"), not
- * `0` — `0` would be a number the API never sent, displayed as fact.
+ * Verified against the running API: `App\Http\Resources\FacultyResource` never
+ * emits a `programs` relation or count, so there is no server-provided number to
+ * map — deriving one would cost an extra
+ * `/v1/academic/programs?filter[faculty_id]=…` request per row. Mapped to `null`
+ * ("unknown"), not `0` — `0` would be a number the API never sent, displayed as
+ * fact.
  */
 function fromResource(resource: FacultyResource): Faculty {
   return {
@@ -66,9 +69,12 @@ export const facultiesApi = {
    * allowlisted `Spatie\QueryBuilder` filters on
    * `Academic\FacultyController::index` (`filter[name_ar|name_en|status]`).
    *
-   * verify against live API: `index()` hardcodes `->paginate(10)` and ignores
-   * `per_page` — `useServerTable` trusts the response `meta` regardless, so
-   * this only matters if a page-size selector is ever added.
+   * Verified: `index()` hardcodes `->paginate(10)` and ignores `per_page` —
+   * `?per_page=100` still answers `meta.per_page = 10`. `useServerTable` trusts
+   * the response `meta` regardless, so this only matters if a page-size selector
+   * is ever added. Filters must be nested (`filter[name_en]=…`); a flat
+   * `?name_en=…` is silently ignored and returns the unfiltered list, which is
+   * why `FacultyListPage` hands this a pre-nested `filter` object.
    */
   list: async (params: ServerTableParams): Promise<ServerTableResponse<Faculty>> => {
     const { data } = await http.get<FacultyListResponse>(API_ENDPOINTS.faculties.list, { params })
@@ -105,8 +111,11 @@ export const facultiesApi = {
   },
 
   /**
-   * Restores a soft-deleted faculty. Not surfaced in the UI yet: the index
-   * endpoint does not return trashed rows, so there is nothing to restore from.
+   * Restores a soft-deleted faculty. Verified end to end against the running
+   * API: `DELETE` answers 204 and the row drops out of both `index` and `show`
+   * (404), then `POST …/restore` answers `200 { data, message }` and brings it
+   * back. Not surfaced in the UI yet: the index endpoint does not return trashed
+   * rows, so there is nothing to restore *from*.
    */
   restore: async (id: number): Promise<Faculty> => {
     const { data } = await http.post<FacultyItemResponse>(API_ENDPOINTS.faculties.restore(id))

@@ -20,14 +20,20 @@ interface UserResource {
   name: string
   email: string
   roles?: string[]
-  /** Present on the resource, unused here — the app has no disabled-account UI. */
+  /**
+   * Present on the resource, unused here — the app has no disabled-account UI,
+   * and it does not need one: the backend refuses an inactive account at login
+   * with `403 { message: 'Your account is inactive. Please contact support.' }`,
+   * which the store surfaces as the form error.
+   */
   status?: string
 }
 
 /**
  * `POST /v1/login` answers with a `UserResource` wrapped by Laravel plus
  * siblings: `(new UserResource($user))->additional(['token' => …])` produces
- * `{ data: {...}, token, message }`. There is no `user` key — reading one gave
+ * `{ data: {...}, token, message }` — confirmed verbatim against the running
+ * API for all three accounts. There is no `user` key — reading one gave
  * `undefined`, `authStorage` then wrote the literal string `"undefined"` into
  * `auth_user`, and every later `getUser()` failed its `JSON.parse` and returned
  * `null`. That single mismatch blinded the router guard, `AppSidebar` and every
@@ -79,11 +85,15 @@ export const AuthService = {
   /**
    * Re-reads the signed-in user.
    *
-   * verify against live API: `GET /v1/me` is **not in `routes/api/v1.php`**, so
-   * this 404s today and `useAuthStore.init()` swallows it (a non-401 keeps the
-   * session, which is why a stale-but-valid token still works). Mapped through
-   * the same `{ data: UserResource }` envelope the rest of the API uses, so it
-   * starts working the moment the route is added — no change needed here.
+   * Verified against the running API: `GET /v1/me` is **not registered** in
+   * `routes/api/v1.php` and answers
+   * `404 {"message":"The route api/v1/me could not be found."}`.
+   *
+   * `useAuthStore.init()` swallows that — only a 401 clears the session — so
+   * boot still succeeds from the stored user and the cost is one failed
+   * request per app load. It is mapped through the same `{ data: UserResource }`
+   * envelope every other endpoint uses, so it starts refreshing for real the
+   * moment the backend registers the route; nothing here changes then.
    */
   async me(): Promise<AuthUser> {
     const { data } = await http.get<{ data: UserResource }>(API_ENDPOINTS.auth.me)

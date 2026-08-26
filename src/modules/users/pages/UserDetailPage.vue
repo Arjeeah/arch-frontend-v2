@@ -12,6 +12,7 @@ import { getApiErrorMessage } from '@/shared/utils/apiError'
 import UserStatusBadge from '../components/UserStatusBadge.vue'
 import CreateUserDialog from '../components/CreateUserDialog.vue'
 import { useUsersStore } from '../stores/useUsersStore'
+import { toUpdateInput } from '../api/usersApi'
 import type { User, UserInput } from '../types'
 
 const store = useUsersStore()
@@ -20,8 +21,9 @@ const router = useRouter()
 const { t } = useI18n()
 const toasts = useToasts()
 
-// verify against live API: `users.id` is a UUID string (`HasUuids` on the
-// `User` model), never a numeric id — do not `parseInt` this.
+// Verified against the running API: `users.id` is a UUID string (`HasUuids` on
+// the `User` model) — e.g. `01a03de0-775c-7004-b340-88a0f53663b5`, which
+// `parseInt` would silently turn into `1`. Keep it a string end to end.
 const userId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
   return raw || null
@@ -70,7 +72,9 @@ const editOpen = ref(false)
 async function handleSave(data: UserInput) {
   if (!user.value) return
   try {
-    user.value = await store.updateUser(user.value.id, data)
+    // `toUpdateInput` drops an email the operator did not change — the backend
+    // re-validates `ends_with:@limu.edu.ly` on whatever is sent.
+    user.value = await store.updateUser(user.value.id, toUpdateInput(data, user.value))
     toasts.success(t('users.toast.updated'))
     editOpen.value = false
   } catch (err) {
