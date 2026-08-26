@@ -14,11 +14,18 @@ Add to `src/app/router/index.ts`, inside the `/` layout route's `children`:
   // no meta.roles — every authenticated role can see their own notifications
 },
 {
-  path: 'settings',
+  path: 'settings/:group?',
   component: () => import('@/modules/settings/pages/SettingsPage.vue'),
   meta: { roles: ['super_admin'] },
 },
 ```
+
+The optional `:group` param matters: the backend sends a
+`/settings/storage` deep link on its storage-capacity notification (see
+Notes). `SettingsPage` reads the param to pick the opening tab and falls
+back to `general` for a bare `/settings` or an unrecognised group, so
+registering it as plain `settings` still works — it just makes that one
+notification land on the wrong tab.
 
 `/settings` was a real route before the foundations phase removed it as a
 dead link (see `05c2c0c fix(router): role-based landing…`) — same path,
@@ -41,12 +48,31 @@ entry the same commit removed:
 
 Position: top-level, after the `audit` entry (its previous position).
 
-**Notifications has no sidebar entry.** It never had one before the removal
-either — the header bell (see Notes below) is the only previous entry
-point, and its dropdown's "View all notifications" link covers the rest.
-If you'd rather also expose a sidebar item, add a `nav.notifications` key
-to both locale files (EN "Notifications" / AR "الإشعارات" is a reasonable
-pair) and a nav item with icon `Bell`, no `roles` (open to everyone), `to: '/notifications'`.
+And the notifications entry — CLAUDE.md requires every route to have a
+matching sidebar entry with the same `roles`, so this one is **required, not
+optional**:
+
+```ts
+{
+  key: 'notifications',
+  labelKey: 'nav.notifications',
+  icon: Bell,                 // from 'lucide-vue-next'
+  to: '/notifications',
+  // no roles — every authenticated role sees their own notifications
+},
+```
+
+Position: top-level, last. Unlike `nav.settings`, `nav.notifications` is
+**not** in the locale files yet — add it to both, in the `nav` block:
+
+| file                  | key                 | value           |
+| --------------------- | ------------------- | --------------- |
+| `src/locales/en.json` | `nav.notifications` | `Notifications` |
+| `src/locales/ar.json` | `nav.notifications` | `الإشعارات`     |
+
+(These are shell-chrome keys in the `nav` namespace, not module keys, so
+they are not in this module's `i18n.fragment.json` — the fragments only
+carry the `notifications.*` / `settings.*` namespaces.)
 
 ## Notes
 
@@ -69,6 +95,36 @@ pair) and a nav item with icon `Bell`, no `roles` (open to everyone), `to: '/not
   unmount), own unread badge sourced from a small Pinia store shared with the
   full notifications page, so mark-read/mark-all/delete done from either
   place stays in sync.
+
+- **Notification `action_url`s use a different URL vocabulary than this
+  router — please reconcile.** The backend builds deep links from its own
+  paths (`grep -rh "'action_url'" app/Notifications/`), and most of them are
+  not routes this frontend serves:
+
+  | backend `action_url`              | frontend route today     | status                                                     |
+  | --------------------------------- | ------------------------ | ---------------------------------------------------------- |
+  | `/settings/storage`               | `settings/:group?` (S8)  | ✅ works once the route above is registered with the param |
+  | `/borrowings/{id}`                | `/borrowing` (list only) | ❌ no detail route — S10 owns borrowing                    |
+  | `/student-documents/{id}`         | —                        | ❌ no route — S4 owns student documents                    |
+  | `/audit-logs?action=failed_login` | `/audit`                 | ❌ path mismatch — S6/audit owns it                        |
+
+  Until they line up, this module **does not** navigate to an unmatched path
+  (that would drop the user on the 404 catch-all). `utils/action-route.ts`'s
+  `resolveActionRoute` resolves the URL first and, when it only matches the
+  `not-found` route, the UI shows `notifications.toasts.noDestination`
+  instead of navigating. Nothing
+  breaks; the links simply stay inert. Fixing it is a one-line change per row
+  once the owning stream's routes land — either add the missing routes under
+  the backend's paths, or add redirect routes (`/borrowings/:id` →
+  `/borrowing`, `/audit-logs` → `/audit`). No change needed inside this
+  module either way.
+
+- **These two modules are invisible to `npm run build` until the routes above
+  are registered.** Nothing in `src/app/` imports them, so Rollup never pulls
+  them into the graph and the build emits no `NotificationsListPage` /
+  `SettingsPage` chunk — a build that "passes" proves nothing about this code.
+  To gate them, add the routes first (or temporarily), then build and confirm
+  both chunks appear.
 
 - **`overrideCapacity`'s payload needs both `reason` and `new_limit`.**
   phase2-specs.md's one-line endpoint summary only lists `{reason}`, but the

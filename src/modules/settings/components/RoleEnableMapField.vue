@@ -1,16 +1,38 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { NOTIFICATION_ROLE_SLUGS } from '../types'
 import type { NotificationRoleSlug } from '../types'
 
-defineProps<{ model: Record<NotificationRoleSlug, boolean> }>()
+/**
+ * Typed `unknown` and narrowed here rather than cast at the call site. The
+ * slot hands over `draft.perRoleEnableMap`, a value off the generic
+ * `Record<string, unknown>` draft, and it is genuinely absent on any render
+ * where the notifications group has not landed yet (deep link to
+ * `/settings/notifications`, a response missing the group) — indexing that in
+ * the template would throw and blank the page. Casting in the template is not
+ * an option either: a `|` union inside a template expression parses as Vue's
+ * deprecated filter syntax and trips `vue/no-deprecated-filter`.
+ */
+const props = defineProps<{ model?: unknown }>()
 
 const emit = defineEmits<{ update: [value: Record<NotificationRoleSlug, boolean>] }>()
 
 const { t } = useI18n()
 
-function toggle(role: NotificationRoleSlug, current: Record<NotificationRoleSlug, boolean>): void {
-  emit('update', { ...current, [role]: !current[role] })
+function readFlag(map: unknown, role: NotificationRoleSlug): boolean {
+  if (typeof map !== 'object' || map === null) return false
+  return (map as Record<string, unknown>)[role] === true
+}
+
+const current = computed<Record<NotificationRoleSlug, boolean>>(() => ({
+  superAdmin: readFlag(props.model, 'superAdmin'),
+  archivist: readFlag(props.model, 'archivist'),
+  facultyStaff: readFlag(props.model, 'facultyStaff'),
+}))
+
+function toggle(role: NotificationRoleSlug): void {
+  emit('update', { ...current.value, [role]: !current.value[role] })
 }
 </script>
 
@@ -34,12 +56,12 @@ function toggle(role: NotificationRoleSlug, current: Record<NotificationRoleSlug
         <button
           type="button"
           class="relative inline-flex h-[22px] w-[40px] items-center rounded-[16px] transition-colors focus:outline-none"
-          :class="model[role] ? 'bg-primary-light' : 'bg-border'"
-          @click="toggle(role, model)"
+          :class="current[role] ? 'bg-primary-light' : 'bg-border'"
+          @click="toggle(role)"
         >
           <span
             class="inline-block h-[16px] w-[16px] transform rounded-[16px] bg-white shadow-sm transition-transform"
-            :class="model[role] ? 'translate-x-[20px]' : 'translate-x-[2px]'"
+            :class="current[role] ? 'translate-x-[20px]' : 'translate-x-[2px]'"
           />
         </button>
       </div>

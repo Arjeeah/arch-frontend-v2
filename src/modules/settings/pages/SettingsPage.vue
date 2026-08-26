@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { RotateCcw, Save, ShieldAlert } from 'lucide-vue-next'
 import AppButton from '@/shared/components/AppButton.vue'
@@ -13,13 +14,28 @@ import RoleEnableMapField from '../components/RoleEnableMapField.vue'
 import OverrideCapacityDialog from '../components/OverrideCapacityDialog.vue'
 import { SETTINGS_FIELDS } from '../settings-field-config'
 import { SETTINGS_GROUP_KEYS } from '../types'
-import type { NotificationRoleSlug, OverrideCapacityInput, SettingsGroupKey } from '../types'
+import type { OverrideCapacityInput, SettingsGroupKey } from '../types'
 
 const { t } = useI18n()
+const route = useRoute()
 const toasts = useToasts()
 const store = useSettingsStore()
 
-const activeGroup = ref<SettingsGroupKey>('general')
+/**
+ * Opens on the group named by an optional `:group` route param, so the
+ * backend's `/settings/storage` notification deep link lands on the right tab
+ * (see WIRING.md — the integrator registers the route as `settings/:group?`).
+ * Anything unrecognised, or no param at all, falls back to `general`.
+ */
+function initialGroup(): SettingsGroupKey {
+  const param = route.params.group
+  const value = Array.isArray(param) ? param[0] : param
+  return SETTINGS_GROUP_KEYS.includes(value as SettingsGroupKey)
+    ? (value as SettingsGroupKey)
+    : 'general'
+}
+
+const activeGroup = ref<SettingsGroupKey>(initialGroup())
 const draft = ref<Record<string, unknown>>({})
 const resetConfirmOpen = ref(false)
 const overrideDialogOpen = ref(false)
@@ -112,7 +128,9 @@ async function handleOverrideCapacity(input: OverrideCapacityInput): Promise<voi
 
       <!-- Active group form -->
       <div class="flex-1 min-w-0 bg-surface-card border border-border rounded-lg p-6">
-        <template v-if="store.loading">
+        <!-- `!store.loaded` covers the first render, which happens before
+             `onMounted` fires the fetch and would otherwise paint an empty form. -->
+        <template v-if="store.loading || !store.loaded">
           <div class="flex flex-col gap-4">
             <div v-for="i in 4" :key="i" class="h-10 bg-surface rounded animate-pulse" />
           </div>
@@ -120,10 +138,7 @@ async function handleOverrideCapacity(input: OverrideCapacityInput): Promise<voi
         <template v-else>
           <SettingsGroupForm v-model="draft" :fields="SETTINGS_FIELDS[activeGroup]">
             <template #field-perRoleEnableMap="{ model, update }">
-              <RoleEnableMapField
-                :model="model.perRoleEnableMap as Record<NotificationRoleSlug, boolean>"
-                @update="update"
-              />
+              <RoleEnableMapField :model="model.perRoleEnableMap" @update="update" />
             </template>
           </SettingsGroupForm>
 

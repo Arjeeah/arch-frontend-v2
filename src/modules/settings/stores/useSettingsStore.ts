@@ -9,6 +9,14 @@ type SettingsGroupsState = Partial<{ [K in SettingsGroupKey]: SettingsGroupModel
 export const useSettingsStore = defineStore('settings', () => {
   const groups = reactive<SettingsGroupsState>({})
   const loading = ref(false)
+  /**
+   * False until the first `fetchAll` settles. `loading` alone is not enough to
+   * gate the form: it is still `false` during the component's first render
+   * (the fetch is kicked off in `onMounted`, which runs after), so the page
+   * would paint a whole settings form full of blank inputs before the
+   * skeleton ever appeared.
+   */
+  const loaded = ref(false)
   /** True while a save/reset/override-capacity request is in flight. */
   const saving = ref(false)
   const error = ref<string | null>(null)
@@ -22,6 +30,7 @@ export const useSettingsStore = defineStore('settings', () => {
       error.value = getApiErrorMessage(err, 'Failed to load settings')
     } finally {
       loading.value = false
+      loaded.value = true
     }
   }
 
@@ -67,5 +76,5 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  return { groups, loading, saving, error, fetchAll, save, reset, overrideCapacity }
+  return { groups, loading, loaded, saving, error, fetchAll, save, reset, overrideCapacity }
 })

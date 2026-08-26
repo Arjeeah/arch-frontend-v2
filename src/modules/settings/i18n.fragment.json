@@ -138,7 +138,7 @@
         "sessionTimeout": "مهلة الجلسة",
         "sessionTimeoutHelper": "بالدقائق",
         "passwordPolicy": "سياسة كلمة المرور",
-        "passwordPolicyHelper": "قواعد مفصولة بشرطة، مثل min:8|mixed_case|numbers",
+        "passwordPolicyHelper": "قواعد مفصولة بعلامة |، مثل min:8|mixed_case|numbers",
         "perRoleEnableMap": "الإشعار حسب الدور",
         "perRoleEnableMapHelper": "الأدوار التي تستلم إشعارات داخل النظام.",
         "mailEnabled": "تفعيل إشعارات البريد الإلكتروني",

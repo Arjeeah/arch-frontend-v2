@@ -1,25 +1,51 @@
-import * as LucideIcons from 'lucide-vue-next'
-import { Bell } from 'lucide-vue-next'
+import {
+  Bell,
+  CircleCheck,
+  Clock,
+  Copy,
+  Database,
+  FileX,
+  Inbox,
+  ShieldAlert,
+  TriangleAlert,
+} from 'lucide-vue-next'
 import type { Component } from 'vue'
 
-// Every icon name observed on the backend (`grep -n "'icon' =>" app/Notifications/*.php`)
-// is a kebab-case lucide icon slug — 'inbox', 'alert-triangle', 'clock',
-// 'check-circle', 'database', 'shield-alert', 'copy', 'file-x'. Rather than
-// hand-maintain a lookup table that silently goes stale as new notification
-// types are added server-side, this resolves any kebab-case slug against the
-// full lucide-vue-next export map at runtime and falls back to a bell.
-const iconRegistry = LucideIcons as unknown as Record<string, Component>
-
-function toPascalCase(kebab: string): string {
-  return kebab
-    .split('-')
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
+/**
+ * Backend `icon` slug -> lucide component.
+ *
+ * The slugs are the complete set emitted by the backend today
+ * (`grep -rh "'icon'" app/Notifications/` → alert-triangle, check-circle,
+ * clock, copy, database, file-x, inbox, shield-alert). Two of them are
+ * lucide's *legacy* names for icons that have since been renamed
+ * (`alert-triangle` → `TriangleAlert`, `check-circle` → `CircleCheck`);
+ * the glyph is identical, and `TriangleAlert` is the spelling `AppErrorState`
+ * already uses.
+ *
+ * This is an explicit map on purpose. Resolving slugs dynamically against
+ * `import * as LucideIcons from 'lucide-vue-next'` also works, but it defeats
+ * tree-shaking: Rollup then has to keep the whole icon set, which measured at
+ * **611.70 kB (152.26 kB gzip)** as a shared chunk. Because `NotificationsBell`
+ * is mounted in `AppHeader` (see WIRING.md), that chunk lands in the *initial*
+ * bundle on every page for every user — more than vue-i18n, vue-router, axios
+ * and runtime-core combined. Nine named imports cost ~1 kB instead.
+ *
+ * A slug added server-side that is missing here renders the `Bell` fallback
+ * rather than breaking; add it to this map when that happens.
+ */
+const NOTIFICATION_ICONS: Readonly<Record<string, Component>> = {
+  'alert-triangle': TriangleAlert,
+  'check-circle': CircleCheck,
+  clock: Clock,
+  copy: Copy,
+  database: Database,
+  'file-x': FileX,
+  inbox: Inbox,
+  'shield-alert': ShieldAlert,
 }
 
 /** Resolves a backend `icon` slug (e.g. `check-circle`) to a lucide component, defaulting to `Bell`. */
 export function resolveNotificationIcon(icon: string | null): Component {
   if (!icon) return Bell
-  return iconRegistry[toPascalCase(icon)] ?? Bell
+  return NOTIFICATION_ICONS[icon] ?? Bell
 }

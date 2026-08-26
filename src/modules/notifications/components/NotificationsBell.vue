@@ -7,6 +7,8 @@ import { useNotificationsStore } from '../stores/useNotificationsStore'
 import { notificationsApi } from '../api/notificationsApi'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { useToasts } from '@/shared/composables/useToasts'
+import AppErrorState from '@/shared/components/AppErrorState.vue'
+import { resolveActionRoute } from '../utils/action-route'
 import NotificationListItem from './NotificationListItem.vue'
 import type { AppNotification } from '../types'
 
@@ -29,17 +31,22 @@ const store = useNotificationsStore()
 const open = ref(false)
 const items = ref<AppNotification[]>([])
 const loading = ref(false)
+const error = ref<string | null>(null)
 
 let timer: ReturnType<typeof setInterval> | undefined
 
 async function loadPreview(): Promise<void> {
   loading.value = true
+  error.value = null
   try {
     const page = await notificationsApi.list({ page: 1, per_page: PREVIEW_COUNT })
     items.value = page.data
-  } catch {
-    // Fails quietly — the badge count still comes from refreshUnreadCount,
-    // and the full list page is one click away via "View all".
+  } catch (err) {
+    // Surfaced in the dropdown rather than swallowed: a failed fetch that fell
+    // through to the empty state would read as "you're all caught up", which is
+    // the opposite of the truth.
+    items.value = []
+    error.value = getApiErrorMessage(err, t('notifications.bell.loadError'))
   } finally {
     loading.value = false
   }
@@ -60,7 +67,11 @@ async function handleItemClick(item: AppNotification): Promise<void> {
       // Non-blocking — navigation still proceeds even if marking read failed.
     }
   }
-  if (item.actionUrl) void router.push(item.actionUrl)
+  // Backend `action_url`s point at paths this frontend may not serve yet —
+  // navigating blindly strands the user on the 404 catch-all.
+  const target = resolveActionRoute(router, item.actionUrl)
+  if (target) void router.push(target)
+  else if (item.actionUrl) toasts.info(t('notifications.toasts.noDestination'))
 }
 
 async function handleMarkAll(): Promise<void> {
@@ -102,7 +113,7 @@ onUnmounted(() => {
       <Bell class="w-4 h-4 text-text-primary" />
       <span
         v-if="store.unreadCount > 0"
-        class="absolute -top-1.5 end-[-6px] min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-danger text-[10px] font-display font-semibold text-white border border-white"
+        class="absolute -top-1.5 -end-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-danger text-[10px] font-display font-semibold text-white border border-white"
       >
         {{ store.unreadCount > 99 ? '99+' : store.unreadCount }}
       </span>
@@ -134,6 +145,14 @@ onUnmounted(() => {
         <div v-if="loading" class="flex items-center justify-center py-8">
           <Loader2 class="w-5 h-5 text-text-muted animate-spin" />
         </div>
+        <AppErrorState
+          v-else-if="error"
+          compact
+          :title="t('notifications.bell.loadError')"
+          :description="error"
+          :retry-label="t('notifications.bell.retry')"
+          @retry="loadPreview"
+        />
         <p v-else-if="!items.length" class="px-4 py-8 text-center text-sm text-text-secondary">
           {{ t('notifications.bell.empty') }}
         </p>

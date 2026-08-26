@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { CheckCheck, Inbox } from 'lucide-vue-next'
@@ -14,6 +14,7 @@ import { useToasts } from '@/shared/composables/useToasts'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { notificationsApi } from '../api/notificationsApi'
 import { useNotificationsStore } from '../stores/useNotificationsStore'
+import { resolveActionRoute } from '../utils/action-route'
 import NotificationListItem from '../components/NotificationListItem.vue'
 import type { AppNotification } from '../types'
 
@@ -27,10 +28,23 @@ const { rows, loading, error, page, totalPages, isEmpty, setFilters, refresh } =
 
 /** Plain string, not a narrowed union — `AppSelect`'s `v-model` is `string`, matching the rest of the app (see `FacultyListPage`'s `statusFilter`). */
 const readFilterValue = ref('')
-const filterOptions = [
+
+/**
+ * `computed`, not a plain array: `t()` evaluated once at setup would freeze
+ * these labels in whichever locale the app booted in, so switching AR/EN from
+ * the header would leave the filter reading the old language.
+ */
+const filterOptions = computed(() => [
   { value: 'unread', label: t('notifications.list.filters.unread') },
   { value: 'read', label: t('notifications.list.filters.read') },
-]
+])
+
+/** The empty state should not claim "nothing yet" when a filter is what emptied the list. */
+const emptyDescription = computed(() =>
+  readFilterValue.value
+    ? t('notifications.list.emptyFilteredDescription')
+    : t('notifications.list.emptyDescription'),
+)
 
 watch(readFilterValue, (value) => {
   setFilters({ read: value === 'unread' ? false : value === 'read' ? true : undefined })
@@ -38,9 +52,16 @@ watch(readFilterValue, (value) => {
 
 const pendingDelete = ref<AppNotification | null>(null)
 
-async function handleMarkRead(item: AppNotification): Promise<void> {
+/**
+ * `silent` covers the row-click path, where marking read is incidental to
+ * opening the notification — a success toast there would fire on every click.
+ * The explicit mark-read button confirms, per the "every mutation reports via
+ * toasts" convention.
+ */
+async function handleMarkRead(item: AppNotification, silent = false): Promise<void> {
   try {
     await notificationsApi.markRead(item.id)
+    if (!silent) toasts.success(t('notifications.toasts.markReadSuccess'))
     void notificationsStore.refreshUnreadCount()
     await refresh()
   } catch (err) {
@@ -49,8 +70,12 @@ async function handleMarkRead(item: AppNotification): Promise<void> {
 }
 
 async function handleRowClick(item: AppNotification): Promise<void> {
-  if (!item.readAt) await handleMarkRead(item)
-  if (item.actionUrl) void router.push(item.actionUrl)
+  if (!item.readAt) await handleMarkRead(item, true)
+  // Backend `action_url`s point at paths this frontend may not serve yet —
+  // navigating blindly strands the user on the 404 catch-all.
+  const target = resolveActionRoute(router, item.actionUrl)
+  if (target) void router.push(target)
+  else if (item.actionUrl) toasts.info(t('notifications.toasts.noDestination'))
 }
 
 async function confirmDelete(): Promise<void> {
@@ -109,7 +134,7 @@ async function handleMarkAll(): Promise<void> {
       v-else-if="isEmpty"
       :icon="Inbox"
       :title="t('notifications.list.emptyTitle')"
-      :description="t('notifications.list.emptyDescription')"
+      :description="emptyDescription"
     />
     <template v-else>
       <div class="bg-surface-card border border-border rounded-lg overflow-hidden">
