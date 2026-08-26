@@ -1,0 +1,82 @@
+{
+  "en": {
+    "notifications": {
+      "bell": {
+        "title": "Notifications",
+        "markAllRead": "Mark all read",
+        "empty": "You're all caught up.",
+        "viewAll": "View all notifications",
+        "loadError": "Couldn't load notifications",
+        "retry": "Try again"
+      },
+      "list": {
+        "title": "Notifications",
+        "subtitle": "Everything the system has sent you, in one place.",
+        "markAllRead": "Mark all as read",
+        "filters": {
+          "all": "All",
+          "unread": "Unread",
+          "read": "Read"
+        },
+        "emptyTitle": "No notifications yet",
+        "emptyDescription": "Notifications about your borrowings, uploads and system alerts will show up here.",
+        "markRead": "Mark as read",
+        "delete": "Delete",
+        "deleteConfirmTitle": "Delete notification",
+        "deleteConfirmMessage": "This notification will be removed permanently. This action cannot be undone.",
+        "emptyFilteredDescription": "No notifications match this filter.",
+        "loadError": "Couldn't load notifications",
+        "retry": "Try again"
+      },
+      "toasts": {
+        "markReadError": "Could not mark this notification as read.",
+        "markAllReadSuccess": "All notifications marked as read.",
+        "markAllReadError": "Could not mark all notifications as read.",
+        "deleteSuccess": "Notification deleted.",
+        "deleteError": "Could not delete this notification.",
+        "markReadSuccess": "Notification marked as read.",
+        "noDestination": "This notification has no page to open yet."
+      }
+    }
+  },
+  "ar": {
+    "notifications": {
+      "bell": {
+        "title": "الإشعارات",
+        "markAllRead": "تعليم الكل كمقروء",
+        "empty": "لا توجد إشعارات جديدة.",
+        "viewAll": "عرض جميع الإشعارات",
+        "loadError": "تعذّر تحميل الإشعارات",
+        "retry": "إعادة المحاولة"
+      },
+      "list": {
+        "title": "الإشعارات",
+        "subtitle": "كل ما أرسله لك النظام، في مكان واحد.",
+        "markAllRead": "تعليم الكل كمقروء",
+        "filters": {
+          "all": "الكل",
+          "unread": "غير مقروءة",
+          "read": "مقروءة"
+        },
+        "emptyTitle": "لا توجد إشعارات بعد",
+        "emptyDescription": "ستظهر هنا الإشعارات المتعلقة بالإعارات ورفع الملفات وتنبيهات النظام.",
+        "markRead": "تعليم كمقروء",
+        "delete": "حذف",
+        "deleteConfirmTitle": "حذف الإشعار",
+        "deleteConfirmMessage": "سيتم حذف هذا الإشعار نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+        "emptyFilteredDescription": "لا توجد إشعارات مطابقة لهذه التصفية.",
+        "loadError": "تعذّر تحميل الإشعارات",
+        "retry": "إعادة المحاولة"
+      },
+      "toasts": {
+        "markReadError": "تعذّر تعليم هذا الإشعار كمقروء.",
+        "markAllReadSuccess": "تم تعليم جميع الإشعارات كمقروءة.",
+        "markAllReadError": "تعذّر تعليم جميع الإشعارات كمقروءة.",
+        "deleteSuccess": "تم حذف الإشعار.",
+        "deleteError": "تعذّر حذف هذا الإشعار.",
+        "markReadSuccess": "تم تعليم الإشعار كمقروء.",
+        "noDestination": "لا توجد صفحة مرتبطة بهذا الإشعار حاليًا."
+      }
+    }
+  }
+}
