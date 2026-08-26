@@ -27,10 +27,13 @@ const [SUPER_ADMIN, ARCHIVIST, FACULTY_STAFF] = USER_ROLE_SLUGS
  *    keys (`capacity_warning`, `ocr_queue`, `recent_activity_list`) whose
  *    contents are camelCase (`totalFiles`, `usagePercent`). Both spellings are
  *    handled explicitly rather than by a blanket casing pass.
- * 2. Two known server-side bugs (documented at their call sites below) mean a
- *    section can arrive empty or the whole request can 500. Every reader below
- *    survives a missing key, so a half-broken payload still renders the parts
- *    that did come through.
+ * 2. Every reader survives a missing key, so a half-broken payload still
+ *    renders the parts that did come through. Two server-side faults that used
+ *    to make that essential — the OCR queue pinned at zero, and a 500 on any
+ *    pending borrowing — have since been fixed, and both are now verified
+ *    against the live API at their call sites below. The defensiveness stays:
+ *    these are aggregates assembled from half a dozen services, and a card
+ *    that renders four of its five numbers beats a page that renders none.
  */
 
 /** Coerces anything the wire sends into a finite number, defaulting to 0. */
@@ -138,7 +141,13 @@ interface ArchivistOverviewResource {
     scansToday?: number
     scansTodayChangePct?: number
   }
-  ocr_queue?: { pending?: number; completed?: number; failed?: number }
+  ocr_queue?: {
+    pending?: number
+    processing?: number
+    completed?: number
+    failed?: number
+    total?: number
+  }
   recent_activity_list?: ArchivistActivityResource[]
 }
 
@@ -162,14 +171,20 @@ function archivistOverviewFromResource(resource: ArchivistOverviewResource): Arc
       scansToday: num(summary.scansToday),
       scansTodayChangePct: num(summary.scansTodayChangePct),
     },
-    // KNOWN SERVER BUG: `ArchivistDashboardService::getOcrQueueToday()` guards on
-    // a `student_documents.ocr_status` column that the pipeline migrations never
-    // added, so this section is always `{0, 0, 0}`. Rendered as-is on purpose —
-    // the card says "no data" rather than inventing numbers.
+    // `getOcrQueueToday()` used to guard on a `student_documents.ocr_status`
+    // column the pipeline migration had already replaced, which pinned this
+    // section at `{0, 0, 0}`. It now groups on `pipeline_status` and folds the
+    // eight-state `PipelineStatus` enum into four buckets plus a `total`, so
+    // five keys arrive where three used to — verified against the live API,
+    // which reports `{pending: 331, processing: 0, completed: 0, failed: 0,
+    // total: 331}`. Reading only the original three silently dropped every
+    // document actually in flight.
     ocrQueue: {
       pending: num(queue.pending),
+      processing: num(queue.processing),
       completed: num(queue.completed),
       failed: num(queue.failed),
+      total: num(queue.total),
     },
     recentActivity: (resource.recent_activity_list ?? []).map((row, index) => ({
       key: `${row.time ?? index}-${row.action ?? ''}-${index}`,
@@ -230,10 +245,13 @@ function facultyRowFromResource(
     actorName: str(resource.borrowed_by) ?? str(resource.requested_by),
     status: toBorrowStatus(resource.status),
     dueDate: str(resource.due_date),
-    // The server sends `now()->diffInDays($dueDate)`, and on Carbon 3 that diff
-    // is signed and fractional. The due date is by definition in the past on
-    // this list, so the value arrives as e.g. `-3.98`; printed raw the column
-    // would read "-4 days late". Only the magnitude is meaningful.
+    // `FacultyStaffDashboardService::daysOverdue()` now returns a whole,
+    // non-negative count (`(int) floor($dueDate->diffInDays(now(), true))`,
+    // zero for a null or future date) — verified live, a four-day-late loan
+    // reports `4`. It used to send Carbon 3's signed fractional diff, so a
+    // three-day-late file arrived as `-3.125` and printed as "-3 days late".
+    // The normalisation is kept as a cheap guard against that regressing;
+    // against the current server it is the identity.
     daysOverdue:
       typeof resource.days_overdue === 'number'
         ? Math.round(Math.abs(resource.days_overdue))
@@ -344,8 +362,29 @@ interface Wrapped<T> {
 /** A Laravel resource collection: rows in `data`, counts in `meta`. */
 interface Paginated<T> {
   data?: T[]
-  meta?: { total?: number }
+  meta?: { total?: number; last_page?: number }
 }
+
+/**
+ * The only field of `UserResource` this module reads. `roles` is an array of
+ * wire role slugs — a user can hold several, which is the whole reason the
+ * breakdown below has to look at it.
+ */
+interface UserRolesResource {
+  roles?: unknown
+}
+
+/**
+ * `UserController::index()` hard-codes `paginate(10)` and ignores `per_page`
+ * (verified: `?per_page=100` still answers `meta.per_page = 10`), so the head
+ * count below costs one request per ten users.
+ *
+ * The cap exists so a dashboard load can never fan out without bound. 40 pages
+ * is 400 accounts — comfortably beyond a university archive's staff list, and
+ * past it the card reports a failure rather than a number derived from a
+ * partial read.
+ */
+const USER_PAGE_CAP = 40
 
 export const dashboardApi = {
   /**
@@ -369,11 +408,12 @@ export const dashboardApi = {
   /**
    * Faculty-staff overview.
    *
-   * KNOWN SERVER BUG: `FacultyStaffDashboardService::getRecentBorrowings()`
-   * formats `due_date` unconditionally, but the column is nullable and a
-   * *pending* borrowing has no due date yet — so this 500s as soon as one of
-   * the staff member's faculties has a pending request. The page catches it and
-   * explains, rather than showing a bare error.
+   * `getRecentBorrowings()` used to format `due_date` unconditionally, which
+   * 500'd as soon as one of the staff member's faculties held a *pending*
+   * borrowing — that status has no due date until an archivist approves it.
+   * Every row mapper is null-safe now: verified live against a staff account
+   * whose faculties carry five pending borrowings with a null `due_date`, and
+   * the endpoint answered 200 with `"due_date": null` on those rows.
    */
   getFacultyOverview: async (): Promise<FacultyOverview> => {
     const { data } = await http.get<Wrapped<FacultyOverviewResource>>('/v1/faculty-staff/dashboard')
@@ -400,51 +440,81 @@ export const dashboardApi = {
   /**
    * Head count per role, plus the authoritative user total, for the users card.
    *
-   * There is no aggregate endpoint, so this asks the paginated user list for a
-   * count and reads `meta.total` (`UserController::index()` hard-codes
-   * `paginate(10)`, so `per_page` is ignored — only the meta is used here).
-   * `/v1/users` is super_admin-only per `UserPolicy`, which is why this card
-   * only appears on the admin dashboard.
+   * There is no aggregate endpoint, so this reads the paginated user list and
+   * buckets it here. `/v1/users` is super_admin-only per `UserPolicy`, which is
+   * why this card only appears on the admin dashboard.
    *
-   * The counts need arithmetic, not just reading. Roles on this backend are
-   * HIERARCHICAL: `User::assignRoleWithHierarchy()` gives a super_admin all
-   * three role names and an archivist two, and `filter[role]=` resolves through
-   * Spatie's `scopeRole`, which matches "holds this role". The raw counts are
-   * therefore cumulative — `filter[role]=faculty_staff` returns very nearly
-   * every user — and adding them up would count each super_admin three times.
-   *
-   * Exclusive buckets, by the same precedence `utils/role.ts` applies to the
-   * signed-in user's own roles:
+   * This USED TO subtract cumulative `filter[role]=` counts:
    *
    *     super_admin   = holds(super_admin)
    *     archivist     = holds(archivist) − holds(super_admin)
    *     faculty_staff = total            − holds(archivist)
    *
-   * which reconciles back to `total` exactly, and needs three requests rather
-   * than four. Clamped at zero because `DatabaseSeeder` assigns the bootstrap
-   * account flat (`assignRole`), so that one user can hold `super_admin`
-   * without the two roles beneath it.
+   * on the assumption that role names nest, because `User::
+   * assignRoleWithHierarchy()` gives a super_admin all three rows. They do not
+   * nest reliably — `DatabaseSeeder` assigns the bootstrap account flat via
+   * `assignRole()` — and wherever they don't, the subtraction is wrong.
+   *
+   * Measured against the live API, on three accounts holding exactly one role
+   * each, it reported 1 / 0 / 2 where the truth is 1 / 1 / 1: the lone
+   * archivist is subtracted away to pay for a super_admin who never held that
+   * role, and the super_admin is then counted a second time under
+   * `faculty_staff`. The `Math.max(0, …)` clamp hid the inconsistency rather
+   * than fixing it.
+   *
+   * A union filter would have made it exact in three requests, but
+   * `filter[role]=a,b` is not supported: spatie-query-builder splits the value
+   * and passes the second element to `scopeRole` as its *guard* argument, so
+   * the request dies with `RoleDoesNotExist: no role named 'super_admin' for
+   * guard 'archivist'`.
+   *
+   * So the buckets are assigned per user, from the `roles` array the payload
+   * already carries, under the same precedence `utils/role.ts` applies to the
+   * signed-in user — highest role wins, each account counted exactly once. A
+   * user holding no recognised role is counted in `total` only, so the rows can
+   * sum to less than the total but never to more.
    */
   getUserRoleBreakdown: async (): Promise<RoleBreakdown> => {
-    const countUsers = async (role?: string): Promise<number> => {
-      const { data } = await http.get<Paginated<unknown>>('/v1/users', {
-        params: role ? { filter: { role } } : {},
+    const fetchPage = async (page: number): Promise<Paginated<UserRolesResource>> => {
+      const { data } = await http.get<Paginated<UserRolesResource>>('/v1/users', {
+        params: { page },
       })
-      return num(data.meta?.total)
+      return data
     }
 
-    const [total, superAdmins, archivists] = await Promise.all([
-      countUsers(),
-      countUsers(SUPER_ADMIN),
-      countUsers(ARCHIVIST),
-    ])
+    const first = await fetchPage(1)
+    const total = num(first.meta?.total)
+    const lastPage = Math.max(1, num(first.meta?.last_page) || 1)
+
+    if (lastPage > USER_PAGE_CAP) {
+      throw new Error(`User list is ${lastPage} pages; refusing to page past ${USER_PAGE_CAP}.`)
+    }
+
+    const rest = await Promise.all(Array.from({ length: lastPage - 1 }, (_, i) => fetchPage(i + 2)))
+
+    // Keyed on the slug union, not `string`: a finite key set is exempt from
+    // `noUncheckedIndexedAccess`, so the increment below needs no assertion.
+    const counts: Record<(typeof USER_ROLE_SLUGS)[number], number> = {
+      super_admin: 0,
+      archivist: 0,
+      faculty_staff: 0,
+    }
+
+    for (const page of [first, ...rest]) {
+      for (const user of page.data ?? []) {
+        const roles: readonly unknown[] = Array.isArray(user.roles) ? user.roles : []
+        // Precedence order, so the first match is the highest role held.
+        const highest = USER_ROLE_SLUGS.find((slug) => roles.includes(slug))
+        if (highest) counts[highest] += 1
+      }
+    }
 
     return {
       total,
       rows: [
-        { role: SUPER_ADMIN, count: superAdmins },
-        { role: ARCHIVIST, count: Math.max(0, archivists - superAdmins) },
-        { role: FACULTY_STAFF, count: Math.max(0, total - archivists) },
+        { role: SUPER_ADMIN, count: counts[SUPER_ADMIN] },
+        { role: ARCHIVIST, count: counts[ARCHIVIST] },
+        { role: FACULTY_STAFF, count: counts[FACULTY_STAFF] },
       ],
     }
   },
