@@ -64,6 +64,21 @@ function statusLabel(status: DocumentTypeStatus): string {
             <ListFilter class="w-4 h-4" />
             {{ item.requirementConditions.conditions.length }}
           </span>
+          <!--
+            A stored rule the builder cannot express (verified live: two seeded
+            rows hold the legacy `{"applies_to": …}` shape) maps to a null
+            `requirementConditions`. Showing the same "—" as a row with no rule
+            at all was the one place the table said something untrue — the rule
+            is there, it is enforced, and an edit deliberately preserves it.
+          -->
+          <span
+            v-else-if="item.hasUnsupportedConditions"
+            class="inline-flex items-center gap-1 text-xs text-text-secondary"
+            :title="t('documentTypes.conditions.customTooltip')"
+          >
+            <ListFilter class="w-4 h-4" />
+            {{ t('documentTypes.conditions.custom') }}
+          </span>
           <span v-else class="text-xs text-text-muted">—</span>
         </td>
         <td class="px-3 py-3 text-center">

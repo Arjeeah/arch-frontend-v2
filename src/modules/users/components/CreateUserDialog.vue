@@ -55,9 +55,41 @@ watch(
   },
 )
 
+/**
+ * The one address the backend accepts, checked client-side.
+ *
+ * `UserStoreRequest`/`UserUpdateRequest` carry `ends_with:@limu.edu.ly` and
+ * answer `422 {"message":"Email must end with @limu.edu.ly"}` — verified live,
+ * and verified **case-sensitive**: `probe@LIMU.EDU.LY` is rejected too, which is
+ * why this compares the raw suffix rather than lower-casing first. Without this
+ * check the only feedback was that English sentence rendered inside an
+ * otherwise Arabic dialog, one round-trip later.
+ */
+const LIMU_EMAIL_SUFFIX = '@limu.edu.ly'
+
+/**
+ * Whether the typed address will actually be sent.
+ *
+ * `usersApi.toUpdateInput` drops an email identical to the stored one, because
+ * the update request re-validates whatever it receives and two seeded accounts
+ * predate the rule (`archivist@limu.local`). An untouched field must therefore
+ * not be flagged here either, or those users become uneditable in the UI for a
+ * second reason.
+ */
+function emailIsSent(value: string): boolean {
+  return !isEdit.value || value !== props.user?.email
+}
+
 function validate() {
   errors.name = form.name.trim() ? '' : t('users.dialog.errors.nameRequired')
-  errors.email = form.email.trim() ? '' : t('users.dialog.errors.emailRequired')
+  const email = form.email.trim()
+  if (!email) {
+    errors.email = t('users.dialog.errors.emailRequired')
+  } else if (emailIsSent(email) && !email.endsWith(LIMU_EMAIL_SUFFIX)) {
+    errors.email = t('users.dialog.errors.emailDomain')
+  } else {
+    errors.email = ''
+  }
   errors.role = form.role ? '' : t('users.dialog.errors.roleRequired')
   // The backend requires a password when creating; on edit an empty field
   // means "leave the current password alone".

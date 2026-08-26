@@ -307,10 +307,11 @@
     "ocrQueue": {
       "title": "OCR Queue",
       "pending": "Pending",
+      "processing": "Processing",
       "completed": "Completed",
       "failed": "Failed",
-      "today": "Documents scanned today.",
-      "unavailable": "The server is not reporting OCR counts yet."
+      "today": "One document scanned today. | {count} documents scanned today.",
+      "none": "No documents scanned today."
     },
     "capacityWarning": {
       "title": "A drawer is {percent} full",
@@ -421,7 +422,9 @@
       "atLeastOne": "Add at least one condition, or clear the checkbox above.",
       "incomplete": "Every condition needs both a field and a value.",
       "emptyList": "A list condition needs at least one value between the commas.",
-      "tooltip": "{count} condition configured | {count} conditions configured"
+      "tooltip": "{count} condition configured | {count} conditions configured",
+      "custom": "Custom rule",
+      "customTooltip": "A requirement rule is stored that this builder cannot display. Editing this document type leaves the rule untouched."
     },
     "deleteDialog": {
       "title": "Delete Document Type",
@@ -1786,6 +1789,7 @@
       "errors": {
         "nameRequired": "Full name is required",
         "emailRequired": "Email is required",
+        "emailDomain": "Email must end with @limu.edu.ly",
         "roleRequired": "Role is required",
         "passwordRequired": "Password is required",
         "facultyRequired": "Select at least one faculty"
