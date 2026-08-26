@@ -126,7 +126,7 @@
       "allStatus": "جميع الحالات",
       "empty": {
         "title": "لا توجد سجلات إعارة",
-        "description": "لا توجد سجلات إعارة مطابقة للمرشحات الحالية.",
+        "description": "لا توجد سجلات إعارة مطابقة لعوامل التصفية الحالية.",
         "noMatchesTitle": "لا نتائج في هذه الصفحة",
         "noMatchesDescription": "لا يوجد في هذه الصفحة ما يطابق بحثك. امسح البحث أو انتقل إلى صفحة أخرى."
       },
@@ -157,7 +157,7 @@
         "overdue": "متأخر"
       },
       "table": {
-        "document": "الوثيقة",
+        "document": "المستند",
         "borrower": "المستعير",
         "notes": "ملاحظات",
         "dueDate": "تاريخ الاستحقاق",
@@ -209,14 +209,14 @@
       "dialog": {
         "createTitle": "إنشاء إعارة",
         "editTitle": "تعديل إعارة",
-        "createSubtitle": "ابحث عن الوثيقة المؤرشفة المطلوب إعارتها.",
+        "createSubtitle": "ابحث عن المستند المؤرشف المطلوب إعارته.",
         "editSubtitle": "يمكن تعديل الملاحظات فقط بعد إنشاء الطلب.",
-        "documentLabel": "الوثيقة",
+        "documentLabel": "المستند",
         "documentPlaceholder": "ابحث برقم الملف…",
-        "documentMinChars": "اكتب {n} أحرف على الأقل",
+        "documentMinChars": "اكتب ما لا يقل عن {n} من الأحرف",
         "documentEmpty": "لا توجد وثائق مطابقة",
-        "documentSearchError": "تعذر البحث عن الوثائق",
-        "documentLocked": "لا يمكن تغيير الوثيقة المُعارة بعد إنشاء الطلب.",
+        "documentSearchError": "تعذر البحث عن المستندات",
+        "documentLocked": "لا يمكن تغيير المستند المُعار بعد إنشاء الطلب.",
         "notesLabel": "ملاحظات",
         "notesPlaceholder": "ملاحظات اختيارية لهذا الطلب",
         "dueDateHint": "يتم تحديد تاريخ الاستحقاق تلقائيًا عند موافقة أمين الأرشيف على الطلب.",
@@ -224,7 +224,7 @@
         "save": "حفظ الإعارة",
         "update": "تحديث الإعارة",
         "errors": {
-          "documentRequired": "اختر وثيقة للإعارة"
+          "documentRequired": "اختر مستندًا للإعارة"
         },
         "documentSearching": "جارٍ البحث…",
         "documentClear": "مسح الاختيار"

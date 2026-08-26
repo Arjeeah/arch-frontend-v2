@@ -94,7 +94,7 @@ const roleOptions = computed(() =>
 
 /** `roleLabel()` from `types.ts` returns an English fallback label; route it through i18n instead. */
 function roleLabelT(role: UserRole): string {
-  return t(`users.roles.${role}`)
+  return t(`common.roles.${role}`)
 }
 </script>
 

@@ -103,9 +103,9 @@
       "entities": {
         "faculties": "الكليات",
         "programs": "البرامج",
-        "students": "الطلبة",
+        "students": "الطلاب",
         "users": "المستخدمون",
-        "student_documents": "مستندات الطلبة"
+        "student_documents": "مستندات الطلاب"
       },
       "template": {
         "title": "قالب الاستيراد",

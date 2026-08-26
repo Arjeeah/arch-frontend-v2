@@ -44,8 +44,8 @@
       "referenceIdPlaceholder": "ابحث بالرقم المرجعي"
     },
     "sort": {
-      "newest": "الأحدث أولاً",
-      "oldest": "الأقدم أولاً"
+      "newest": "الأحدث أولًا",
+      "oldest": "الأقدم أولًا"
     }
   },
   "borrowing": {
@@ -56,7 +56,7 @@
     "allStatus": "جميع الحالات",
     "empty": {
       "title": "لا توجد سجلات إعارة",
-      "description": "لا توجد سجلات إعارة مطابقة للمرشحات الحالية.",
+      "description": "لا توجد سجلات إعارة مطابقة لعوامل التصفية الحالية.",
       "noMatchesTitle": "لا نتائج في هذه الصفحة",
       "noMatchesDescription": "لا يوجد في هذه الصفحة ما يطابق بحثك. امسح البحث أو انتقل إلى صفحة أخرى."
     },
@@ -87,7 +87,7 @@
       "overdue": "متأخر"
     },
     "table": {
-      "document": "الوثيقة",
+      "document": "المستند",
       "borrower": "المستعير",
       "notes": "ملاحظات",
       "dueDate": "تاريخ الاستحقاق",
@@ -139,14 +139,14 @@
     "dialog": {
       "createTitle": "إنشاء إعارة",
       "editTitle": "تعديل إعارة",
-      "createSubtitle": "ابحث عن الوثيقة المؤرشفة المطلوب إعارتها.",
+      "createSubtitle": "ابحث عن المستند المؤرشف المطلوب إعارته.",
       "editSubtitle": "يمكن تعديل الملاحظات فقط بعد إنشاء الطلب.",
-      "documentLabel": "الوثيقة",
+      "documentLabel": "المستند",
       "documentPlaceholder": "ابحث برقم الملف…",
-      "documentMinChars": "اكتب {n} أحرف على الأقل",
+      "documentMinChars": "اكتب ما لا يقل عن {n} من الأحرف",
       "documentEmpty": "لا توجد وثائق مطابقة",
-      "documentSearchError": "تعذر البحث عن الوثائق",
-      "documentLocked": "لا يمكن تغيير الوثيقة المُعارة بعد إنشاء الطلب.",
+      "documentSearchError": "تعذر البحث عن المستندات",
+      "documentLocked": "لا يمكن تغيير المستند المُعار بعد إنشاء الطلب.",
       "notesLabel": "ملاحظات",
       "notesPlaceholder": "ملاحظات اختيارية لهذا الطلب",
       "dueDateHint": "يتم تحديد تاريخ الاستحقاق تلقائيًا عند موافقة أمين الأرشيف على الطلب.",
@@ -154,7 +154,7 @@
       "save": "حفظ الإعارة",
       "update": "تحديث الإعارة",
       "errors": {
-        "documentRequired": "اختر وثيقة للإعارة"
+        "documentRequired": "اختر مستندًا للإعارة"
       },
       "documentSearching": "جارٍ البحث…",
       "documentClear": "مسح الاختيار"
@@ -169,7 +169,7 @@
       "student_file_checkout": "تم سحب ملف",
       "student_file_returned": "تم إرجاع ملف",
       "document_scanned": "تم مسح مستند",
-      "document_ocr_processed": "اكتملت المعالجة الضوئية",
+      "document_ocr_processed": "اكتمل التعرّف الضوئي",
       "cabinet_capacity_updated": "تم تحديث سعة خزانة",
       "borrowing_requested": "طلب إعارة",
       "borrowing_extension_requested": "طلب تمديد إعارة",
@@ -177,7 +177,7 @@
       "duplicate_file_removed_soft_delete": "تم حذف ملف مكرر",
       "excel_import_completed": "اكتمل الاستيراد من Excel",
       "view_reports": "عرض التقارير",
-      "view_student_files": "عرض ملفات الطلبة",
+      "view_student_files": "عرض ملفات الطلاب",
       "login": "تسجيل دخول",
       "failed_login": "محاولة دخول فاشلة",
       "report_generated": "تم إنشاء تقرير",
@@ -211,11 +211,11 @@
     "nothingHere": "لا يوجد شيء هنا بعد",
     "pipelineStatus": {
       "pending": "قيد الانتظار",
-      "ocr_processing": "جاري استخراج النص",
+      "ocr_processing": "جارٍ استخراج النص",
       "ocr_completed": "اكتمل استخراج النص",
-      "refining": "جاري التحليل الذكي",
+      "refining": "جارٍ التحليل الذكي",
       "refined": "اكتمل التحليل",
-      "embedding": "جاري إنشاء التضمينات",
+      "embedding": "جارٍ إنشاء التضمينات",
       "completed": "مكتمل",
       "failed": "فشل"
     },
@@ -255,10 +255,10 @@
       "securityAlertsHint": "محاولات دخول فاشلة خلال آخر 24 ساعة",
       "totalFiles": "إجمالي الملفات",
       "totalFilesHint": "المستندات داخل الأرشيف",
-      "borrowedNow": "معارة حالياً",
+      "borrowedNow": "معارة حاليًا",
       "borrowedNowHint": "ملفات خارج الأرشيف الآن",
       "overdue": "متأخرة",
-      "overdueHint": "تجاوزت تاريخ الإرجاع",
+      "overdueHint": "تجاوزت موعد الاستحقاق",
       "scansToday": "عمليات المسح اليوم",
       "scansTodayHint": "مستندات أُضيفت اليوم",
       "scansTodayChange": "{change} مقارنة بالأمس",
@@ -275,7 +275,7 @@
       "noWarnings": "لا توجد تنبيهات بشأن السعة."
     },
     "warnings": {
-      "storage_capacity": "بلغ استخدام التخزين {percent} من السعة. يُنصح بمراجعة السعة قريباً."
+      "storage_capacity": "بلغ استخدام التخزين {percent} من السعة. يُنصح بمراجعة السعة قريبًا."
     },
     "facultyStorage": {
       "title": "التخزين حسب الكلية",
@@ -302,15 +302,15 @@
       "weeklyBorrowing": "إعارات هذا الأسبوع",
       "storage": "استخدام التخزين",
       "empty": "لا يوجد ما يُعرض",
-      "cta": "عرض الملخص كاملاً"
+      "cta": "عرض الملخص كاملًا"
     },
     "ocrQueue": {
-      "title": "طابور المعالجة الضوئية",
+      "title": "طابور التعرّف الضوئي",
       "pending": "قيد الانتظار",
       "completed": "مكتملة",
       "failed": "فاشلة",
       "today": "المستندات الممسوحة اليوم.",
-      "unavailable": "الخادم لا يرسل بيانات المعالجة الضوئية بعد."
+      "unavailable": "الخادم لا يرسل بيانات التعرّف الضوئي بعد."
     },
     "capacityWarning": {
       "title": "أحد الأدراج ممتلئ بنسبة {percent}",
@@ -328,11 +328,6 @@
       "empty": "لا يوجد نشاط بعد",
       "emptyHint": "ستظهر هنا العمليات على الملفات والإعارات."
     },
-    "roles": {
-      "super_admin": "مدير النظام",
-      "archivist": "أمين أرشيف",
-      "faculty_staff": "موظف كلية"
-    },
     "borrowStatus": {
       "pending": "قيد الانتظار",
       "approved": "موافق عليها",
@@ -347,7 +342,7 @@
       "actor": "المستعير",
       "requestedBy": "مقدّم الطلب",
       "status": "الحالة",
-      "dueDate": "تاريخ الإرجاع",
+      "dueDate": "تاريخ الاستحقاق",
       "daysOverdue": "أيام التأخير",
       "timestamp": "تاريخ الطلب",
       "requestsTitle": "الطلبات قيد الانتظار",
@@ -362,15 +357,15 @@
     }
   },
   "documentTypes": {
-    "title": "أنواع الوثائق",
-    "subtitle": "إدارة أنواع الوثائق التي يمكن للطلاب تقديمها ومتى تكون مطلوبة",
-    "addNew": "إضافة نوع وثيقة",
+    "title": "أنواع المستندات",
+    "subtitle": "إدارة أنواع المستندات التي يمكن للطلاب تقديمها ومتى تكون مطلوبة",
+    "addNew": "إضافة نوع مستند",
     "searchPlaceholder": "البحث بالاسم…",
     "fields": {
       "name": "الاسم",
       "description": "الوصف",
       "status": "الحالة",
-      "isRequired": "مطلوبة افتراضيًا",
+      "isRequired": "مطلوب افتراضيًا",
       "required": "مطلوبة",
       "optional": "اختيارية"
     },
@@ -379,8 +374,8 @@
       "allTypes": "كل الأنواع"
     },
     "status": {
-      "active": "نشطة",
-      "inactive": "غير نشطة"
+      "active": "نشط",
+      "inactive": "غير نشط"
     },
     "table": {
       "actions": "الإجراءات",
@@ -389,21 +384,21 @@
     },
     "empty": {
       "title": "لا توجد أنواع وثائق بعد",
-      "description": "أضف نوع وثيقة ليتمكن الطلاب من تقديمها.",
+      "description": "أضف نوع مستند ليتمكن الطلاب من تقديمه.",
       "filteredTitle": "لا توجد نتائج مطابقة",
-      "filteredDescription": "لا يوجد نوع وثيقة يطابق البحث والفلاتر الحالية."
+      "filteredDescription": "لا يوجد نوع مستند يطابق البحث وعوامل التصفية الحالية."
     },
     "errorState": {
-      "title": "تعذر تحميل أنواع الوثائق",
+      "title": "تعذر تحميل أنواع المستندات",
       "retry": "إعادة المحاولة"
     },
     "dialog": {
-      "createTitle": "إضافة نوع وثيقة",
-      "editTitle": "تعديل نوع الوثيقة",
-      "createSubtitle": "املأ التفاصيل لإنشاء نوع وثيقة جديد.",
-      "editSubtitle": "قم بتحديث تفاصيل نوع الوثيقة.",
+      "createTitle": "إضافة نوع مستند",
+      "editTitle": "تعديل نوع المستند",
+      "createSubtitle": "املأ التفاصيل لإنشاء نوع مستند جديد.",
+      "editSubtitle": "قم بتحديث تفاصيل نوع المستند.",
       "namePlaceholder": "مثال: نسخة البطاقة الشخصية",
-      "descriptionPlaceholder": "ملاحظات اختيارية تظهر للموظفين عند مراجعة هذه الوثيقة",
+      "descriptionPlaceholder": "ملاحظات اختيارية تظهر للموظفين عند مراجعة هذا المستند",
       "nameRequired": "الاسم مطلوب",
       "cancel": "إلغاء",
       "save": "حفظ",
@@ -429,16 +424,16 @@
       "tooltip": "تم إعداد {count} شرط"
     },
     "deleteDialog": {
-      "title": "حذف نوع الوثيقة",
+      "title": "حذف نوع المستند",
       "confirm": "حذف",
       "message": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء."
     },
     "toasts": {
-      "created": "تم إنشاء نوع الوثيقة.",
-      "updated": "تم تحديث نوع الوثيقة.",
-      "deleted": "تم حذف نوع الوثيقة.",
-      "saveFailed": "تعذر حفظ نوع الوثيقة",
-      "deleteFailed": "تعذر حذف نوع الوثيقة"
+      "created": "تم إنشاء نوع المستند.",
+      "updated": "تم تحديث نوع المستند.",
+      "deleted": "تم حذف نوع المستند.",
+      "saveFailed": "تعذر حفظ نوع المستند",
+      "deleteFailed": "تعذر حذف نوع المستند"
     }
   },
   "faculties": {
@@ -449,7 +444,7 @@
     "allStatus": "جميع الحالات",
     "empty": {
       "title": "لا توجد كليات",
-      "description": "لا توجد كليات مطابقة للمرشحات الحالية."
+      "description": "لا توجد كليات مطابقة لعوامل التصفية الحالية."
     },
     "toast": {
       "created": "تم إنشاء الكلية بنجاح",
@@ -464,8 +459,8 @@
       "message": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء."
     },
     "status": {
-      "active": "نشط",
-      "inactive": "غير نشط"
+      "active": "نشطة",
+      "inactive": "غير نشطة"
     },
     "table": {
       "code": "الرمز",
@@ -517,9 +512,9 @@
     "entities": {
       "faculties": "الكليات",
       "programs": "البرامج",
-      "students": "الطلبة",
+      "students": "الطلاب",
       "users": "المستخدمون",
-      "student_documents": "مستندات الطلبة"
+      "student_documents": "مستندات الطلاب"
     },
     "template": {
       "title": "قالب الاستيراد",
@@ -766,7 +761,7 @@
     "studentDocuments": "مستندات الطلاب",
     "students": "الطلاب",
     "programs": "البرامج الدراسية",
-    "documentTypes": "أنواع الوثائق",
+    "documentTypes": "أنواع المستندات",
     "notifications": "الإشعارات"
   },
   "notFound": {
@@ -838,7 +833,7 @@
       "ruleSize": "الحد الأقصى لحجم الملف الواحد: {size} ميجابايت",
       "ruleCount": "حتى {max} ملف في الدفعة الواحدة",
       "rejected": "تم رفض {count} من الملفات المسحوبة — الأسباب موضّحة أسفل منطقة الرفع.",
-      "uploading": "جاري الرفع…",
+      "uploading": "جارٍ الرفع…",
       "selectionSummary": "{count} ملف محدّد · {size}",
       "clear": "مسح التحديد",
       "cancel": "إلغاء الرفع",
@@ -872,7 +867,7 @@
       },
       "breakdownTitle": "التوزيع حسب المرحلة",
       "breakdownHint": "أعداد على مستوى الأرشيف بالكامل، وليست الصفحة أدناه.",
-      "loading": "جاري التحميل",
+      "loading": "جارٍ التحميل",
       "searchPlaceholder": "ابحث برقم الملف",
       "allFileStatuses": "كل حالات الملف",
       "allStates": "كل المراحل",
@@ -949,7 +944,7 @@
       "title": "لا توجد برامج بعد",
       "description": "أضف برنامجًا إلى إحدى الكليات للبدء.",
       "filteredTitle": "لا توجد نتائج مطابقة",
-      "filteredDescription": "لا يوجد برنامج يطابق البحث والفلاتر الحالية."
+      "filteredDescription": "لا يوجد برنامج يطابق البحث وعوامل التصفية الحالية."
     },
     "errorState": {
       "title": "تعذر تحميل البرامج",
@@ -1006,7 +1001,7 @@
     "types": {
       "audit_logs": "سجلات التدقيق",
       "borrowings": "الإعارات",
-      "student_documents": "مستندات الطلبة",
+      "student_documents": "مستندات الطلاب",
       "users": "المستخدمون",
       "weekly_digest": "الملخص الأسبوعي",
       "faculty_report": "تقرير الكليات"
@@ -1039,10 +1034,6 @@
       "borrowed": "معارة",
       "returned": "مُعادة",
       "overdue": "متأخرة",
-      "super_admin": "مدير عام",
-      "archivist": "أمين الأرشيف",
-      "faculty_staff": "موظف كلية",
-      "system": "النظام",
       "complete": "مكتمل",
       "incomplete": "غير مكتمل",
       "draft": "مسودة",
@@ -1122,7 +1113,7 @@
   "review": {
     "navLabel": "قائمة المراجعة",
     "title": "قائمة المراجعة",
-    "subtitle": "أكّد أو صحّح ما قرأه الذكاء الاصطناعي من كل مستند — الأقل ثقةً أولاً.",
+    "subtitle": "أكّد أو صحّح ما قرأه الذكاء الاصطناعي من كل مستند — الأقل ثقةً أولًا.",
     "header": {
       "pending": "{count} بانتظار المراجعة",
       "position": "{index} من {count}"
@@ -1138,14 +1129,14 @@
       "title": "درجة ثقة الاستخراج: {value}%"
     },
     "preview": {
-      "title": "المستند الممسوح ضوئياً",
+      "title": "المستند الممسوح ضوئيًا",
       "openInNewTab": "فتح",
       "emptyTitle": "لا يوجد ما يُعرض",
       "noFile": "لا يوجد ملف محفوظ لهذا المستند.",
-      "selectRow": "اختر مستنداً من قائمة الانتظار لبدء المراجعة."
+      "selectRow": "اختر مستندًا من قائمة الانتظار لبدء المراجعة."
     },
     "fields": {
-      "studentNumber": "الرقم الدراسي",
+      "studentNumber": "رقم القيد",
       "studentName": "اسم الطالب",
       "college": "الكلية",
       "program": "البرنامج",
@@ -1173,7 +1164,7 @@
       "revert": "استعادة قيمة الذكاء الاصطناعي",
       "unsaved": "تغييرات غير محفوظة",
       "noSelectionTitle": "لم يُحدَّد أي مستند",
-      "noSelectionDescription": "اختر صفاً من قائمة الانتظار لبدء المراجعة."
+      "noSelectionDescription": "اختر صفًا من قائمة الانتظار لبدء المراجعة."
     },
     "filter": {
       "all": "كل درجات الثقة",
@@ -1328,7 +1319,7 @@
       "dateFormatHelper": "صيغة تاريخ بلغة PHP، مثل Y-m-d",
       "capacityWarningThreshold": "حد تنبيه سعة التخزين (%)",
       "maxFileSize": "الحد الأقصى لحجم الملف",
-      "maxFileSizeHelper": "بالميغابايت",
+      "maxFileSizeHelper": "بالميجابايت",
       "allowedExtensions": "امتدادات الملفات المسموح بها",
       "defaultDurationDays": "مدة الإعارة الافتراضية (أيام)",
       "maxActivePerUser": "الحد الأقصى للإعارات النشطة لكل مستخدم",
@@ -1353,12 +1344,7 @@
       "languageAr": "العربية",
       "languageEn": "الإنجليزية",
       "languageAra": "العربية",
-      "languageEng": "الإنجليزية",
-      "role": {
-        "superAdmin": "مدير عام",
-        "archivist": "أمين أرشيف",
-        "facultyStaff": "موظف كلية"
-      }
+      "languageEng": "الإنجليزية"
     },
     "tagsInput": {
       "placeholder": "اكتب قيمة واضغط Enter"
@@ -1444,7 +1430,7 @@
       "openFile": "فتح الملف"
     },
     "states": {
-      "loading": "جاري التحميل…"
+      "loading": "جارٍ التحميل…"
     },
     "upload": {
       "title": "رفع مستند",
@@ -1619,7 +1605,7 @@
       "promote": "اعتماد الطالب"
     },
     "states": {
-      "loading": "جاري التحميل…",
+      "loading": "جارٍ التحميل…",
       "noFaculty": "لا توجد كلية مسجلة"
     },
     "form": {
@@ -1629,7 +1615,7 @@
     "errors": {
       "required": "هذا الحقل مطلوب",
       "maxLength": "استخدم {max} حرفًا كحد أقصى",
-      "email": "أدخل بريدًا إلكترونيًا صحيحًا",
+      "email": "أدخل بريدًا إلكترونيًا صالحًا",
       "yearRange": "أدخل سنة بين 1900 و2100",
       "graduationBeforeEnrollment": "لا يمكن أن تسبق سنة التخرج سنة القيد",
       "lookupFailed": "تعذر تحميل قائمة الخيارات",
@@ -1684,7 +1670,7 @@
     "allFaculties": "جميع الكليات",
     "empty": {
       "title": "لا يوجد مستخدمون",
-      "description": "لا يوجد مستخدمون مطابقون للمرشحات الحالية."
+      "description": "لا يوجد مستخدمون مطابقون لعوامل التصفية الحالية."
     },
     "toast": {
       "created": "تم إنشاء المستخدم بنجاح",
@@ -1697,11 +1683,6 @@
       "title": "حذف المستخدم",
       "confirm": "حذف",
       "message": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء."
-    },
-    "roles": {
-      "super_admin": "مسؤول عام",
-      "archivist": "أمين الأرشيف",
-      "faculty_staff": "موظف كلية"
     },
     "status": {
       "active": "نشط",

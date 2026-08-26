@@ -22,7 +22,7 @@ const { t, te, locale } = useI18n()
 
 /** Translated role name, falling back to the raw slug for an unknown role. */
 function roleLabel(role: string): string {
-  const key = `dashboard.roles.${role}`
+  const key = `common.roles.${role}`
   return te(key) ? t(key) : role
 }
 

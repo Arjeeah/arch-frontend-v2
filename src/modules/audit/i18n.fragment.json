@@ -117,8 +117,8 @@
         "referenceIdPlaceholder": "ابحث بالرقم المرجعي"
       },
       "sort": {
-        "newest": "الأحدث أولاً",
-        "oldest": "الأقدم أولاً"
+        "newest": "الأحدث أولًا",
+        "oldest": "الأقدم أولًا"
       }
     },
     "common": {
@@ -126,7 +126,7 @@
         "student_file_checkout": "تم سحب ملف",
         "student_file_returned": "تم إرجاع ملف",
         "document_scanned": "تم مسح مستند",
-        "document_ocr_processed": "اكتملت المعالجة الضوئية",
+        "document_ocr_processed": "اكتمل التعرّف الضوئي",
         "cabinet_capacity_updated": "تم تحديث سعة خزانة",
         "borrowing_requested": "طلب إعارة",
         "borrowing_extension_requested": "طلب تمديد إعارة",
@@ -134,7 +134,7 @@
         "duplicate_file_removed_soft_delete": "تم حذف ملف مكرر",
         "excel_import_completed": "اكتمل الاستيراد من Excel",
         "view_reports": "عرض التقارير",
-        "view_student_files": "عرض ملفات الطلبة",
+        "view_student_files": "عرض ملفات الطلاب",
         "login": "تسجيل دخول",
         "failed_login": "محاولة دخول فاشلة",
         "report_generated": "تم إنشاء تقرير",

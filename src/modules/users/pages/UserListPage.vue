@@ -139,7 +139,7 @@ async function confirmDelete() {
 
 // Select options
 const roleOptions = computed(() =>
-  ROLES.map((r) => ({ value: r.value, label: t(`users.roles.${r.value}`) })),
+  ROLES.map((r) => ({ value: r.value, label: t(`common.roles.${r.value}`) })),
 )
 const statusOptions = computed(() => [
   { value: 'Active', label: t('users.status.active') },

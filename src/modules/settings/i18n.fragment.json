@@ -62,12 +62,7 @@
         "languageAr": "Arabic",
         "languageEn": "English",
         "languageAra": "Arabic",
-        "languageEng": "English",
-        "role": {
-          "superAdmin": "Super admin",
-          "archivist": "Archivist",
-          "facultyStaff": "Faculty staff"
-        }
+        "languageEng": "English"
       },
       "tagsInput": {
         "placeholder": "Type a value and press Enter"
@@ -130,7 +125,7 @@
         "dateFormatHelper": "صيغة تاريخ بلغة PHP، مثل Y-m-d",
         "capacityWarningThreshold": "حد تنبيه سعة التخزين (%)",
         "maxFileSize": "الحد الأقصى لحجم الملف",
-        "maxFileSizeHelper": "بالميغابايت",
+        "maxFileSizeHelper": "بالميجابايت",
         "allowedExtensions": "امتدادات الملفات المسموح بها",
         "defaultDurationDays": "مدة الإعارة الافتراضية (أيام)",
         "maxActivePerUser": "الحد الأقصى للإعارات النشطة لكل مستخدم",
@@ -155,12 +150,7 @@
         "languageAr": "العربية",
         "languageEn": "الإنجليزية",
         "languageAra": "العربية",
-        "languageEng": "الإنجليزية",
-        "role": {
-          "superAdmin": "مدير عام",
-          "archivist": "أمين أرشيف",
-          "facultyStaff": "موظف كلية"
-        }
+        "languageEng": "الإنجليزية"
       },
       "tagsInput": {
         "placeholder": "اكتب قيمة واضغط Enter"

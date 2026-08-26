@@ -28,7 +28,7 @@
       "fields": {
         "studentNumber": "Student number",
         "studentName": "Student name",
-        "college": "College",
+        "college": "Faculty",
         "program": "Program",
         "documentType": "Document type",
         "enrollmentDate": "Enrollment date",
@@ -46,7 +46,7 @@
         "datePlaceholder": "YYYY-MM-DD",
         "loadingOptions": "Loading…",
         "optionsUnavailable": "List unavailable — Refresh to retry",
-        "noCollege": "No college selected",
+        "noCollege": "No faculty selected",
         "noDocumentType": "No document type selected",
         "unlistedOption": "{value} — not on record",
         "aiSaid": "AI read: {value}",
@@ -94,7 +94,7 @@
         "loadTitle": "Could not load the review queue",
         "save": "Could not save the corrections",
         "verify": "Could not verify this document",
-        "lookups": "Could not load the college and document-type lists"
+        "lookups": "Could not load the faculty and document-type lists"
       },
       "toasts": {
         "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
@@ -107,7 +107,7 @@
     "review": {
       "navLabel": "قائمة المراجعة",
       "title": "قائمة المراجعة",
-      "subtitle": "أكّد أو صحّح ما قرأه الذكاء الاصطناعي من كل مستند — الأقل ثقةً أولاً.",
+      "subtitle": "أكّد أو صحّح ما قرأه الذكاء الاصطناعي من كل مستند — الأقل ثقةً أولًا.",
       "header": {
         "pending": "{count} بانتظار المراجعة",
         "position": "{index} من {count}"
@@ -123,14 +123,14 @@
         "title": "درجة ثقة الاستخراج: {value}%"
       },
       "preview": {
-        "title": "المستند الممسوح ضوئياً",
+        "title": "المستند الممسوح ضوئيًا",
         "openInNewTab": "فتح",
         "emptyTitle": "لا يوجد ما يُعرض",
         "noFile": "لا يوجد ملف محفوظ لهذا المستند.",
-        "selectRow": "اختر مستنداً من قائمة الانتظار لبدء المراجعة."
+        "selectRow": "اختر مستندًا من قائمة الانتظار لبدء المراجعة."
       },
       "fields": {
-        "studentNumber": "الرقم الدراسي",
+        "studentNumber": "رقم القيد",
         "studentName": "اسم الطالب",
         "college": "الكلية",
         "program": "البرنامج",
@@ -158,7 +158,7 @@
         "revert": "استعادة قيمة الذكاء الاصطناعي",
         "unsaved": "تغييرات غير محفوظة",
         "noSelectionTitle": "لم يُحدَّد أي مستند",
-        "noSelectionDescription": "اختر صفاً من قائمة الانتظار لبدء المراجعة."
+        "noSelectionDescription": "اختر صفًا من قائمة الانتظار لبدء المراجعة."
       },
       "filter": {
         "all": "كل درجات الثقة",

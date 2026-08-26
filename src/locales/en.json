@@ -328,11 +328,6 @@
       "empty": "No activity yet",
       "emptyHint": "Actions on files and borrowings will show up here."
     },
-    "roles": {
-      "super_admin": "Super Admin",
-      "archivist": "Archivist",
-      "faculty_staff": "Faculty Staff"
-    },
     "borrowStatus": {
       "pending": "Pending",
       "approved": "Approved",
@@ -1039,10 +1034,6 @@
       "borrowed": "Borrowed",
       "returned": "Returned",
       "overdue": "Overdue",
-      "super_admin": "Super admin",
-      "archivist": "Archivist",
-      "faculty_staff": "Faculty staff",
-      "system": "System",
       "complete": "Complete",
       "incomplete": "Incomplete",
       "draft": "Draft",
@@ -1147,7 +1138,7 @@
     "fields": {
       "studentNumber": "Student number",
       "studentName": "Student name",
-      "college": "College",
+      "college": "Faculty",
       "program": "Program",
       "documentType": "Document type",
       "enrollmentDate": "Enrollment date",
@@ -1165,7 +1156,7 @@
       "datePlaceholder": "YYYY-MM-DD",
       "loadingOptions": "Loading…",
       "optionsUnavailable": "List unavailable — Refresh to retry",
-      "noCollege": "No college selected",
+      "noCollege": "No faculty selected",
       "noDocumentType": "No document type selected",
       "unlistedOption": "{value} — not on record",
       "aiSaid": "AI read: {value}",
@@ -1213,7 +1204,7 @@
       "loadTitle": "Could not load the review queue",
       "save": "Could not save the corrections",
       "verify": "Could not verify this document",
-      "lookups": "Could not load the college and document-type lists"
+      "lookups": "Could not load the faculty and document-type lists"
     },
     "toasts": {
       "saved": "Nothing to save | 1 correction saved | {count} corrections saved",
@@ -1353,12 +1344,7 @@
       "languageAr": "Arabic",
       "languageEn": "English",
       "languageAra": "Arabic",
-      "languageEng": "English",
-      "role": {
-        "superAdmin": "Super admin",
-        "archivist": "Archivist",
-        "facultyStaff": "Faculty staff"
-      }
+      "languageEng": "English"
     },
     "tagsInput": {
       "placeholder": "Type a value and press Enter"
@@ -1697,11 +1683,6 @@
       "title": "Delete User",
       "confirm": "Delete",
       "message": "Are you sure you want to delete {name}? This action cannot be undone."
-    },
-    "roles": {
-      "super_admin": "Super Admin",
-      "archivist": "Archivist",
-      "faculty_staff": "Faculty Staff"
     },
     "status": {
       "active": "Active",

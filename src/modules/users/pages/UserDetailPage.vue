@@ -102,7 +102,7 @@ async function handleSave(data: UserInput) {
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">
         <p class="text-xs text-text-muted font-display mb-1">{{ t('users.detail.role') }}</p>
         <p class="text-base font-display font-semibold text-text-primary">
-          {{ t(`users.roles.${user.role}`) }}
+          {{ t(`common.roles.${user.role}`) }}
         </p>
       </div>
       <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm">

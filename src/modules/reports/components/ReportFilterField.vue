@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 /**
  * Values for the PHP enums named in `filter_schema[].options`.
@@ -74,10 +74,18 @@ const enumValues = computed<readonly string[] | null>(() => {
   return null
 })
 
+/**
+ * Role slugs read their label from `common.roles.*`, the one set the whole app
+ * uses — `/dashboard`, `/users`, `/settings` and this dropdown used to carry
+ * four different Arabic names for `super_admin`. Everything else (statuses,
+ * file states) stays in `reports.filterValues.*`.
+ */
 const selectOptions = computed(() =>
   (enumValues.value ?? []).map((value) => ({
     value,
-    label: t(`reports.filterValues.${value}`),
+    label: te(`common.roles.${value}`)
+      ? t(`common.roles.${value}`)
+      : t(`reports.filterValues.${value}`),
   })),
 )
 

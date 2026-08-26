@@ -24,11 +24,6 @@
         "confirm": "Delete",
         "message": "Are you sure you want to delete {name}? This action cannot be undone."
       },
-      "roles": {
-        "super_admin": "Super Admin",
-        "archivist": "Archivist",
-        "faculty_staff": "Faculty Staff"
-      },
       "status": {
         "active": "Active",
         "inactive": "Inactive"
@@ -105,7 +100,7 @@
       "allFaculties": "جميع الكليات",
       "empty": {
         "title": "لا يوجد مستخدمون",
-        "description": "لا يوجد مستخدمون مطابقون للمرشحات الحالية."
+        "description": "لا يوجد مستخدمون مطابقون لعوامل التصفية الحالية."
       },
       "toast": {
         "created": "تم إنشاء المستخدم بنجاح",
@@ -118,11 +113,6 @@
         "title": "حذف المستخدم",
         "confirm": "حذف",
         "message": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء."
-      },
-      "roles": {
-        "super_admin": "مسؤول عام",
-        "archivist": "أمين الأرشيف",
-        "faculty_staff": "موظف كلية"
       },
       "status": {
         "active": "نشط",

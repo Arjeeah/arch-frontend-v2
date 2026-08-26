@@ -122,11 +122,11 @@
     "common": {
       "pipelineStatus": {
         "pending": "قيد الانتظار",
-        "ocr_processing": "جاري استخراج النص",
+        "ocr_processing": "جارٍ استخراج النص",
         "ocr_completed": "اكتمل استخراج النص",
-        "refining": "جاري التحليل الذكي",
+        "refining": "جارٍ التحليل الذكي",
         "refined": "اكتمل التحليل",
-        "embedding": "جاري إنشاء التضمينات",
+        "embedding": "جارٍ إنشاء التضمينات",
         "completed": "مكتمل",
         "failed": "فشل"
       }
@@ -155,7 +155,7 @@
         "ruleSize": "الحد الأقصى لحجم الملف الواحد: {size} ميجابايت",
         "ruleCount": "حتى {max} ملف في الدفعة الواحدة",
         "rejected": "تم رفض {count} من الملفات المسحوبة — الأسباب موضّحة أسفل منطقة الرفع.",
-        "uploading": "جاري الرفع…",
+        "uploading": "جارٍ الرفع…",
         "selectionSummary": "{count} ملف محدّد · {size}",
         "clear": "مسح التحديد",
         "cancel": "إلغاء الرفع",
@@ -189,7 +189,7 @@
         },
         "breakdownTitle": "التوزيع حسب المرحلة",
         "breakdownHint": "أعداد على مستوى الأرشيف بالكامل، وليست الصفحة أدناه.",
-        "loading": "جاري التحميل",
+        "loading": "جارٍ التحميل",
         "searchPlaceholder": "ابحث برقم الملف",
         "allFileStatuses": "كل حالات الملف",
         "allStates": "كل المراحل",

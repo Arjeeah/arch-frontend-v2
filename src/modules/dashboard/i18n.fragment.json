@@ -115,11 +115,6 @@
         "empty": "No activity yet",
         "emptyHint": "Actions on files and borrowings will show up here."
       },
-      "roles": {
-        "super_admin": "Super Admin",
-        "archivist": "Archivist",
-        "faculty_staff": "Faculty Staff"
-      },
       "borrowStatus": {
         "pending": "Pending",
         "approved": "Approved",
@@ -155,7 +150,7 @@
         "student_file_checkout": "تم سحب ملف",
         "student_file_returned": "تم إرجاع ملف",
         "document_scanned": "تم مسح مستند",
-        "document_ocr_processed": "اكتملت المعالجة الضوئية",
+        "document_ocr_processed": "اكتمل التعرّف الضوئي",
         "cabinet_capacity_updated": "تم تحديث سعة خزانة",
         "borrowing_requested": "طلب إعارة",
         "borrowing_extension_requested": "طلب تمديد إعارة",
@@ -163,7 +158,7 @@
         "duplicate_file_removed_soft_delete": "تم حذف ملف مكرر",
         "excel_import_completed": "اكتمل الاستيراد من Excel",
         "view_reports": "عرض التقارير",
-        "view_student_files": "عرض ملفات الطلبة",
+        "view_student_files": "عرض ملفات الطلاب",
         "login": "تسجيل دخول",
         "failed_login": "محاولة دخول فاشلة",
         "report_generated": "تم إنشاء تقرير",
@@ -192,10 +187,10 @@
         "securityAlertsHint": "محاولات دخول فاشلة خلال آخر 24 ساعة",
         "totalFiles": "إجمالي الملفات",
         "totalFilesHint": "المستندات داخل الأرشيف",
-        "borrowedNow": "معارة حالياً",
+        "borrowedNow": "معارة حاليًا",
         "borrowedNowHint": "ملفات خارج الأرشيف الآن",
         "overdue": "متأخرة",
-        "overdueHint": "تجاوزت تاريخ الإرجاع",
+        "overdueHint": "تجاوزت موعد الاستحقاق",
         "scansToday": "عمليات المسح اليوم",
         "scansTodayHint": "مستندات أُضيفت اليوم",
         "scansTodayChange": "{change} مقارنة بالأمس",
@@ -212,7 +207,7 @@
         "noWarnings": "لا توجد تنبيهات بشأن السعة."
       },
       "warnings": {
-        "storage_capacity": "بلغ استخدام التخزين {percent} من السعة. يُنصح بمراجعة السعة قريباً."
+        "storage_capacity": "بلغ استخدام التخزين {percent} من السعة. يُنصح بمراجعة السعة قريبًا."
       },
       "facultyStorage": {
         "title": "التخزين حسب الكلية",
@@ -239,15 +234,15 @@
         "weeklyBorrowing": "إعارات هذا الأسبوع",
         "storage": "استخدام التخزين",
         "empty": "لا يوجد ما يُعرض",
-        "cta": "عرض الملخص كاملاً"
+        "cta": "عرض الملخص كاملًا"
       },
       "ocrQueue": {
-        "title": "طابور المعالجة الضوئية",
+        "title": "طابور التعرّف الضوئي",
         "pending": "قيد الانتظار",
         "completed": "مكتملة",
         "failed": "فاشلة",
         "today": "المستندات الممسوحة اليوم.",
-        "unavailable": "الخادم لا يرسل بيانات المعالجة الضوئية بعد."
+        "unavailable": "الخادم لا يرسل بيانات التعرّف الضوئي بعد."
       },
       "capacityWarning": {
         "title": "أحد الأدراج ممتلئ بنسبة {percent}",
@@ -265,11 +260,6 @@
         "empty": "لا يوجد نشاط بعد",
         "emptyHint": "ستظهر هنا العمليات على الملفات والإعارات."
       },
-      "roles": {
-        "super_admin": "مدير النظام",
-        "archivist": "أمين أرشيف",
-        "faculty_staff": "موظف كلية"
-      },
       "borrowStatus": {
         "pending": "قيد الانتظار",
         "approved": "موافق عليها",
@@ -284,7 +274,7 @@
         "actor": "المستعير",
         "requestedBy": "مقدّم الطلب",
         "status": "الحالة",
-        "dueDate": "تاريخ الإرجاع",
+        "dueDate": "تاريخ الاستحقاق",
         "daysOverdue": "أيام التأخير",
         "timestamp": "تاريخ الطلب",
         "requestsTitle": "الطلبات قيد الانتظار",

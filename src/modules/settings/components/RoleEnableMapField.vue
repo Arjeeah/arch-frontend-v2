@@ -20,6 +20,18 @@ const emit = defineEmits<{ update: [value: Record<NotificationRoleSlug, boolean>
 
 const { t } = useI18n()
 
+/**
+ * The settings payload keys this map in camelCase (`perRoleEnableMap`), but
+ * role labels live under `common.roles.*` keyed by the backend slug — the one
+ * set `/dashboard`, `/users`, `/reports` and this screen now share. Four
+ * different Arabic names for `super_admin` were in circulation before.
+ */
+const ROLE_LABEL_KEY: Record<NotificationRoleSlug, string> = {
+  superAdmin: 'super_admin',
+  archivist: 'archivist',
+  facultyStaff: 'faculty_staff',
+}
+
 function readFlag(map: unknown, role: NotificationRoleSlug): boolean {
   if (typeof map !== 'object' || map === null) return false
   return (map as Record<string, unknown>)[role] === true
@@ -51,7 +63,7 @@ function toggle(role: NotificationRoleSlug): void {
         class="flex items-center justify-between px-4 py-2.5 bg-white"
       >
         <span class="text-sm font-sans text-text-primary">
-          {{ t(`settings.options.role.${role}`) }}
+          {{ t(`common.roles.${ROLE_LABEL_KEY[role]}`) }}
         </span>
         <!-- Logical `start-*` inset, not `translate-x-*`: a physical transform
              does not flip under `dir="rtl"`, which left the knob rendering

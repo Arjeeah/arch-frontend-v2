@@ -24,7 +24,7 @@ function facultyNames(user: User) {
 }
 
 function roleLabelT(role: User['role']): string {
-  return t(`users.roles.${role}`)
+  return t(`common.roles.${role}`)
 }
 </script>
 
