@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Loader2, Trash2 } from 'lucide-vue-next'
+import { FileX2, Loader2, Trash2 } from 'lucide-vue-next'
 import AppButton from '@/shared/components/AppButton.vue'
 import AppConfirmDialog from '@/shared/components/AppConfirmDialog.vue'
+import AppEmptyState from '@/shared/components/AppEmptyState.vue'
 import AppErrorState from '@/shared/components/AppErrorState.vue'
 import { useToasts } from '@/shared/composables/useToasts'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
@@ -34,6 +35,10 @@ const canSeeDigest = computed(() => {
 })
 
 onMounted(() => {
+  // Signing in and out are router navigations, so this store can outlive a user
+  // switch — re-read the queue for whoever is signed in *now* before anything
+  // else touches it.
+  store.hydrate()
   void store.fetchTypes()
   if (canSeeDigest.value) void store.fetchDigest()
   // Jobs restored from a previous visit may have finished while the tab was
@@ -69,8 +74,13 @@ async function handleDownload(job: ReportJob): Promise<void> {
   }
 }
 
+/** Explicit user action, so a failed poll is reported rather than swallowed. */
 async function handleRefresh(jobId: string): Promise<void> {
-  await store.refreshJob(jobId)
+  try {
+    await store.refreshJob(jobId, { throwOnError: true })
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, t('reports.toasts.refreshFailed')))
+  }
 }
 
 function handleRemove(jobId: string): void {
@@ -119,6 +129,19 @@ function confirmClear(): void {
           :description="store.typesError"
           :retry-label="t('reports.actions.retry')"
           @retry="store.fetchTypes()"
+        />
+
+        <!--
+          `GET /v1/reports/types` is role-filtered server-side, so an empty
+          catalog means this account may not generate anything — say so rather
+          than showing a dropdown with nothing in it.
+        -->
+        <AppEmptyState
+          v-else-if="!store.types.length"
+          compact
+          :icon="FileX2"
+          :title="t('reports.emptyTypes.title')"
+          :description="t('reports.emptyTypes.description')"
         />
 
         <ReportGenerateForm

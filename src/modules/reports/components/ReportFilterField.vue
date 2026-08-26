@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import FormField from '@/shared/components/FormField.vue'
 import FormInput from '@/shared/components/FormInput.vue'
 import AppSelect from '@/shared/components/AppSelect.vue'
-import type { ReportFilterField } from '../types'
+import type { ReportFilterField, ReportFilterType } from '../types'
 
 const props = defineProps<{
   field: ReportFilterField
@@ -46,10 +46,31 @@ const STRING_ENUM_BY_KEY: Record<string, readonly string[]> = {
   role: ['super_admin', 'archivist', 'faculty_staff', 'system'],
 }
 
+/**
+ * Filter keys whose declared schema type does not match the actual column.
+ *
+ * `document_type_id` is advertised as `integer` by `ReportType::filterSchema()`,
+ * but `document_types.id` is a `uuid` (migration `create_document_types_table`)
+ * and `GenerateReportRequest` validates the filter as a plain `string`. Rendered
+ * as `<input type="number">` the field cannot hold a UUID at all, which makes
+ * the filter unusable — so it is treated as a uuid here.
+ *
+ * verify against live API: `StudentDocumentsExport::query()` still casts this
+ * filter with `(int)`, so the server needs the matching fix before the filter
+ * narrows anything. Logged for the integrator in WIRING.md.
+ */
+const FIELD_TYPE_OVERRIDES: Record<string, ReportFilterType> = {
+  document_type_id: 'uuid',
+}
+
+const fieldType = computed<ReportFilterType>(
+  () => FIELD_TYPE_OVERRIDES[props.field.key] ?? props.field.type,
+)
+
 const enumValues = computed<readonly string[] | null>(() => {
-  const { type, key, options } = props.field
-  if (type === 'enum' && options) return ENUM_OPTIONS[options] ?? null
-  if (type === 'string') return STRING_ENUM_BY_KEY[key] ?? null
+  const { key, options } = props.field
+  if (fieldType.value === 'enum' && options) return ENUM_OPTIONS[options] ?? null
+  if (fieldType.value === 'string') return STRING_ENUM_BY_KEY[key] ?? null
   return null
 })
 
@@ -63,15 +84,15 @@ const selectOptions = computed(() =>
 const label = computed(() => t(`reports.filters.${props.field.key}`))
 
 const inputType = computed(() => {
-  if (props.field.type === 'date') return 'date'
-  if (props.field.type === 'integer') return 'number'
+  if (fieldType.value === 'date') return 'date'
+  if (fieldType.value === 'integer') return 'number'
   return 'text'
 })
 
 /** Hint for the free-text shapes a user cannot guess (id lists, uuids). */
 const hint = computed(() => {
-  if (props.field.type === 'array') return t('reports.hints.idList')
-  if (props.field.type === 'uuid') return t('reports.hints.uuid')
+  if (fieldType.value === 'array') return t('reports.hints.idList')
+  if (fieldType.value === 'uuid') return t('reports.hints.uuid')
   return ''
 })
 

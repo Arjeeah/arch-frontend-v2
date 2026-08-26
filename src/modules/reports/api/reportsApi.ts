@@ -28,6 +28,13 @@ const REPORTS_ENDPOINTS = {
   download: (jobId: string) => `/v1/reports/${jobId}/download`,
 } as const
 
+/**
+ * The shared axios instance is created with `timeout: 15_000` — right for JSON,
+ * far too short for a generated workbook. A report over a few megabytes aborts
+ * with `ECONNABORTED` on any ordinary link, so the download call overrides it.
+ */
+const DOWNLOAD_TIMEOUT_MS = 120_000
+
 /* ── Wire shapes (snake_case, exactly as Laravel sends them) ─────────────── */
 
 interface ReportFilterFieldResource {
@@ -202,7 +209,17 @@ function fileNameFromDisposition(header: unknown): string | null {
   if (typeof header !== 'string') return null
   const match = /filename\*?=(?:UTF-8'')?((['"]).*?\2|[^;\n]*)/i.exec(header)
   if (!match?.[1]) return null
-  return decodeURIComponent(match[1].replace(/['"]/g, '')).trim() || null
+  const raw = match[1].replace(/['"]/g, '')
+  // `decodeURIComponent` throws URIError on a lone `%` (`filename="100% x.xlsx"`),
+  // which would turn an already-completed download into an error toast. The
+  // undecoded name is a perfectly good file name, so fall back to it.
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(raw)
+  } catch {
+    decoded = raw
+  }
+  return decoded.trim() || null
 }
 
 /**
@@ -274,6 +291,7 @@ export const reportsApi = {
     try {
       const response = await http.get<Blob>(REPORTS_ENDPOINTS.download(jobId), {
         responseType: 'blob',
+        timeout: DOWNLOAD_TIMEOUT_MS,
       })
       return {
         blob: response.data,

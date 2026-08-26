@@ -16,6 +16,17 @@ const IMPORTS_ENDPOINTS = {
   errors: (jobId: string) => `/v1/imports/${jobId}/errors`,
 } as const
 
+/**
+ * The shared axios instance is created with `timeout: 15_000` — right for JSON,
+ * far too short for files. `ImportController::store` accepts up to 10 MB
+ * (`max:10240` KB), which needs better than ~5.5 Mbit/s of upstream to clear
+ * 15 s; below that the request aborts with `ECONNABORTED` *after* the server has
+ * very possibly already taken the file, and the user is told "timeout of
+ * 15000ms exceeded". Every file call therefore overrides the timeout.
+ */
+const UPLOAD_TIMEOUT_MS = 300_000
+const DOWNLOAD_TIMEOUT_MS = 120_000
+
 /* ── Wire shapes ────────────────────────────────────────────────────────── */
 
 /**
@@ -76,7 +87,17 @@ function fileNameFromDisposition(header: unknown): string | null {
   if (typeof header !== 'string') return null
   const match = /filename\*?=(?:UTF-8'')?((['"]).*?\2|[^;\n]*)/i.exec(header)
   if (!match?.[1]) return null
-  return decodeURIComponent(match[1].replace(/['"]/g, '')).trim() || null
+  const raw = match[1].replace(/['"]/g, '')
+  // `decodeURIComponent` throws URIError on a lone `%` (`filename="100% x.csv"`),
+  // which would turn an already-completed download into an error toast. The
+  // undecoded name is a perfectly good file name, so fall back to it.
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(raw)
+  } catch {
+    decoded = raw
+  }
+  return decoded.trim() || null
 }
 
 async function readBlobMessage(blob: Blob): Promise<string | null> {
@@ -185,6 +206,7 @@ export const importsApi = {
     try {
       const response = await http.get<Blob>(IMPORTS_ENDPOINTS.template(type), {
         responseType: 'blob',
+        timeout: DOWNLOAD_TIMEOUT_MS,
       })
       return {
         blob: response.data,
@@ -210,6 +232,7 @@ export const importsApi = {
     form.append('file', file)
 
     const { data } = await http.post<ImportUploadResource>(IMPORTS_ENDPOINTS.upload(type), form, {
+      timeout: UPLOAD_TIMEOUT_MS,
       onUploadProgress: (event) => {
         if (!onProgress || !event.total) return
         onProgress(Math.round((event.loaded / event.total) * 100))
@@ -250,6 +273,7 @@ export const importsApi = {
       const response = await http.get<Blob>(IMPORTS_ENDPOINTS.errors(jobId), {
         params: { format: 'csv' },
         responseType: 'blob',
+        timeout: DOWNLOAD_TIMEOUT_MS,
       })
       return parseImportErrors(await response.data.text())
     } catch (err) {
@@ -266,6 +290,7 @@ export const importsApi = {
       const response = await http.get<Blob>(IMPORTS_ENDPOINTS.errors(jobId), {
         params: { format },
         responseType: 'blob',
+        timeout: DOWNLOAD_TIMEOUT_MS,
       })
       return {
         blob: response.data,

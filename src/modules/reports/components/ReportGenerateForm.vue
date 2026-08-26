@@ -22,6 +22,7 @@ const format = ref<string>('')
 const filterValues = reactive<Record<string, string>>({})
 const fieldErrors = reactive<Record<string, string>>({})
 const typeError = ref('')
+const formatError = ref('')
 
 const selectedType = computed<ReportTypeOption | null>(
   () => props.types.find((option) => option.key === selectedKey.value) ?? null,
@@ -43,6 +44,7 @@ const formatOptions = computed(() =>
 
 function clearErrors(): void {
   typeError.value = ''
+  formatError.value = ''
   for (const key of Object.keys(fieldErrors)) delete fieldErrors[key]
 }
 
@@ -92,7 +94,7 @@ function validate(): GenerateReportInput | null {
   // the guard for the request's `format ∈ supportedFormats(type)` rule.
   const chosenFormat = option.formats.find((candidate) => candidate === format.value)
   if (!chosenFormat) {
-    typeError.value = t('reports.errors.formatRequired')
+    formatError.value = t('reports.errors.formatRequired')
     return null
   }
 
@@ -150,7 +152,11 @@ function onSubmit(): void {
         />
       </FormField>
 
-      <FormField :label="t('reports.form.format')" field-id="report-format">
+      <FormField
+        :label="t('reports.form.format')"
+        field-id="report-format"
+        :error="formatError || undefined"
+      >
         <AppSelect
           v-model="format"
           :options="formatOptions"

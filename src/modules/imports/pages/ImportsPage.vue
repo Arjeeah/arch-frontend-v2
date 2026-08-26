@@ -33,7 +33,10 @@ const entityOptions = computed(() =>
 )
 
 onMounted(() => {
-  // A job may have finished while the tab was closed — settle the list first,
+  // Signing in and out are router navigations, so this store can outlive a user
+  // switch — re-read the history for whoever is signed in *now* first.
+  store.hydrate()
+  // A job may have finished while the tab was closed — settle the list next,
   // then let the interval keep the still-running ones fresh.
   void store.pollActiveJobs()
   store.startPolling()
@@ -102,8 +105,13 @@ function downloadOpenErrors(): void {
   if (jobId) void handleDownloadErrors(jobId)
 }
 
+/** Explicit user action, so a failed poll is reported rather than swallowed. */
 async function handleRefresh(jobId: string): Promise<void> {
-  await store.refreshJob(jobId)
+  try {
+    await store.refreshJob(jobId, { throwOnError: true })
+  } catch (err) {
+    toasts.error(getApiErrorMessage(err, t('imports.toasts.refreshFailed')))
+  }
 }
 
 function handleRemove(jobId: string): void {

@@ -82,7 +82,8 @@
         "templateFailed": "Could not download the template",
         "errorsDownloaded": "Error file download started",
         "errorsFailed": "Could not download the error file",
-        "historyCleared": "Import history cleared from this browser"
+        "historyCleared": "Import history cleared from this browser",
+        "refreshFailed": "Could not refresh the import status"
       },
       "confirmClear": {
         "title": "Clear the import history?",
@@ -174,7 +175,8 @@
         "templateFailed": "تعذّر تنزيل القالب",
         "errorsDownloaded": "بدأ تنزيل ملف الأخطاء",
         "errorsFailed": "تعذّر تنزيل ملف الأخطاء",
-        "historyCleared": "تم مسح سجل الاستيراد من هذا المتصفح"
+        "historyCleared": "تم مسح سجل الاستيراد من هذا المتصفح",
+        "refreshFailed": "تعذّر تحديث حالة الاستيراد"
       },
       "confirmClear": {
         "title": "مسح سجل الاستيراد؟",

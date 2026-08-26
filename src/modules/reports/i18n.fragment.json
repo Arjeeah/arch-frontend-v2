@@ -118,12 +118,17 @@
         "queueFailed": "Could not queue the report",
         "downloaded": "Download started",
         "downloadFailed": "Could not download the report",
-        "historyCleared": "Report list cleared from this browser"
+        "historyCleared": "Report list cleared from this browser",
+        "refreshFailed": "Could not refresh the report status"
       },
       "confirmClear": {
         "title": "Clear the report list?",
         "message": "This only clears the list in your browser. No generated file is deleted from the server.",
         "confirm": "Clear list"
+      },
+      "emptyTypes": {
+        "title": "No report types available",
+        "description": "This account is not allowed to generate any of the system reports. Ask a super admin if you think that is wrong."
       }
     }
   },
@@ -246,12 +251,17 @@
         "queueFailed": "تعذّرت جدولة التقرير",
         "downloaded": "بدأ التنزيل",
         "downloadFailed": "تعذّر تنزيل التقرير",
-        "historyCleared": "تم مسح قائمة التقارير من هذا المتصفح"
+        "historyCleared": "تم مسح قائمة التقارير من هذا المتصفح",
+        "refreshFailed": "تعذّر تحديث حالة التقرير"
       },
       "confirmClear": {
         "title": "مسح قائمة التقارير؟",
         "message": "سيُمسح ما في هذا المتصفح فقط، ولن يُحذف أي ملف من الخادم.",
         "confirm": "مسح القائمة"
+      },
+      "emptyTypes": {
+        "title": "لا توجد أنواع تقارير متاحة",
+        "description": "لا يملك هذا الحساب صلاحية إنشاء أي من تقارير النظام. راجع المدير العام إن كنت ترى أن هذا غير صحيح."
       }
     }
   }

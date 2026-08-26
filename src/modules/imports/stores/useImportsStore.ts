@@ -2,8 +2,10 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import axios from 'axios'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
+import { authStorage } from '@/app/config/authStorage'
+import { i18n } from '@/app/plugins/i18n'
 import { importsApi } from '../api/importsApi'
-import { isImportInFlight } from '../types'
+import { IMPORT_ENTITIES, IMPORT_JOB_STATUSES, isImportInFlight } from '../types'
 import type { ImportEntity, ImportJob, ImportRowError } from '../types'
 
 /**
@@ -14,19 +16,82 @@ import type { ImportEntity, ImportJob, ImportRowError } from '../types'
  * user sees is therefore the set of job ids this browser has created, re-polled
  * on every visit. It also carries the two facts the status endpoint omits: the
  * entity that was imported and the uploaded file's name.
+ *
+ * Namespaced per user id: archive workstations are shared, and
+ * `ImportStatusController::status` carries no ownership check at all, so a
+ * browser-global key would hand the next person to sign in a live view of the
+ * previous one's import — uploaded file name included.
  */
-const STORAGE_KEY = 'arch.imports.jobs'
+const STORAGE_PREFIX = 'arch.imports.jobs'
 
 const MAX_TRACKED_JOBS = 15
 
 const POLL_INTERVAL_MS = 5000
 
+function storageKey(): string {
+  const id = authStorage.getUser()?.id
+  return id === undefined || id === null ? `${STORAGE_PREFIX}.anon` : `${STORAGE_PREFIX}.u${id}`
+}
+
+/**
+ * Narrows one persisted entry back onto `ImportJob`. Storage is not a trusted
+ * source — an entry may predate a shape change or be half-written — and an
+ * unchecked cast leaks `undefined` into `job.id` (the poll would request
+ * `/imports/undefined/status`) and into `job.status` (the badge renders a raw
+ * i18n key and the row never polls again).
+ */
+function jobFromStorage(value: unknown): ImportJob | null {
+  if (!value || typeof value !== 'object') return null
+  const row = value as Record<string, unknown>
+
+  const str = (key: string): string | null => {
+    const raw = row[key]
+    return typeof raw === 'string' ? raw : null
+  }
+  const count = (key: string): number => {
+    const raw = row[key]
+    return typeof raw === 'number' && Number.isFinite(raw) && raw >= 0 ? raw : 0
+  }
+
+  const id = str('id')
+  const status = str('status')
+  if (id === null || id === '') return null
+  if (status === null || !(IMPORT_JOB_STATUSES as readonly string[]).includes(status)) return null
+
+  const entity = str('entity')
+
+  return {
+    id,
+    status: status as ImportJob['status'],
+    processedCount: count('processedCount'),
+    successCount: count('successCount'),
+    errorCount: count('errorCount'),
+    startedAt: str('startedAt'),
+    completedAt: str('completedAt'),
+    entity:
+      entity !== null && (IMPORT_ENTITIES as readonly string[]).includes(entity)
+        ? (entity as ImportEntity)
+        : null,
+    fileName: str('fileName'),
+  }
+}
+
+/**
+ * Guarded on read as well as on write: `localStorage.getItem` throws outright
+ * when storage is blocked (Safari's "block all cookies", enterprise policy, a
+ * storage-blocked iframe), and an unguarded throw during store setup takes the
+ * page down rather than merely losing the history.
+ */
 function readStoredJobs(): ImportJob[] {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return []
   try {
+    const raw = localStorage.getItem(storageKey())
+    if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
-    return Array.isArray(parsed) ? (parsed as ImportJob[]) : []
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .map(jobFromStorage)
+      .filter((job): job is ImportJob => job !== null)
+      .slice(0, MAX_TRACKED_JOBS)
   } catch {
     return []
   }
@@ -34,10 +99,15 @@ function readStoredJobs(): ImportJob[] {
 
 function writeStoredJobs(jobs: ImportJob[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs.slice(0, MAX_TRACKED_JOBS)))
+    localStorage.setItem(storageKey(), JSON.stringify(jobs.slice(0, MAX_TRACKED_JOBS)))
   } catch {
     // A full or disabled storage quota must not break uploading.
   }
+}
+
+/** Store-level fallback copy. Components read the same fragment via `useI18n`. */
+function tr(key: string): string {
+  return i18n.global.t(key)
 }
 
 export const useImportsStore = defineStore('imports', () => {
@@ -58,6 +128,17 @@ export const useImportsStore = defineStore('imports', () => {
 
   function persist(): void {
     writeStoredJobs(jobs.value)
+  }
+
+  /**
+   * Re-reads the list for whoever is signed in *now*. Signing in and out are
+   * plain router navigations, so this Pinia store outlives a user switch; the
+   * page calls this on mount so the previous user's history does not linger.
+   */
+  function hydrate(): void {
+    jobs.value = readStoredJobs()
+    clearErrorRows()
+    if (!hasActiveJobs.value) stopPolling()
   }
 
   function upsert(job: ImportJob): void {
@@ -90,8 +171,15 @@ export const useImportsStore = defineStore('imports', () => {
   /**
    * Re-reads one job, keeping the entity/file name the status endpoint does not
    * return. A 404 means the row is gone server-side, so it is dropped here too.
+   *
+   * Background ticks swallow every other failure — it is transient and the next
+   * tick retries. A *manual* refresh passes `throwOnError` so the page can
+   * toast; a button that silently does nothing is worse than no button.
    */
-  async function refreshJob(jobId: string): Promise<void> {
+  async function refreshJob(
+    jobId: string,
+    options: { throwOnError?: boolean } = {},
+  ): Promise<void> {
     const existing = jobs.value.find((row) => row.id === jobId)
     try {
       const fresh = await importsApi.status(jobId, {
@@ -104,7 +192,7 @@ export const useImportsStore = defineStore('imports', () => {
         removeJob(jobId)
         return
       }
-      // Transient failure — leave the row for the next tick.
+      if (options.throwOnError) throw err
     }
   }
 
@@ -137,7 +225,7 @@ export const useImportsStore = defineStore('imports', () => {
       errorRows.value = await importsApi.errorRows(jobId)
     } catch (err) {
       errorRows.value = []
-      errorRowsError.value = getApiErrorMessage(err, 'Failed to load the failed rows')
+      errorRowsError.value = getApiErrorMessage(err, tr('imports.errors.loadFailed'))
     } finally {
       errorRowsLoading.value = false
     }
@@ -174,6 +262,7 @@ export const useImportsStore = defineStore('imports', () => {
     errorRowsError,
     activeJobs,
     hasActiveJobs,
+    hydrate,
     upload,
     refreshJob,
     removeJob,
