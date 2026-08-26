@@ -108,7 +108,17 @@ async function confirmDelete() {
     await roomsApi.remove(deletingRoom.value.id)
     toasts.success(t('locations.rooms.toasts.deleted'))
     deleteDialogOpen.value = false
-    await refresh()
+    /**
+     * Deleting the only row on a page past the first strands the user there.
+     * `useServerTable` treats the API as the authority on the current page, but
+     * Laravel's paginator echoes the requested page back instead of clamping it
+     * to `last_page` — so the composable keeps page 3 of a now-2-page list,
+     * `isEmpty` flips true, and the empty state replaces the table *and* the
+     * pagination control, leaving no way back. Stepping back one page instead
+     * re-fetches through the `page` watcher.
+     */
+    if (rooms.value.length === 1 && page.value > 1) page.value -= 1
+    else await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('locations.rooms.toasts.deleteFailed')))
   } finally {
@@ -152,7 +162,13 @@ async function confirmDelete() {
       <AppSelect v-model="statusFilter" :options="statusOptions" class="w-full sm:w-[170px]" />
     </div>
 
-    <AppErrorState v-if="error" :description="error" @retry="refresh" />
+    <AppErrorState
+      v-if="error"
+      :title="t('locations.common.errorTitle')"
+      :description="error"
+      :retry-label="t('locations.common.retry')"
+      @retry="refresh"
+    />
     <AppEmptyState
       v-else-if="isEmpty"
       :title="

@@ -39,9 +39,13 @@ interface RoomListResponse {
   meta: ServerTableMeta
 }
 
-// verify against live API: Status::class casts to the enum's string value
-// ('active' | 'inactive'), so the wire value should already be lowercase.
-// Narrowed defensively rather than trusted as-is.
+/**
+ * Confirmed statically: `Room::$casts` declares `'status' => Status::class`, and
+ * `App\Enums\Status` is a string-backed enum whose only cases are `active` and
+ * `inactive`, so the wire value is always one of those two in lowercase. The
+ * narrowing below is what turns that wire `string` into the `LocationStatus`
+ * union at the api boundary — not a guard against an unverified shape.
+ */
 function toStatus(raw: string): LocationStatus {
   return raw === 'inactive' ? 'inactive' : 'active'
 }

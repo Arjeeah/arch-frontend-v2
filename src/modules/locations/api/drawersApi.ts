@@ -32,7 +32,7 @@ interface DrawerListResponse {
   meta: ServerTableMeta
 }
 
-// verify against live API: same shape as Status::class elsewhere in this module.
+/** Same `Status::class` cast as `Drawer::$casts` — see `roomsApi.toStatus`. */
 function toStatus(raw: string): LocationStatus {
   return raw === 'inactive' ? 'inactive' : 'active'
 }

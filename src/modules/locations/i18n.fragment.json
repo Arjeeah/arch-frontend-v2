@@ -16,6 +16,8 @@
         "loading": "Loading…",
         "backToRooms": "Back to Rooms",
         "backToCabinets": "Back to Cabinets",
+        "errorTitle": "Something went wrong",
+        "retry": "Try again",
         "noMatchesTitle": "No matches",
         "noMatchesDescription": "Nothing matches the current search or filter. Try clearing them."
       },
@@ -149,6 +151,8 @@
         "loading": "جارٍ التحميل…",
         "backToRooms": "العودة إلى الغرف",
         "backToCabinets": "العودة إلى الخزائن",
+        "errorTitle": "حدث خطأ ما",
+        "retry": "إعادة المحاولة",
         "noMatchesTitle": "لا توجد نتائج",
         "noMatchesDescription": "لا يوجد ما يطابق البحث أو التصفية الحالية. جرّب مسحهما."
       },

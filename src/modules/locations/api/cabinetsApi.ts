@@ -14,8 +14,14 @@ interface CabinetResource {
   id: string
   Room: string
   name: string
-  position_x: number
-  position_y: number
+  /**
+   * `integer NULL` in the create_cabinets_table migration, with no model cast.
+   * `CabinetStoreRequest` makes both coordinates `required|numeric`, so anything
+   * created through the API has a value — but seeded/factory rows predate that
+   * rule and can still send `null`, which `fromResource` folds to 0.
+   */
+  position_x: number | null
+  position_y: number | null
   status: string
   drawers?: unknown[]
   created_at: string
@@ -31,7 +37,7 @@ interface CabinetListResponse {
   meta: ServerTableMeta
 }
 
-// verify against live API: same shape as Status::class elsewhere in this module.
+/** Same `Status::class` cast as `Cabinet::$casts` — see `roomsApi.toStatus`. */
 function toStatus(raw: string): LocationStatus {
   return raw === 'inactive' ? 'inactive' : 'active'
 }

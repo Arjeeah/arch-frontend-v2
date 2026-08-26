@@ -134,7 +134,10 @@ async function confirmDelete() {
     await drawersApi.remove(deletingDrawer.value.id)
     toasts.success(t('locations.drawers.toasts.deleted'))
     deleteDialogOpen.value = false
-    await refresh()
+    // See RoomsPage.confirmDelete: deleting the last row on a page past the
+    // first would otherwise strand the user on an out-of-range page.
+    if (drawers.value.length === 1 && page.value > 1) page.value -= 1
+    else await refresh()
   } catch (err) {
     toasts.error(getApiErrorMessage(err, t('locations.drawers.toasts.deleteFailed')))
   } finally {
@@ -155,7 +158,13 @@ async function confirmDelete() {
       {{ roomIdHint ? t('locations.common.backToCabinets') : t('locations.common.backToRooms') }}
     </button>
 
-    <AppErrorState v-if="cabinetError" :description="cabinetError" @retry="loadCabinet" />
+    <AppErrorState
+      v-if="cabinetError"
+      :title="t('locations.common.errorTitle')"
+      :description="cabinetError"
+      :retry-label="t('locations.common.retry')"
+      @retry="loadCabinet"
+    />
     <template v-else>
       <div class="flex items-start justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -198,7 +207,13 @@ async function confirmDelete() {
         <AppSelect v-model="statusFilter" :options="statusOptions" class="w-full sm:w-[170px]" />
       </div>
 
-      <AppErrorState v-if="error" :description="error" @retry="refresh" />
+      <AppErrorState
+        v-if="error"
+        :title="t('locations.common.errorTitle')"
+        :description="error"
+        :retry-label="t('locations.common.retry')"
+        @retry="refresh"
+      />
       <AppEmptyState
         v-else-if="isEmpty"
         :title="
