@@ -118,7 +118,7 @@ export const studentDocumentsApi = {
    * The endpoint has no pipeline-status filter — `allowedFilters` covers
    * `file_number`, `student_id`, `document_type_id` and `file_status` only —
    * so "show me everything that failed OCR" is not expressible here; the
-   * pipeline monitor owns that view. // verify against live API
+   * pipeline monitor owns that view.
    */
   list: async (params: ServerTableParams): Promise<ServerTableResponse<StudentDocument>> => {
     const { data } = await http.get<DocumentListResponse>(DOCUMENTS_URL, { params })

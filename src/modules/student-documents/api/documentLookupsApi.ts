@@ -215,7 +215,9 @@ export const documentLookupsApi = {
    * the AI-console endpoint instead — the only one that returns them. It is a
    * prompt-engineering surface, so callers must treat a failure here as
    * "no segment view available" rather than an error worth reporting.
-   * // verify against live API
+   *
+   * The field list below is `AiConsoleController@storedSegments`' own `map`,
+   * key for key — it hand-rolls the response rather than using a Resource.
    */
   segments: async (documentId: string): Promise<DocumentSegment[]> => {
     const { data } = await http.get<SegmentResponse>(SEGMENTS_URL(documentId))
