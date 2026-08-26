@@ -202,9 +202,14 @@ function roleLabelT(role: UserRole): string {
               :class="form.status === 'Active' ? 'bg-primary-light' : 'bg-border'"
               @click="form.status = form.status === 'Active' ? 'Inactive' : 'Active'"
             >
+              <!-- Logical `start-*` inset, not `translate-x-*`: under `dir="rtl"`
+                   the flex child starts at the right edge and a positive
+                   translate pushes it further right, so the knob rendered
+                   outside the track in both states. Same fix as
+                   `RoleEnableMapField` / `SettingsGroupForm`. -->
               <span
-                class="inline-block h-[19px] w-[19px] transform rounded-[16px] bg-white shadow-[0px_3px_7px_rgba(0,0,0,0.12)] transition-transform"
-                :class="form.status === 'Active' ? 'translate-x-[24px]' : 'translate-x-[2px]'"
+                class="absolute top-[3px] h-[19px] w-[19px] rounded-[16px] bg-white shadow-[0px_3px_7px_rgba(0,0,0,0.12)] transition-all"
+                :class="form.status === 'Active' ? 'start-[24px]' : 'start-[2px]'"
               />
             </button>
           </div>

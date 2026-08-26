@@ -119,8 +119,8 @@
       "confidence": {
         "label": "درجة ثقة الاستخراج",
         "unknown": "بدون درجة",
-        "percent": "{value}٪",
-        "title": "درجة ثقة الاستخراج: {value}٪"
+        "percent": "{value}%",
+        "title": "درجة ثقة الاستخراج: {value}%"
       },
       "preview": {
         "title": "المستند الممسوح ضوئياً",
@@ -162,7 +162,7 @@
       },
       "filter": {
         "all": "كل درجات الثقة",
-        "below": "أقل من {value}٪"
+        "below": "أقل من {value}%"
       },
       "actions": {
         "refresh": "تحديث",

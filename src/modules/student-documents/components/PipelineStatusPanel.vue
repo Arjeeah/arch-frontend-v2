@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { formatPercent } from '@/shared/utils/percent'
 import { BadgeCheck, TriangleAlert } from 'lucide-vue-next'
 import { relativeTime } from '@/shared/utils/date'
 import AppPipelineStatusChip from '@/shared/components/AppPipelineStatusChip.vue'
@@ -135,7 +136,9 @@ function confidenceTone(percent: number): string {
                 :style="{ width: `${confidencePercent}%` }"
               />
             </div>
-            <span class="font-sans text-sm text-text-secondary">{{ confidencePercent }}%</span>
+            <span class="font-sans text-sm text-text-secondary tabular-nums">{{
+              formatPercent(confidencePercent, locale)
+            }}</span>
           </div>
         </div>
 

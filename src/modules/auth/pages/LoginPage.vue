@@ -66,9 +66,15 @@ async function handleLogin() {
     class="relative min-h-screen overflow-hidden bg-white bg-no-repeat bg-cover bg-center"
     :style="{ backgroundImage: `url(${pattern})` }"
   >
-    <!-- Curved blue shape — pinned to the right, scales to cover -->
+    <!--
+      Curved blue shape — pinned to the trailing edge, scales to cover.
+      `end-0` plus `rtl:-scale-x-100` mirrors the whole composition under
+      `dir="rtl"`, which `applyDocumentLocale` sets before the first paint: an
+      Arabic reader used to get RTL text in a left-pinned form with the artwork
+      still on the right, so the page read backwards.
+    -->
     <svg
-      class="absolute top-0 right-0 h-full pointer-events-none"
+      class="absolute top-0 end-0 h-full pointer-events-none rtl:-scale-x-100"
       style="width: auto; aspect-ratio: 1172 / 800"
       viewBox="0 0 1172 800"
       preserveAspectRatio="xMaxYMid slice"
@@ -94,12 +100,12 @@ async function handleLogin() {
       </defs>
     </svg>
 
-    <!-- Form — positioned exactly per Figma: left 49px, top 64px, width 751px -->
-    <form
-      class="absolute z-10"
-      style="left: 49px; top: 64px; width: 751px"
-      @submit.prevent="handleLogin"
-    >
+    <!--
+      Form — positioned per Figma at 49px from the leading edge, 64px down,
+      751px wide. Logical `start-*`, not an inline `left`, so it swaps sides
+      with the artwork in Arabic.
+    -->
+    <form class="absolute z-10 start-[49px] top-[64px] w-[751px]" @submit.prevent="handleLogin">
       <!-- "Sign in" heading — Poppins 500, 55px -->
       <h1 class="font-display font-medium text-black" style="font-size: 55px; line-height: 82px">
         {{ t('login.title') }}

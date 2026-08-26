@@ -58,9 +58,14 @@ const formatted = computed(() => {
 })
 
 /**
- * Arabic writes the percent sign as `٪`, and both the tooltip and the queue
- * filter labels already use it — so the number itself has to come from the
- * same message rather than a hardcoded Latin `%`.
+ * The sign comes from the message rather than a hardcoded literal so the
+ * chip, the tooltip and the queue filter can never disagree.
+ *
+ * Arabic writes the percent sign as `٪`, and this screen used to. Every other
+ * confidence readout in the app goes through `Intl` with `style: 'percent'`,
+ * which emits a Latin `%` — so the same score read `92٪` here and `92%` on
+ * `/pipeline/monitor` and the document detail page. Latin wins because it is
+ * what `Intl` produces everywhere else.
  */
 const display = computed(() =>
   clamped.value === null

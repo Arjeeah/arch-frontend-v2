@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { formatPercent } from '@/shared/utils/percent'
 import { Layers, TriangleAlert } from 'lucide-vue-next'
 import DataTable from '@/shared/components/DataTable.vue'
 import AppEmptyState from '@/shared/components/AppEmptyState.vue'
@@ -112,7 +113,7 @@ const rows = computed(() =>
               {{ row.segment.matchedType ?? t('studentDocuments.segments.unmatched') }}
             </td>
             <td class="px-3 py-3 font-sans text-sm text-text-secondary">
-              {{ row.confidence !== null ? `${row.confidence}%` : '—' }}
+              {{ row.confidence !== null ? formatPercent(row.confidence, locale) : '—' }}
             </td>
           </tr>
           <tr v-if="row.segment.error" class="border-t border-border bg-danger/5">
