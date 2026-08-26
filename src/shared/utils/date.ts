@@ -69,7 +69,31 @@ export function formatDateTime(value: string | null | undefined, locale?: string
   })
 }
 
-/** Converts an API date/datetime string to the `yyyy-mm-dd` an `<input type="date">` expects. */
+/**
+ * Converts an API date/datetime string to the `yyyy-mm-dd` an `<input type="date">` expects.
+ *
+ * CAVEAT — timezone. Every function in this file reads the instant through the
+ * viewer's local calendar (`getFullYear`/`getMonth`/`getDate`), which keeps the
+ * picker and `formatDate` showing the same day as each other. It does mean the
+ * day can differ from the one the server stored.
+ *
+ * What the live API actually sends was checked rather than assumed: **no
+ * endpoint emits a bare `yyyy-mm-dd` or a zone-less `Y-m-d H:i:s`.** Every
+ * timestamp across students, borrowings, documents, audit, notifications,
+ * dashboards, reports and settings is a full ISO instant with `Z` — including
+ * `due_date`, which is `2026-09-09T11:41:56.000000Z`, not a date. So the
+ * classic "date-only string parses as UTC midnight" trap is not reachable here.
+ *
+ * The one shape that does land on the boundary is a date this picker itself
+ * produced: `PUT /v1/student-documents/{id}` with `submitted_at: "2026-08-26"`
+ * stores and returns `2026-08-26T00:00:00.000000Z` (verified live). At UTC+2 —
+ * the deployment timezone — that renders back as 26 August and round-trips
+ * cleanly. West of UTC it would render as the 25th and walk backwards one day
+ * per save. Fixing that means deciding whether such a value is an instant or a
+ * calendar day, which is a backend question (the column is a datetime); do not
+ * "fix" it by making one function here UTC-based, because that would only make
+ * the picker and the table disagree.
+ */
 export function toDateInputValue(value: string | null | undefined): string {
   if (!value) return ''
   const date = new Date(value)

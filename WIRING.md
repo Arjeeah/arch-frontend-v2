@@ -67,6 +67,43 @@ records what was applied centrally and what is still outstanding.
   English and `"، مثل min:8"` in Arabic. Escaped as `{'|'}` in the locale files
   and in S8's fragment.
 
+### Live-API verification round (`verify/v1` … `verify/v5`)
+
+Five streams re-checked their modules against a running backend. Their
+module-local fixes are in their own commits; these are the items that landed in
+shared territory (`src/app/`, `src/shared/`, `src/locales/`) and so could only
+be applied centrally:
+
+- **The router guard did not use `readSessionRole()`.** `sessionRole.ts`
+  documents itself as "the same source the router guard decides on", and three
+  call sites in `src/app/router/index.ts` read `authStorage.getUser()?.role`
+  instead. Identical today (the login mapper persists a scalar), but a session
+  still carrying the wire's `roles[]` array resolved to `undefined` and bounced
+  the user off every `meta.roles` route while `AppSidebar` hid every gated item.
+  The guard now calls `roleAllowed()`, and `useAuthStore`'s `role` getter falls
+  back to `readSessionRole()` so the sidebar cannot disagree with the guard.
+- **`authStore.init()` no longer awaits `GET /v1/me`.** See "Still outstanding".
+- **`users.dialog.errors.emailDomain`** (new key, en + ar + fragment).
+  `CreateUserDialog` now rejects a non-`@limu.edu.ly` address before the round
+  trip, instead of surfacing the backend's English 422 inside an Arabic dialog.
+  The check is case-sensitive because `ends_with` is: `probe@LIMU.EDU.LY` was
+  verified to 422 as well. It is skipped when the email is unchanged on an edit,
+  matching `usersApi.toUpdateInput`, so the two seeded `@limu.local` accounts
+  stay editable.
+- **`documentTypes.conditions.custom` / `.customTooltip`** (new keys, en + ar +
+  fragment). A row whose `requirement_conditions` the builder cannot express
+  (two seeded rows hold the legacy `{"applies_to": …}` shape) rendered the same
+  "—" as a row with no rule at all. It now shows a "Custom rule" chip whose
+  tooltip says the rule survives an edit untouched.
+- **`shared/utils/date.ts` gained a verified timezone caveat**, replacing an
+  assumption. No behaviour changed: the API was checked and emits **no** bare
+  `yyyy-mm-dd` and no zone-less `Y-m-d H:i:s` — `due_date` included, which is a
+  full ISO instant. The one boundary shape is a date this app's own picker
+  produces (`submitted_at: "2026-08-26"` is stored and returned as
+  `2026-08-26T00:00:00.000000Z`); the note explains why that is a backend
+  question and why patching one function here would only desynchronise the
+  picker from the table.
+
 ## Still outstanding
 
 Backend changes, flagged by the streams and unchanged by integration — see the
@@ -78,23 +115,40 @@ per-stream files for the detail:
   guaranteed a 404), and the page disables both write actions with an
   explanation. Adding `'refinement_id' => $refinement?->id` to the resource is
   a one-line change and lights the screen up with no further frontend edit.
-- `StudentDocumentsExport::query()` casts `document_type_id` with `(int)`, so
-  that report filter can never match a UUID (S9 note 8), and
-  `ReportType::filterSchema()` mis-declares the field as `integer`.
-  **Mitigated on the frontend**: `ReportGenerateForm` withholds the filter, so
-  the user cannot generate a report that is certain to fail. Remove the key
-  from `UNSUPPORTED_FILTER_KEYS` once the cast is dropped.
+- `ReportType::filterSchema()` still mis-declares `document_type_id` as
+  `integer` though the column is a uuid. The `(int)` cast in
+  `StudentDocumentsExport::query()` that made the filter unusable **is gone** —
+  verified end-to-end against the live API (36 rows filtered against 337
+  unfiltered) — so `UNSUPPORTED_FILTER_KEYS` is now empty and the filter is
+  offered again. Only the label is wrong; `FIELD_TYPE_OVERRIDES` in
+  `ReportFilterField` corrects it and can be deleted once the schema is fixed.
 - `UserController::index` allowlists `status` as a partial filter, so the Users
   list's "Active" option also matches `inactive` (S10 note 2).
 - `UserResource` omits `faculties`, so a user's current faculties are not
   visible anywhere (S10 note 3).
-- `/v1/me` is not routed, so `authStore.init()` always fails (harmlessly).
+- `/v1/me` is not routed —
+  `404 {"message":"The route api/v1/me could not be found."}` for every role.
+  `useAuthStore.init()` no longer calls it: it rehydrates from `authStorage`,
+  which is what boot fell back to anyway, and the app's only console error is
+  gone. `AuthService.me()` is kept and still correct; re-await it in `init()`
+  the day the route is registered.
 - `FacultyController` / `ProgramController` / `UserController` hardcode
   `paginate(10)` and ignore `per_page`; several lookups page-walk because of it.
 - `/v1/academic/faculties` has no policy — `/faculties` is a frontend-only
   restriction (S10 note 6).
-- `student_documents` cannot be filtered or sorted by `pipeline_status`, which
-  is why the pipeline monitor hydrates per row (S2 note 2).
+- **Archivists can call `POST /v1/settings/storage/override-capacity` but
+  cannot reach it.** Verified live: the archivist token gets `422` (a validation
+  error, i.e. authorized) on that endpoint while `GET /v1/settings` answers
+  `403`. The frontend gates `settings/:group?` to `super_admin`, which matches
+  every _other_ settings endpoint, so the dialog is unreachable for the one role
+  the backend lets use it. Deliberately not "fixed" by widening the route —
+  that would hand archivists the whole settings screen. It needs either a
+  read-scoped settings endpoint for archivists or a standalone capacity dialog.
+- `student_documents` cannot be **filtered or sorted** by `pipeline_status` —
+  `?filter[pipeline_status]=…` is a `400 InvalidFilterQuery`, so that parameter
+  must never be sent. The _reading_ half of this is retired:
+  `StudentDocumentResource` now ships `pipeline_status`, `_label` and `_error`
+  on the list, so the monitor no longer hydrates per row (the N+1 is gone).
 
 ## Adversarial audit — outcomes
 
