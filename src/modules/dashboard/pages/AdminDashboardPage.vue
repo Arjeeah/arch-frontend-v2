@@ -132,11 +132,18 @@ const healthLoading = computed(() => overview.loading.value && auditStats.loadin
 
 const refreshing = computed(() => resources.some((resource) => resource.loading.value))
 
+/**
+ * Five panels refresh independently, so the outcome is not binary. Reporting a
+ * plain success while four of the five 403'd would be a lie the operator can
+ * only catch by reading every card.
+ */
 async function refreshAll(): Promise<void> {
   await Promise.all(resources.map((resource) => resource.load()))
   const failed = resources.filter((resource) => resource.error.value).length
   if (failed === resources.length) {
     toasts.error(t('dashboard.refreshFailed'))
+  } else if (failed > 0) {
+    toasts.info(t('dashboard.refreshedPartial', { failed, total: resources.length }))
   } else {
     toasts.success(t('dashboard.refreshed'))
   }

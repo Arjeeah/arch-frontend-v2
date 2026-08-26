@@ -6,6 +6,7 @@
       "facultyTitle": "Faculty Dashboard",
       "refresh": "Refresh",
       "refreshed": "Dashboard updated",
+      "refreshedPartial": "Dashboard updated, but {failed} of {total} panels failed to load",
       "refreshFailed": "Could not refresh the dashboard",
       "retry": "Try again",
       "loadFailed": "Could not load this panel",
@@ -39,6 +40,9 @@
         "title": "Storage",
         "usedOfTotal": "{used} of {total}",
         "noWarnings": "No capacity warnings."
+      },
+      "warnings": {
+        "storage_capacity": "Storage is at {percent} of capacity. Review capacity soon."
       },
       "facultyStorage": {
         "title": "Storage by Faculty",
@@ -150,6 +154,7 @@
       "facultyTitle": "لوحة تحكم الكلية",
       "refresh": "تحديث",
       "refreshed": "تم تحديث اللوحة",
+      "refreshedPartial": "تم تحديث اللوحة، لكن تعذّر تحميل {failed} من أصل {total}",
       "refreshFailed": "تعذّر تحديث اللوحة",
       "retry": "إعادة المحاولة",
       "loadFailed": "تعذّر تحميل هذا القسم",
@@ -183,6 +188,9 @@
         "title": "مساحة التخزين",
         "usedOfTotal": "{used} من {total}",
         "noWarnings": "لا توجد تنبيهات بشأن السعة."
+      },
+      "warnings": {
+        "storage_capacity": "بلغ استخدام التخزين {percent} من السعة. يُنصح بمراجعة السعة قريباً."
       },
       "facultyStorage": {
         "title": "التخزين حسب الكلية",

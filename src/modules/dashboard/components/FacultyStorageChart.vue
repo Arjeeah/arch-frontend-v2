@@ -11,6 +11,7 @@ import {
   type ChartData,
   type ChartOptions,
 } from 'chart.js'
+import { intlLocale, isolate } from '../utils/format'
 import type { FacultyStorageRow } from '../types'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
@@ -20,6 +21,14 @@ const props = defineProps<{ rows: FacultyStorageRow[] }>()
 const { locale } = useI18n()
 
 const isRtl = computed(() => locale.value === 'ar')
+
+/**
+ * The axis numbers are formatted by Chart.js, not by us, so they have to be
+ * handed the same Latin-digit locale `utils/format` uses. Passing the bare
+ * `'ar'` tag here would print the y-axis in Arabic-Indic digits (٥٠٠ ج.ب) while
+ * every other figure on the page stays Latin.
+ */
+const numberLocale = computed(() => intlLocale(locale.value))
 
 /** Faculty names come in both languages; show the one matching the UI locale. */
 const labels = computed(() =>
@@ -79,7 +88,7 @@ const chartData = computed<ChartData<'bar'>>(() => ({
 const chartOptions = computed<ChartOptions<'bar'>>(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  locale: locale.value,
+  locale: numberLocale.value,
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -88,7 +97,9 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
       callbacks: {
         // The API already formatted every value ("1.4 GB"); reuse that string
         // rather than re-deriving it from the scaled number on the axis.
-        label: (context) => props.rows[context.dataIndex]?.usedFormatted ?? '',
+        // Isolated because the tooltip runs RTL in Arabic, which would
+        // otherwise reorder "1.4 GB" into "GB 1.4".
+        label: (context) => isolate(props.rows[context.dataIndex]?.usedFormatted ?? ''),
       },
     },
   },
@@ -110,8 +121,12 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
         stepSize: axisMax.value / 4,
         font: { size: 11 },
         color: '#727272',
+        // Number and unit isolated together — the canvas inherits the page's
+        // RTL direction, which would otherwise print the axis as "GB 500".
         callback: (value) =>
-          `${Number(value).toLocaleString(locale.value, { maximumFractionDigits: 1 })} ${unit.value.suffix}`,
+          isolate(
+            `${Number(value).toLocaleString(numberLocale.value, { maximumFractionDigits: 1 })} ${unit.value.suffix}`,
+          ),
       },
     },
   },

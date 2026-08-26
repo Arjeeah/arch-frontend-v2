@@ -44,9 +44,14 @@ No change. The existing entry is already correct:
 ## i18n
 
 Merge `src/modules/dashboard/i18n.fragment.json` into `src/locales/en.json` and
-`src/locales/ar.json` under the existing `dashboard` key. **112 keys per
+`src/locales/ar.json` under the existing `dashboard` key. **114 keys per
 locale**, en/ar in sync. `dashboard.title` is included with its current value so
 the merge is idempotent.
+
+`dashboard.warnings.*` is keyed by the server's warning `type` slug
+(`storage_capacity` today). The card falls back to the server's own English
+`message` for a type the fragment does not cover, so a new server-side warning
+degrades to English rather than disappearing — add the key here when one lands.
 
 ## Notes
 

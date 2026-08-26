@@ -53,11 +53,14 @@ const scansChangeLabel = computed(() => {
 
 const refreshing = computed(() => resources.some((resource) => resource.loading.value))
 
+/** Partial failure is reported as such — see `AdminDashboardPage.refreshAll`. */
 async function refreshAll(): Promise<void> {
   await Promise.all(resources.map((resource) => resource.load()))
   const failed = resources.filter((resource) => resource.error.value).length
   if (failed === resources.length) {
     toasts.error(t('dashboard.refreshFailed'))
+  } else if (failed > 0) {
+    toasts.info(t('dashboard.refreshedPartial', { failed, total: resources.length }))
   } else {
     toasts.success(t('dashboard.refreshed'))
   }

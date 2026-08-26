@@ -3,14 +3,14 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TriangleAlert } from 'lucide-vue-next'
 import type { DashboardWarning, StorageUsage } from '../types'
-import { formatPercent } from '../utils/format'
+import { formatPercent, isolate } from '../utils/format'
 
 const props = defineProps<{
   storage: StorageUsage
   warnings: DashboardWarning[]
 }>()
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 
 /** Matches `dashboard.storage_warning_threshold` (60%) on the server. */
 const WARNING_AT = 60
@@ -41,6 +41,22 @@ const percentClass = computed(
       critical: 'text-danger',
     })[level.value],
 )
+
+/**
+ * `DashboardService::getWarnings()` builds its `message` as an English
+ * sentence ("Storage capacity is at 64%. Consider reviewing capacity."), so
+ * rendering it raw drops English prose into the Arabic UI. The `type` slug is
+ * stable and the percentage is already on this card, so a known warning is
+ * re-rendered from the fragment — the same `te()`-guarded lookup
+ * `RecentActivityTable` uses for audit actions. A type we have no translation
+ * for still falls back to the server's sentence, which is better than hiding
+ * an operational warning.
+ */
+function warningText(warning: DashboardWarning): string {
+  const key = `dashboard.warnings.${warning.type}`
+  if (!te(key)) return warning.message
+  return t(key, { percent: formatPercent(percent.value, locale.value) })
+}
 </script>
 
 <template>
@@ -49,11 +65,12 @@ const percentClass = computed(
       <p class="text-3xl font-display font-semibold leading-none" :class="percentClass">
         {{ formatPercent(percent, locale) }}
       </p>
+      <!-- Isolated: "1.3 TB" inside an Arabic line otherwise renders "TB 1.3". -->
       <p class="text-xs font-sans text-text-secondary text-end">
         {{
           t('dashboard.storage.usedOfTotal', {
-            used: storage.usedFormatted,
-            total: storage.totalFormatted,
+            used: isolate(storage.usedFormatted),
+            total: isolate(storage.totalFormatted),
           })
         }}
       </p>
@@ -74,7 +91,7 @@ const percentClass = computed(
         class="flex items-start gap-2 rounded-lg bg-warning/10 px-3 py-2"
       >
         <TriangleAlert class="w-4 h-4 shrink-0 text-warning mt-0.5" />
-        <span class="text-xs font-sans text-text-primary">{{ warning.message }}</span>
+        <span class="text-xs font-sans text-text-primary">{{ warningText(warning) }}</span>
       </li>
     </ul>
     <p v-else class="text-xs font-sans text-text-secondary">
