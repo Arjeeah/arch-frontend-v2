@@ -92,7 +92,7 @@
       },
       "errors": {
         "required": "This field is required",
-        "maxLength": "Use at most {max} characters",
+        "maxLength": "Use at most {max} character | Use at most {max} characters",
         "email": "Enter a valid email address",
         "yearRange": "Enter a year between 1900 and 2100",
         "graduationBeforeEnrollment": "Graduation cannot be before enrollment",
@@ -232,7 +232,7 @@
       },
       "errors": {
         "required": "هذا الحقل مطلوب",
-        "maxLength": "استخدم {max} حرفًا كحد أقصى",
+        "maxLength": "لا تستخدم أي حرف | استخدم حرفًا واحدًا كحد أقصى | استخدم حرفين كحد أقصى | استخدم {max} أحرف كحد أقصى | استخدم {max} حرفًا كحد أقصى | استخدم {max} حرف كحد أقصى",
         "email": "أدخل بريدًا إلكترونيًا صالحًا",
         "yearRange": "أدخل سنة بين 1900 و2100",
         "graduationBeforeEnrollment": "لا يمكن أن تسبق سنة التخرج سنة القيد",

@@ -142,7 +142,7 @@
         "progress": "الصفوف المعالجة",
         "started": "وقت البدء",
         "actions": "إجراءات",
-        "counts": "{processed} صفًا · {success} ناجح · {failed} فاشل",
+        "counts": "الصفوف: {processed} · ناجح: {success} · فاشل: {failed}",
         "unknownEntity": "غير معروف"
       },
       "jobs": {

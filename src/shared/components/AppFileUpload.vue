@@ -68,7 +68,8 @@ const hintText = computed(() => {
   const parts: string[] = []
   if (props.accept) parts.push(props.accept.split(',').join(', '))
   if (props.maxSizeMb !== undefined) parts.push(t('common.fileHintSize', { max: props.maxSizeMb }))
-  if (props.maxFiles !== undefined) parts.push(t('common.fileHintCount', { max: props.maxFiles }))
+  if (props.maxFiles !== undefined)
+    parts.push(t('common.fileHintCount', { max: props.maxFiles }, props.maxFiles))
   return parts.join(' · ')
 })
 
@@ -125,7 +126,9 @@ function addFiles(incoming: File[]): void {
       continue
     }
     if (props.maxFiles !== undefined && accepted.length >= props.maxFiles) {
-      rejected.push(t('common.fileCountExceeded', { name: file.name, max: props.maxFiles }))
+      rejected.push(
+        t('common.fileCountExceeded', { name: file.name, max: props.maxFiles }, props.maxFiles),
+      )
       continue
     }
     accepted.push(file)
