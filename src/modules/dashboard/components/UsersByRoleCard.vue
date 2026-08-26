@@ -1,32 +1,68 @@
-<!-- src/modules/dashboard/components/UsersByRoleCard.vue -->
 <script setup lang="ts">
 import { Users } from 'lucide-vue-next'
-import { usersByRole } from '../data/mockDashboard'
+import { useI18n } from 'vue-i18n'
+import DashboardCard from './DashboardCard.vue'
+import DashboardLinkButton from './DashboardLinkButton.vue'
+import { DASHBOARD_LINKS } from '../links'
+import { formatNumber } from '../utils/format'
+import type { RoleCount } from '../types'
+
+const props = defineProps<{
+  /** Exclusive per-role buckets — each user counted once, under their highest role. */
+  rows: RoleCount[]
+  /** Unfiltered head count the rows reconcile to; the denominator for the bars. */
+  total: number
+  loading?: boolean
+  error?: string | null
+}>()
+
+defineEmits<{ retry: [] }>()
+
+const { t, te, locale } = useI18n()
+
+/** Translated role name, falling back to the raw slug for an unknown role. */
+function roleLabel(role: string): string {
+  const key = `dashboard.roles.${role}`
+  return te(key) ? t(key) : role
+}
+
+/** Share of all users, used for the proportion bar. */
+function share(count: number): number {
+  return props.total > 0 ? Math.min(100, Math.round((count / props.total) * 100)) : 0
+}
 </script>
 
 <template>
-  <div class="bg-white rounded-[10px] border border-border p-5 shadow-sm flex flex-col gap-4">
-    <h3 class="text-sm font-display font-medium text-text-primary">Users by Role</h3>
-    <table class="w-full flex-1">
-      <thead>
-        <tr class="border-b border-border">
-          <th class="text-left text-xs text-text-muted font-display font-medium pb-2">Role</th>
-          <th class="text-right text-xs text-text-muted font-display font-medium pb-2">Count</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in usersByRole" :key="row.role" class="border-b border-border last:border-0">
-          <td class="py-2 text-sm text-text-primary font-sans">{{ row.role }}</td>
-          <td class="py-2 text-sm text-text-primary font-sans text-right">{{ row.count }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <button
-      disabled
-      class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-primary/40 text-white text-sm font-display font-medium cursor-not-allowed"
-    >
-      <Users class="w-4 h-4" />
-      View Users
-    </button>
-  </div>
+  <DashboardCard
+    :title="t('dashboard.usersByRole.title')"
+    :loading="loading"
+    :error="error"
+    :empty="!rows.length"
+    :empty-title="t('dashboard.usersByRole.empty')"
+    :retry-label="t('dashboard.retry')"
+    @retry="$emit('retry')"
+  >
+    <div class="flex flex-col gap-3 flex-1">
+      <div v-for="row in rows" :key="row.role" class="flex flex-col gap-1.5">
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-sm text-text-primary font-sans">{{ roleLabel(row.role) }}</span>
+          <span class="text-sm text-text-primary font-display font-medium">
+            {{ formatNumber(row.count, locale) }}
+          </span>
+        </div>
+        <div class="h-1.5 w-full rounded-full bg-surface overflow-hidden">
+          <div class="h-full rounded-full bg-primary" :style="{ width: `${share(row.count)}%` }" />
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <DashboardLinkButton
+        :to="DASHBOARD_LINKS.users"
+        :label="t('dashboard.usersByRole.cta')"
+        :icon="Users"
+        :unavailable-hint="t('dashboard.linkUnavailable')"
+      />
+    </template>
+  </DashboardCard>
 </template>

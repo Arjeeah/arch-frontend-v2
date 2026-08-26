@@ -1,0 +1,298 @@
+{
+  "en": {
+    "dashboard": {
+      "title": "System Dashboard",
+      "archivistTitle": "Archive Dashboard",
+      "facultyTitle": "Faculty Dashboard",
+      "refresh": "Refresh",
+      "refreshed": "Dashboard updated",
+      "refreshedPartial": "Dashboard updated, but {failed} of {total} panels failed to load",
+      "refreshFailed": "Could not refresh the dashboard",
+      "retry": "Try again",
+      "loadFailed": "Could not load this panel",
+      "linkUnavailable": "This screen is not available for your account yet",
+      "stats": {
+        "totalArchive": "Total Files",
+        "totalArchiveHint": "Documents in the archive",
+        "totalUsers": "Total Users",
+        "totalUsersHint": "All system users",
+        "activeBorrows": "Active Borrows",
+        "activeBorrowsHint": "Files out of the archive",
+        "securityAlerts": "Security Alerts",
+        "securityAlertsHint": "Failed logins in the last 24 hours",
+        "totalFiles": "Total Files",
+        "totalFilesHint": "Documents in the archive",
+        "borrowedNow": "Borrowed Now",
+        "borrowedNowHint": "Files currently out",
+        "overdue": "Overdue",
+        "overdueHint": "Past their due date",
+        "scansToday": "Scans Today",
+        "scansTodayHint": "Documents added today",
+        "scansTodayChange": "{change} vs yesterday",
+        "facultyFiles": "Faculty Files",
+        "facultyFilesHint": "Documents in your faculties",
+        "myBorrowings": "My Borrowings",
+        "myBorrowingsHint": "Files you have out",
+        "pendingRequests": "Pending Requests",
+        "pendingRequestsHint": "Awaiting approval"
+      },
+      "storage": {
+        "title": "Storage",
+        "usedOfTotal": "{used} of {total}",
+        "noWarnings": "No capacity warnings."
+      },
+      "warnings": {
+        "storage_capacity": "Storage is at {percent} of capacity. Review capacity soon."
+      },
+      "facultyStorage": {
+        "title": "Storage by Faculty",
+        "empty": "No faculty storage recorded yet"
+      },
+      "systemHealth": {
+        "title": "System Health",
+        "storage": "Storage used",
+        "warnings": "Active warnings",
+        "documents": "Documents indexed",
+        "operationsToday": "Operations today",
+        "empty": "No health data available",
+        "cta": "System Settings"
+      },
+      "usersByRole": {
+        "title": "Users by Role",
+        "empty": "No users found",
+        "cta": "View Users"
+      },
+      "weeklyDigest": {
+        "title": "Weekly Digest",
+        "overdue": "Overdue files",
+        "dueSoon": "Due in 7 days",
+        "weeklyBorrowing": "Borrowings this week",
+        "storage": "Storage usage",
+        "empty": "Nothing to report",
+        "cta": "View Full Digest"
+      },
+      "ocrQueue": {
+        "title": "OCR Queue",
+        "pending": "Pending",
+        "completed": "Completed",
+        "failed": "Failed",
+        "today": "Documents scanned today.",
+        "unavailable": "The server is not reporting OCR counts yet."
+      },
+      "capacityWarning": {
+        "title": "A drawer is {percent} full",
+        "location": "Cabinet {cabinet} · {drawer}",
+        "unknownCabinet": "unnamed cabinet",
+        "unknownDrawer": "unnamed drawer",
+        "override": "Capacity can be overridden from the storage settings."
+      },
+      "activity": {
+        "title": "Recent Activity",
+        "action": "Action",
+        "user": "User",
+        "target": "Target",
+        "time": "When",
+        "empty": "No activity yet",
+        "emptyHint": "Actions on files and borrowings will show up here."
+      },
+      "auditActions": {
+        "student_file_checkout": "File checked out",
+        "student_file_returned": "File returned",
+        "document_scanned": "Document scanned",
+        "document_ocr_processed": "OCR completed",
+        "cabinet_capacity_updated": "Cabinet capacity updated",
+        "borrowing_requested": "Borrowing requested",
+        "borrowing_extension_requested": "Extension requested",
+        "high_school_cert_uploaded": "Certificate uploaded",
+        "duplicate_file_removed_soft_delete": "Duplicate file removed",
+        "excel_import_completed": "Excel import completed",
+        "view_reports": "Reports viewed",
+        "view_student_files": "Student files viewed",
+        "login": "Signed in",
+        "failed_login": "Failed sign-in",
+        "report_generated": "Report generated",
+        "report_downloaded": "Report downloaded"
+      },
+      "roles": {
+        "super_admin": "Super Admin",
+        "archivist": "Archivist",
+        "faculty_staff": "Faculty Staff"
+      },
+      "borrowStatus": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "borrowed": "Borrowed",
+        "returned": "Returned",
+        "overdue": "Overdue"
+      },
+      "borrowTable": {
+        "document": "Document",
+        "student": "Student",
+        "actor": "Borrowed by",
+        "requestedBy": "Requested by",
+        "status": "Status",
+        "dueDate": "Due date",
+        "daysOverdue": "Days late",
+        "timestamp": "Requested",
+        "requestsTitle": "Pending Requests",
+        "requestsEmpty": "No pending requests",
+        "overdueTitle": "Overdue Files",
+        "overdueEmpty": "Nothing is overdue",
+        "borrowingsTitle": "Recent Borrowings",
+        "borrowingsEmpty": "No borrowings yet"
+      },
+      "faculty": {
+        "knownFault": "The dashboard service failed on a pending borrowing request"
+      }
+    }
+  },
+  "ar": {
+    "dashboard": {
+      "title": "لوحة تحكم النظام",
+      "archivistTitle": "لوحة تحكم الأرشيف",
+      "facultyTitle": "لوحة تحكم الكلية",
+      "refresh": "تحديث",
+      "refreshed": "تم تحديث اللوحة",
+      "refreshedPartial": "تم تحديث اللوحة، لكن تعذّر تحميل {failed} من أصل {total}",
+      "refreshFailed": "تعذّر تحديث اللوحة",
+      "retry": "إعادة المحاولة",
+      "loadFailed": "تعذّر تحميل هذا القسم",
+      "linkUnavailable": "هذه الشاشة غير متاحة لحسابك حتى الآن",
+      "stats": {
+        "totalArchive": "إجمالي الملفات",
+        "totalArchiveHint": "المستندات داخل الأرشيف",
+        "totalUsers": "إجمالي المستخدمين",
+        "totalUsersHint": "جميع مستخدمي النظام",
+        "activeBorrows": "الإعارات النشطة",
+        "activeBorrowsHint": "ملفات خارج الأرشيف",
+        "securityAlerts": "تنبيهات أمنية",
+        "securityAlertsHint": "محاولات دخول فاشلة خلال آخر 24 ساعة",
+        "totalFiles": "إجمالي الملفات",
+        "totalFilesHint": "المستندات داخل الأرشيف",
+        "borrowedNow": "معارة حالياً",
+        "borrowedNowHint": "ملفات خارج الأرشيف الآن",
+        "overdue": "متأخرة",
+        "overdueHint": "تجاوزت تاريخ الإرجاع",
+        "scansToday": "عمليات المسح اليوم",
+        "scansTodayHint": "مستندات أُضيفت اليوم",
+        "scansTodayChange": "{change} مقارنة بالأمس",
+        "facultyFiles": "ملفات الكلية",
+        "facultyFilesHint": "المستندات في كلياتك",
+        "myBorrowings": "إعاراتي",
+        "myBorrowingsHint": "ملفات بحوزتك",
+        "pendingRequests": "طلبات قيد الانتظار",
+        "pendingRequestsHint": "بانتظار الموافقة"
+      },
+      "storage": {
+        "title": "مساحة التخزين",
+        "usedOfTotal": "{used} من {total}",
+        "noWarnings": "لا توجد تنبيهات بشأن السعة."
+      },
+      "warnings": {
+        "storage_capacity": "بلغ استخدام التخزين {percent} من السعة. يُنصح بمراجعة السعة قريباً."
+      },
+      "facultyStorage": {
+        "title": "التخزين حسب الكلية",
+        "empty": "لا توجد بيانات تخزين للكليات بعد"
+      },
+      "systemHealth": {
+        "title": "حالة النظام",
+        "storage": "التخزين المستخدم",
+        "warnings": "التنبيهات النشطة",
+        "documents": "المستندات المفهرسة",
+        "operationsToday": "العمليات اليوم",
+        "empty": "لا تتوفر بيانات عن حالة النظام",
+        "cta": "إعدادات النظام"
+      },
+      "usersByRole": {
+        "title": "المستخدمون حسب الدور",
+        "empty": "لا يوجد مستخدمون",
+        "cta": "عرض المستخدمين"
+      },
+      "weeklyDigest": {
+        "title": "الملخص الأسبوعي",
+        "overdue": "ملفات متأخرة",
+        "dueSoon": "مستحقة خلال 7 أيام",
+        "weeklyBorrowing": "إعارات هذا الأسبوع",
+        "storage": "استخدام التخزين",
+        "empty": "لا يوجد ما يُعرض",
+        "cta": "عرض الملخص كاملاً"
+      },
+      "ocrQueue": {
+        "title": "طابور المعالجة الضوئية",
+        "pending": "قيد الانتظار",
+        "completed": "مكتملة",
+        "failed": "فاشلة",
+        "today": "المستندات الممسوحة اليوم.",
+        "unavailable": "الخادم لا يرسل بيانات المعالجة الضوئية بعد."
+      },
+      "capacityWarning": {
+        "title": "أحد الأدراج ممتلئ بنسبة {percent}",
+        "location": "الخزانة {cabinet} · {drawer}",
+        "unknownCabinet": "خزانة بدون اسم",
+        "unknownDrawer": "درج بدون اسم",
+        "override": "يمكن تجاوز حدّ السعة من إعدادات التخزين."
+      },
+      "activity": {
+        "title": "آخر النشاطات",
+        "action": "الإجراء",
+        "user": "المستخدم",
+        "target": "العنصر",
+        "time": "الوقت",
+        "empty": "لا يوجد نشاط بعد",
+        "emptyHint": "ستظهر هنا العمليات على الملفات والإعارات."
+      },
+      "auditActions": {
+        "student_file_checkout": "تم سحب ملف",
+        "student_file_returned": "تم إرجاع ملف",
+        "document_scanned": "تم مسح مستند",
+        "document_ocr_processed": "اكتملت المعالجة الضوئية",
+        "cabinet_capacity_updated": "تم تحديث سعة خزانة",
+        "borrowing_requested": "طلب إعارة",
+        "borrowing_extension_requested": "طلب تمديد إعارة",
+        "high_school_cert_uploaded": "تم رفع شهادة الثانوية",
+        "duplicate_file_removed_soft_delete": "تم حذف ملف مكرر",
+        "excel_import_completed": "اكتمل الاستيراد من Excel",
+        "view_reports": "عرض التقارير",
+        "view_student_files": "عرض ملفات الطلبة",
+        "login": "تسجيل دخول",
+        "failed_login": "محاولة دخول فاشلة",
+        "report_generated": "تم إنشاء تقرير",
+        "report_downloaded": "تم تنزيل تقرير"
+      },
+      "roles": {
+        "super_admin": "مدير النظام",
+        "archivist": "أمين أرشيف",
+        "faculty_staff": "موظف كلية"
+      },
+      "borrowStatus": {
+        "pending": "قيد الانتظار",
+        "approved": "موافق عليها",
+        "rejected": "مرفوضة",
+        "borrowed": "معارة",
+        "returned": "مُرجعة",
+        "overdue": "متأخرة"
+      },
+      "borrowTable": {
+        "document": "المستند",
+        "student": "الطالب",
+        "actor": "المستعير",
+        "requestedBy": "مقدّم الطلب",
+        "status": "الحالة",
+        "dueDate": "تاريخ الإرجاع",
+        "daysOverdue": "أيام التأخير",
+        "timestamp": "تاريخ الطلب",
+        "requestsTitle": "الطلبات قيد الانتظار",
+        "requestsEmpty": "لا توجد طلبات قيد الانتظار",
+        "overdueTitle": "الملفات المتأخرة",
+        "overdueEmpty": "لا توجد ملفات متأخرة",
+        "borrowingsTitle": "آخر الإعارات",
+        "borrowingsEmpty": "لا توجد إعارات بعد"
+      },
+      "faculty": {
+        "knownFault": "تعذّر تحميل اللوحة بسبب طلب إعارة قيد الانتظار"
+      }
+    }
+  }
+}
