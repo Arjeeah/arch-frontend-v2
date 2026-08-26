@@ -1,8 +1,11 @@
 # WIRING — S5 Dashboards (`src/modules/dashboard`)
 
-What the phase-3 integrator has to add outside this module. The dashboard route
-already exists, so this is mostly a "nothing to change" file — the one thing to
-merge is the i18n fragment.
+What the phase-3 integrator has to do outside this module.
+
+No route or sidebar entry is added — `/dashboard` already exists and stays as it
+is. Three things are needed: merge the i18n fragment, and the two **required**
+items under Notes (a one-line `ROLE_LANDING` change, and the login response
+mapping in the auth module, which every role gate in the app depends on).
 
 ## Routes
 
