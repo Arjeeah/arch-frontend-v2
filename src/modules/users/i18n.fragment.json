@@ -62,7 +62,7 @@
         "nameLabel": "Full Name",
         "namePlaceholder": "Enter full name",
         "emailLabel": "Email",
-        "emailPlaceholder": "User@limu.edu.ly",
+        "emailPlaceholder": "User{'@'}limu.edu.ly",
         "roleLabel": "Role",
         "rolePlaceholder": "Select role",
         "facultiesLabel": "Faculties",
@@ -80,12 +80,17 @@
           "roleRequired": "Role is required",
           "passwordRequired": "Password is required",
           "facultyRequired": "Select at least one faculty"
-        }
+        },
+        "facultiesHintEdit": "Leave empty to keep the current faculties. Picking any replaces the whole assignment."
       },
       "facultyPicker": {
         "loadError": "Could not load faculties",
         "retry": "Retry",
         "empty": "No faculties available"
+      },
+      "error": {
+        "title": "Could not load users",
+        "retry": "Try again"
       }
     }
   },
@@ -152,7 +157,7 @@
         "nameLabel": "الاسم الكامل",
         "namePlaceholder": "أدخل الاسم الكامل",
         "emailLabel": "البريد الإلكتروني",
-        "emailPlaceholder": "User@limu.edu.ly",
+        "emailPlaceholder": "User{'@'}limu.edu.ly",
         "roleLabel": "الدور",
         "rolePlaceholder": "اختر الدور",
         "facultiesLabel": "الكليات",
@@ -170,12 +175,17 @@
           "roleRequired": "الدور مطلوب",
           "passwordRequired": "كلمة المرور مطلوبة",
           "facultyRequired": "اختر كلية واحدة على الأقل"
-        }
+        },
+        "facultiesHintEdit": "اتركها فارغة للإبقاء على الكليات الحالية. اختيار أي كلية يستبدل التعيين بالكامل."
       },
       "facultyPicker": {
         "loadError": "تعذر تحميل الكليات",
         "retry": "إعادة المحاولة",
         "empty": "لا توجد كليات متاحة"
+      },
+      "error": {
+        "title": "تعذر تحميل المستخدمين",
+        "retry": "إعادة المحاولة"
       }
     }
   }

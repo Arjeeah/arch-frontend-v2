@@ -11,13 +11,17 @@ export interface Faculty {
   nameEN: string
   status: FacultyStatus
   /**
-   * Number of programs attached to this faculty.
+   * Number of programs attached to this faculty, or `null` when the backend
+   * did not tell us.
    *
    * verify against live API: `FacultyResource` never serialises a `programs`
-   * relation, so there is nothing to derive this from today — always `0`
-   * until the backend adds a count. See `facultiesApi.ts`.
+   * relation or a count, so this is `null` for every row today. It is
+   * deliberately NOT `0` — a hard zero renders as "this faculty has no
+   * programs", which is a claim the API never made and which is false for
+   * every seeded faculty. `null` renders as an em dash instead.
+   * See `facultiesApi.ts`.
    */
-  programsCount: number
+  programsCount: number | null
 }
 
 /** The subset of a faculty that the create/edit dialog can submit. */

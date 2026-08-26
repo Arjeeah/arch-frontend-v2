@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Search } from 'lucide-vue-next'
 import { useFacultiesStore } from '../stores/useFacultiesStore'
@@ -60,10 +60,12 @@ const editingItem = ref<Faculty | null>(null)
 const deleteDialogOpen = ref(false)
 const deletingItem = ref<Faculty | null>(null)
 
-const statusOptions = [
+// `computed`, not a plain array: `t()` evaluated once at setup would freeze
+// these labels in whatever locale was active when the page mounted.
+const statusOptions = computed(() => [
   { value: 'Active', label: t('faculties.status.active') },
   { value: 'Inactive', label: t('faculties.status.inactive') },
-]
+])
 
 function openCreate() {
   editingItem.value = null
@@ -147,7 +149,13 @@ async function confirmDelete() {
     </div>
 
     <!-- Error -->
-    <AppErrorState v-if="error" :description="error" @retry="refresh" />
+    <AppErrorState
+      v-if="error"
+      :title="t('faculties.error.title')"
+      :description="error"
+      :retry-label="t('faculties.error.retry')"
+      @retry="refresh"
+    />
 
     <template v-else>
       <!-- Table -->

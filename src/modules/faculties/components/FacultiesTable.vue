@@ -107,7 +107,7 @@ const { t } = useI18n()
           class="flex items-center justify-center px-[13px] flex-1 min-w-[100px] overflow-hidden"
         >
           <span class="text-[15px] font-sans text-text-secondary truncate">{{
-            item.programsCount
+            item.programsCount ?? '—'
           }}</span>
         </div>
         <!-- Status -->

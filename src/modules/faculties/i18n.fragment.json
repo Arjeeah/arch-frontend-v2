@@ -57,6 +57,10 @@
           "nameArRequired": "Name AR is required",
           "nameEnRequired": "Name EN is required"
         }
+      },
+      "error": {
+        "title": "Could not load faculties",
+        "retry": "Try again"
       }
     }
   },
@@ -118,6 +122,10 @@
           "nameArRequired": "الاسم بالعربية مطلوب",
           "nameEnRequired": "الاسم بالإنجليزية مطلوب"
         }
+      },
+      "error": {
+        "title": "تعذر تحميل الكليات",
+        "retry": "إعادة المحاولة"
       }
     }
   }

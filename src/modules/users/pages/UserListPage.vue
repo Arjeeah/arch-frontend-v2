@@ -43,16 +43,26 @@ const statusFilter = ref('')
 const facultyFilter = ref('')
 
 /**
+ * A COMPLETE address — the only thing `filter[email]` will accept.
+ *
+ * `UserController::index` validates `filter.email` with Laravel's `email`
+ * rule, so a half-typed address (`ali@`, `ali@limu`) 422s the whole list
+ * request. Routing on a bare `@` would therefore break the list on nearly
+ * every keystroke of an email search, so the email lane only opens once the
+ * query parses as a whole address; everything else searches by name.
+ */
+const COMPLETE_EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+
+/**
  * `filter[name]` and `filter[email]` are separate allowlisted filters on the
  * backend (`UserController::index`) — there is no OR between them, so one
- * search box has to pick a lane. An `@` in the query is a reasonable signal
- * the user is searching by email.
+ * search box has to pick a lane.
  */
 function buildFilters() {
   const filter: Record<string, string> = {}
   const q = debouncedSearch.value.trim()
   if (q) {
-    if (q.includes('@')) filter.email = q
+    if (COMPLETE_EMAIL.test(q)) filter.email = q
     else filter.name = q
   }
   if (roleFilter.value) filter.role = roleFilter.value
@@ -184,7 +194,13 @@ const statusOptions = computed(() => [
     </div>
 
     <!-- Error -->
-    <AppErrorState v-if="error" :description="error" @retry="refresh" />
+    <AppErrorState
+      v-if="error"
+      :title="t('users.error.title')"
+      :description="error"
+      :retry-label="t('users.error.retry')"
+      @retry="refresh"
+    />
 
     <template v-else>
       <!-- Table -->

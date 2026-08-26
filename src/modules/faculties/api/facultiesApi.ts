@@ -36,7 +36,8 @@ function toStatus(raw: string): FacultyStatus {
  * verify against live API: `App\Http\Resources\FacultyResource` never emits a
  * `programs` relation, so there is no server-provided count to map — the
  * dedicated `/v1/academic/programs?filter[faculty_id]=` endpoint would need
- * an extra request per row to derive one. Left at 0 rather than guessing.
+ * an extra request per row to derive one. Mapped to `null` ("unknown"), not
+ * `0` — `0` would be a number the API never sent, displayed as fact.
  */
 function fromResource(resource: FacultyResource): Faculty {
   return {
@@ -45,7 +46,7 @@ function fromResource(resource: FacultyResource): Faculty {
     nameAR: resource.name_ar,
     nameEN: resource.name_en,
     status: toStatus(resource.status),
-    programsCount: 0,
+    programsCount: null,
   }
 }
 

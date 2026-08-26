@@ -62,8 +62,9 @@ function validate() {
   // The backend requires a password when creating; on edit an empty field
   // means "leave the current password alone".
   errors.password = isEdit.value || form.password ? '' : t('users.dialog.errors.passwordRequired')
-  // Required (min 1) on create; on edit an empty selection leaves the
-  // backend's existing assignment untouched (`faculties` is `nullable` there).
+  // Required (min 1) on create. On edit an empty selection is dropped from the
+  // payload by `usersApi.toPayload`, which leaves the backend's existing
+  // assignment untouched — see the note there for why `[]` must never be sent.
   errors.facultyIds =
     isEdit.value || form.facultyIds.length ? '' : t('users.dialog.errors.facultyRequired')
   return !errors.name && !errors.email && !errors.role && !errors.password && !errors.facultyIds
@@ -152,6 +153,9 @@ function roleLabelT(role: UserRole): string {
         }}</label>
         <FacultyChipPicker v-model="form.facultyIds" />
         <p v-if="errors.facultyIds" class="mt-1 text-xs text-danger">{{ errors.facultyIds }}</p>
+        <p v-else-if="isEdit" class="mt-1 text-xs text-[#6F6F6F]">
+          {{ t('users.dialog.facultiesHintEdit') }}
+        </p>
       </div>
 
       <!-- Default Password (create only) -->

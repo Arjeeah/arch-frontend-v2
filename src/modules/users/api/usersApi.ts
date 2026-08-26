@@ -85,6 +85,15 @@ function fromResource(resource: UserResource): User {
  * `UserUpdateRequest`. Both are asymmetric with the `roles` / (missing)
  * `faculties` read keys on `UserResource`, which is exactly why this mapper
  * exists instead of a shared casing interceptor.
+ *
+ * An EMPTY `facultyIds` array is dropped rather than sent. Both requests
+ * validate `faculties` as `array|min:1`, and `nullable` only exempts `null` —
+ * a literal `[]` is still subject to `min:1` and 422s the whole request. Since
+ * `UserResource` never serialises `faculties`, the edit dialog always opens
+ * with an empty selection, so sending it would 422 every edit where the admin
+ * did not re-pick faculties. Omitting the key leaves the server-side
+ * assignment untouched instead, which is what "I didn't touch the picker"
+ * should mean. Create is unaffected — the dialog requires a selection there.
  */
 function toPayload(input: Partial<UserInput>): Record<string, unknown> {
   const payload: Record<string, unknown> = {}
@@ -92,7 +101,9 @@ function toPayload(input: Partial<UserInput>): Record<string, unknown> {
   if (input.email !== undefined) payload.email = input.email
   if (input.role !== undefined) payload.role = input.role
   if (input.status !== undefined) payload.status = input.status.toLowerCase()
-  if (input.facultyIds !== undefined) payload.faculties = input.facultyIds
+  if (input.facultyIds !== undefined && input.facultyIds.length > 0) {
+    payload.faculties = input.facultyIds
+  }
   if (input.password) {
     payload.password = input.password
     payload.password_confirmation = input.password
@@ -115,7 +126,15 @@ interface FacultyLookupResource {
 
 interface FacultyLookupResponse {
   data: FacultyLookupResource[]
+  meta?: { current_page?: number; last_page?: number }
 }
+
+/**
+ * Safety stop for the faculty lookup's page walk below. Nine faculties exist
+ * today at the backend's hardcoded 10 rows/page, so this is ~10x headroom and
+ * exists only so a malformed `meta` can never spin the loop forever.
+ */
+const FACULTY_LOOKUP_MAX_PAGES = 10
 
 export const usersApi = {
   /**
@@ -163,17 +182,30 @@ export const usersApi = {
    * `/v1/academic/faculties` directly (an HTTP call, not a module import —
    * the users module cannot import `modules/faculties`).
    *
-   * verify against live API: `Academic\FacultyController::index()` also
-   * hardcodes `->paginate(10)`, so this can only ever surface the first 10
-   * faculties. That matches the current roster (9 faculties per the team
-   * plan) but will silently truncate the picker if more are added before the
-   * backend's pagination is fixed.
+   * `Academic\FacultyController::index()` hardcodes `->paginate(10)` and
+   * ignores `per_page`, so a single request can only ever surface ten
+   * faculties — and a picker that silently omits faculties assigns the wrong
+   * ones. This walks the pages instead of asking for a bigger one, using the
+   * response `meta.last_page` and stopping at `FACULTY_LOOKUP_MAX_PAGES`.
+   *
+   * verify against live API: falls back to a single page when `meta` is
+   * absent, which is what a non-paginated response would look like.
    */
   facultyOptions: async (): Promise<FacultyOption[]> => {
-    const { data } = await http.get<FacultyLookupResponse>(API_ENDPOINTS.faculties.list, {
-      params: { per_page: 100 },
-    })
-    return data.data
+    const rows: FacultyLookupResource[] = []
+    let page = 1
+    let lastPage = 1
+
+    do {
+      const { data } = await http.get<FacultyLookupResponse>(API_ENDPOINTS.faculties.list, {
+        params: { page, per_page: 100 },
+      })
+      rows.push(...data.data)
+      lastPage = data.meta?.last_page ?? 1
+      page += 1
+    } while (page <= lastPage && page <= FACULTY_LOOKUP_MAX_PAGES)
+
+    return rows
       .filter((f) => f.status.toLowerCase() === 'active')
       .map((f) => ({ value: f.id, label: f.name_en }))
   },

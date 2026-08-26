@@ -66,10 +66,14 @@ watch(statusFilter, () => {
   setFilters(statusFilter.value ? { filter: { status: statusFilter.value } } : { filter: {} })
 })
 
-const statusOptions = BORROWING_STATUSES.map((status) => ({
-  value: status,
-  label: t(`borrowing.status.${status}`),
-}))
+// `computed`, not a plain array: `t()` evaluated once at setup would freeze
+// these labels in whatever locale was active when the page mounted.
+const statusOptions = computed(() =>
+  BORROWING_STATUSES.map((status) => ({
+    value: status,
+    label: t(`borrowing.status.${status}`),
+  })),
+)
 
 /**
  * Borrowings has no free-text filter on the backend (no `AllowedFilter::partial`
@@ -87,6 +91,15 @@ const visibleRows = computed(() => {
       item.notes.toLowerCase().includes(q),
   )
 })
+
+/**
+ * `isEmpty` from `useServerTable` only knows the server returned no rows. The
+ * search box narrows the loaded page on top of that, so without this the table
+ * can render as a bare header with nothing explaining why.
+ */
+const noLocalMatches = computed(
+  () => !loading.value && !error.value && rows.value.length > 0 && visibleRows.value.length === 0,
+)
 
 // Create / edit dialog
 const dialogOpen = ref(false)
@@ -274,7 +287,13 @@ async function handleMarkBorrowed(item: Borrowing) {
     </div>
 
     <!-- Error -->
-    <AppErrorState v-if="error" :description="error" @retry="refresh" />
+    <AppErrorState
+      v-if="error"
+      :title="t('borrowing.error.title')"
+      :description="error"
+      :retry-label="t('borrowing.error.retry')"
+      @retry="refresh"
+    />
 
     <template v-else>
       <!-- Table -->
@@ -296,6 +315,11 @@ async function handleMarkBorrowed(item: Borrowing) {
         v-if="isEmpty"
         :title="t('borrowing.empty.title')"
         :description="t('borrowing.empty.description')"
+      />
+      <AppEmptyState
+        v-else-if="noLocalMatches"
+        :title="t('borrowing.empty.noMatchesTitle')"
+        :description="t('borrowing.empty.noMatchesDescription')"
       />
 
       <!-- Pagination -->

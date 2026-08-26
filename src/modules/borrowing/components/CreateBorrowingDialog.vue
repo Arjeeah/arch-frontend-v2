@@ -28,6 +28,18 @@ const { t } = useI18n()
 
 const isEdit = computed(() => !!props.item)
 
+/**
+ * Kept in one place because it is used twice: once to configure
+ * `AppAsyncSelect` and once to fill the `{n}` in its hint text.
+ *
+ * The hint MUST be interpolated here rather than handed to `AppAsyncSelect`
+ * with a literal `{n}` — vue-i18n compiles `{n}` as a named interpolation and
+ * strips it when no param is supplied, so the component's own
+ * `.replace('{n}', …)` would never find a placeholder to substitute and the
+ * user would read "Type at least  characters".
+ */
+const DOCUMENT_MIN_CHARS = 2
+
 const documentOption = ref<{ value: string; label: string } | null>(null)
 const notes = ref('')
 const errors = reactive({ document: '' })
@@ -84,9 +96,12 @@ function submit() {
           v-model="documentOption"
           :search-fn="searchDocuments"
           :placeholder="t('borrowing.dialog.documentPlaceholder')"
-          :min-chars-text="t('borrowing.dialog.documentMinChars')"
+          :min-chars="DOCUMENT_MIN_CHARS"
+          :min-chars-text="t('borrowing.dialog.documentMinChars', { n: DOCUMENT_MIN_CHARS })"
+          :loading-text="t('borrowing.dialog.documentSearching')"
           :empty-text="t('borrowing.dialog.documentEmpty')"
           :error-text="t('borrowing.dialog.documentSearchError')"
+          :clear-label="t('borrowing.dialog.documentClear')"
         />
         <p v-else class="text-sm font-sans text-text-secondary">
           {{ documentOption?.label ?? '-' }}

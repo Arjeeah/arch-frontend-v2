@@ -8,15 +8,26 @@
       "allStatus": "All Status",
       "empty": {
         "title": "No borrowing records",
-        "description": "No borrowing records match the current filters."
+        "description": "No borrowing records match the current filters.",
+        "noMatchesTitle": "No matches on this page",
+        "noMatchesDescription": "Nothing on this page matches your search. Clear it, or move to another page."
       },
       "stats": {
-        "active": { "label": "Active Borrowings", "subLabel": "Currently borrowed items" },
-        "overdue": { "label": "Overdue Items", "subLabel": "Items past their due date" },
-        "dueSoon": { "label": "Due Soon", "subLabel": "Items due within the next 7 days" },
+        "active": {
+          "label": "Active Borrowings",
+          "subLabel": "Borrowed right now — this page only"
+        },
+        "overdue": {
+          "label": "Overdue Items",
+          "subLabel": "Past their due date — this page only"
+        },
+        "dueSoon": {
+          "label": "Due Soon",
+          "subLabel": "Due within 7 days — this page only"
+        },
         "returnedThisWeek": {
           "label": "Returned This Week",
-          "subLabel": "Items returned in the past week"
+          "subLabel": "Returned in the past week — this page only"
         }
       },
       "status": {
@@ -96,7 +107,13 @@
         "update": "Update Borrowing",
         "errors": {
           "documentRequired": "Select a document to borrow"
-        }
+        },
+        "documentSearching": "Searching…",
+        "documentClear": "Clear selection"
+      },
+      "error": {
+        "title": "Could not load borrowings",
+        "retry": "Try again"
       }
     }
   },
@@ -109,15 +126,26 @@
       "allStatus": "جميع الحالات",
       "empty": {
         "title": "لا توجد سجلات إعارة",
-        "description": "لا توجد سجلات إعارة مطابقة للمرشحات الحالية."
+        "description": "لا توجد سجلات إعارة مطابقة للمرشحات الحالية.",
+        "noMatchesTitle": "لا نتائج في هذه الصفحة",
+        "noMatchesDescription": "لا يوجد في هذه الصفحة ما يطابق بحثك. امسح البحث أو انتقل إلى صفحة أخرى."
       },
       "stats": {
-        "active": { "label": "الإعارات النشطة", "subLabel": "العناصر المُعارة حاليًا" },
-        "overdue": { "label": "العناصر المتأخرة", "subLabel": "عناصر تجاوزت موعد استحقاقها" },
-        "dueSoon": { "label": "مستحقة قريبًا", "subLabel": "عناصر مستحقة خلال 7 أيام" },
+        "active": {
+          "label": "الإعارات النشطة",
+          "subLabel": "مُعارة حاليًا — في هذه الصفحة فقط"
+        },
+        "overdue": {
+          "label": "العناصر المتأخرة",
+          "subLabel": "تجاوزت موعد الاستحقاق — في هذه الصفحة فقط"
+        },
+        "dueSoon": {
+          "label": "مستحقة قريبًا",
+          "subLabel": "مستحقة خلال 7 أيام — في هذه الصفحة فقط"
+        },
         "returnedThisWeek": {
           "label": "أُعيدت هذا الأسبوع",
-          "subLabel": "عناصر أُعيدت خلال الأسبوع الماضي"
+          "subLabel": "أُعيدت خلال الأسبوع الماضي — في هذه الصفحة فقط"
         }
       },
       "status": {
@@ -197,7 +225,13 @@
         "update": "تحديث الإعارة",
         "errors": {
           "documentRequired": "اختر وثيقة للإعارة"
-        }
+        },
+        "documentSearching": "جارٍ البحث…",
+        "documentClear": "مسح الاختيار"
+      },
+      "error": {
+        "title": "تعذر تحميل الإعارات",
+        "retry": "إعادة المحاولة"
       }
     }
   }
