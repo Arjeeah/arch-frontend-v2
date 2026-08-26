@@ -62,9 +62,11 @@ Merge `src/modules/review/i18n.fragment.json` into `src/locales/en.json` and
 `src/locales/ar.json`. Single top-level key per locale: `review`. 71 leaf keys in
 each language, en/ar at exact parity, no collisions with existing namespaces.
 
-Three entries are vue-i18n **plural** messages (`a | b | c`) — keep the pipes
-intact through the merge: `review.actions.saveCorrections`,
-`review.diff.correctedCount`, `review.toasts.saved`.
+Three entries are vue-i18n **plural** messages (pipe-separated forms) — keep the
+pipes intact through the merge: `review.actions.saveCorrections`,
+`review.diff.correctedCount`, `review.toasts.saved`. The `ar` side now carries
+all six CLDR forms (`zero | one | two | few | many | other`); see the i18n
+section of `CLAUDE.md` before editing one.
 
 ## Notes
 
