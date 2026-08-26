@@ -30,7 +30,7 @@ const icons: Record<ToastVariant, typeof Info> = {
 
 const styles: Record<ToastVariant, string> = {
   success: 'bg-success-bg text-success-text border-success/40',
-  error: 'bg-danger/10 text-danger border-danger/40',
+  error: 'bg-danger-bg text-danger-text border-danger/40',
   info: 'bg-highlight text-primary-dark border-primary/40',
 }
 </script>
@@ -56,7 +56,7 @@ const styles: Record<ToastVariant, string> = {
           v-for="toast in toasts"
           :key="toast.id"
           role="status"
-          class="pointer-events-auto flex items-start gap-3 rounded-[10px] border px-4 py-3 font-sans text-sm shadow-[4px_4px_4px_rgba(0,0,0,0.10)]"
+          class="pointer-events-auto flex items-start gap-3 rounded-[10px] border px-4 py-3 font-sans text-sm shadow-[0_4px_16px_rgba(31,41,55,0.18)]"
           :class="styles[toast.variant]"
         >
           <component :is="icons[toast.variant]" class="mt-0.5 h-4 w-4 shrink-0" />
