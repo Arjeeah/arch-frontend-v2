@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
+import { i18n } from '@/app/plugins/i18n'
 import { getApiErrorMessage } from '@/shared/utils/apiError'
 import { settingsApi } from '../api/settingsApi'
 import type { OverrideCapacityInput, SettingsGroupKey, SettingsGroupModelMap } from '../types'
@@ -27,7 +28,11 @@ export const useSettingsStore = defineStore('settings', () => {
     try {
       Object.assign(groups, await settingsApi.fetchAll())
     } catch (err) {
-      error.value = getApiErrorMessage(err, 'Failed to load settings')
+      // Translated through the i18n instance rather than `useI18n()`: a store is
+      // not a component, and `getApiErrorMessage`'s own fallback is hardcoded
+      // English. The message is read at throw time, so it always matches the
+      // locale the user is actually in.
+      error.value = getApiErrorMessage(err, i18n.global.t('settings.errors.loadFailed'))
     } finally {
       loading.value = false
       loaded.value = true

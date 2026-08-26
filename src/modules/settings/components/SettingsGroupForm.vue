@@ -34,6 +34,20 @@ function selectOptions(field: SettingsFieldConfig): { value: string; label: stri
 function asStringArray(value: unknown): string[] {
   return Array.isArray(value) ? (value as string[]) : []
 }
+
+/**
+ * A cleared number input falls back to the field's own minimum rather than 0.
+ * Seven of the nine number fields validate `min:1` server-side
+ * (`capacity_warning_threshold`, `max_file_size`, `default_duration_days`,
+ * `max_active_per_user`, `failed_login_lockout_count`, `session_timeout`,
+ * `retention_days`), so coercing an emptied field to 0 handed the next save a
+ * guaranteed 422 with no way for the user to see which field caused it.
+ */
+function toNumber(raw: string, field: SettingsFieldConfig): number {
+  const value = Number(raw)
+  if (raw === '' || !Number.isFinite(value)) return field.min ?? 0
+  return value
+}
 </script>
 
 <template>
@@ -52,15 +66,19 @@ function asStringArray(value: unknown): string[] {
               {{ t(field.helperKey) }}
             </p>
           </div>
+          <!-- The knob is positioned with the logical `start-*` inset rather
+               than `translate-x-*`: a physical transform does not flip under
+               `dir="rtl"`, which left the knob rendering outside the track in
+               Arabic (measured: track [66,106], knob [110,126]). -->
           <button
             type="button"
-            class="relative inline-flex h-[25px] w-[46px] shrink-0 items-center rounded-[16px] transition-colors focus:outline-none"
+            class="relative inline-flex h-[25px] w-[46px] shrink-0 rounded-[16px] transition-colors focus:outline-none"
             :class="modelValue[field.key] ? 'bg-primary-light' : 'bg-border'"
             @click="update(field.key, !modelValue[field.key])"
           >
             <span
-              class="inline-block h-[19px] w-[19px] transform rounded-[16px] bg-white shadow-[0px_3px_7px_rgba(0,0,0,0.12)] transition-transform"
-              :class="modelValue[field.key] ? 'translate-x-[24px]' : 'translate-x-[2px]'"
+              class="absolute top-[3px] h-[19px] w-[19px] rounded-[16px] bg-white shadow-[0px_3px_7px_rgba(0,0,0,0.12)] transition-all"
+              :class="modelValue[field.key] ? 'start-[24px]' : 'start-[2px]'"
             />
           </button>
         </div>
@@ -72,12 +90,20 @@ function asStringArray(value: unknown): string[] {
             :model-value="String(modelValue[field.key] ?? '')"
             @update:model-value="update(field.key, $event)"
           />
+          <!-- `min`/`max`/`step` land on the underlying `<input>` as fallthrough
+               attributes. Without them the config's declared bounds were dead
+               data, and `ocr.confidenceThreshold` — a float — inherited the
+               default `step="1"`, so the browser rejected 70.5 as a step
+               mismatch and the spinner could not reach it. -->
           <FormInput
             v-else-if="field.type === 'number'"
             :id="field.key"
             type="number"
+            :min="field.min"
+            :max="field.max"
+            :step="field.step"
             :model-value="String(modelValue[field.key] ?? '')"
-            @update:model-value="update(field.key, $event === '' ? 0 : Number($event))"
+            @update:model-value="update(field.key, toNumber($event, field))"
           />
           <AppSelect
             v-else-if="field.type === 'select'"

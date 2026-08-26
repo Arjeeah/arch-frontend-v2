@@ -53,15 +53,18 @@ function toggle(role: NotificationRoleSlug): void {
         <span class="text-sm font-sans text-text-primary">
           {{ t(`settings.options.role.${role}`) }}
         </span>
+        <!-- Logical `start-*` inset, not `translate-x-*`: a physical transform
+             does not flip under `dir="rtl"`, which left the knob rendering
+             outside the track in Arabic. Same fix as `SettingsGroupForm`. -->
         <button
           type="button"
-          class="relative inline-flex h-[22px] w-[40px] items-center rounded-[16px] transition-colors focus:outline-none"
+          class="relative inline-flex h-[22px] w-[40px] rounded-[16px] transition-colors focus:outline-none"
           :class="current[role] ? 'bg-primary-light' : 'bg-border'"
           @click="toggle(role)"
         >
           <span
-            class="inline-block h-[16px] w-[16px] transform rounded-[16px] bg-white shadow-sm transition-transform"
-            :class="current[role] ? 'translate-x-[20px]' : 'translate-x-[2px]'"
+            class="absolute top-[3px] h-[16px] w-[16px] rounded-[16px] bg-white shadow-sm transition-all"
+            :class="current[role] ? 'start-[22px]' : 'start-[2px]'"
           />
         </button>
       </div>

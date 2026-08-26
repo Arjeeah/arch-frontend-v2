@@ -24,7 +24,9 @@
         "delete": "Delete",
         "deleteConfirmTitle": "Delete notification",
         "deleteConfirmMessage": "This notification will be removed permanently. This action cannot be undone.",
-        "emptyFilteredDescription": "No notifications match this filter."
+        "emptyFilteredDescription": "No notifications match this filter.",
+        "loadError": "Couldn't load notifications",
+        "retry": "Try again"
       },
       "toasts": {
         "markReadError": "Could not mark this notification as read.",
@@ -57,12 +59,14 @@
           "read": "مقروءة"
         },
         "emptyTitle": "لا توجد إشعارات بعد",
-        "emptyDescription": "ستظهر هنا الإشعارات المتعلقة بالإعارات والرفع وتنبيهات النظام.",
+        "emptyDescription": "ستظهر هنا الإشعارات المتعلقة بالإعارات ورفع الملفات وتنبيهات النظام.",
         "markRead": "تعليم كمقروء",
         "delete": "حذف",
         "deleteConfirmTitle": "حذف الإشعار",
         "deleteConfirmMessage": "سيتم حذف هذا الإشعار نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
-        "emptyFilteredDescription": "لا توجد إشعارات مطابقة لهذه التصفية."
+        "emptyFilteredDescription": "لا توجد إشعارات مطابقة لهذه التصفية.",
+        "loadError": "تعذّر تحميل الإشعارات",
+        "retry": "إعادة المحاولة"
       },
       "toasts": {
         "markReadError": "تعذّر تعليم هذا الإشعار كمقروء.",

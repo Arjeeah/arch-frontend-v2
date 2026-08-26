@@ -13,8 +13,9 @@ import NotificationListItem from './NotificationListItem.vue'
 import type { AppNotification } from '../types'
 
 /**
- * Standalone dropdown bell — the header shell mounts this directly
- * (`AppHeader` is out of this module's territory; see WIRING.md). Owns its
+ * Standalone dropdown bell. `DashboardLayout` (in `src/app/`, which may import
+ * a module) passes it into `AppHeader`'s `#notifications` slot — `AppHeader`
+ * itself is in `src/shared/` and may not import a module. See WIRING.md. Owns its
  * own preview list, unread badge (via the shared store so mutations made on
  * the full notifications page are reflected here too) and a 60s poll that
  * starts on mount and is cleared on unmount.

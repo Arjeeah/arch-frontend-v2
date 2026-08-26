@@ -99,9 +99,14 @@ async function handleOverrideCapacity(input: OverrideCapacityInput): Promise<voi
       <p class="text-sm text-text-secondary font-sans mt-0.5">{{ t('settings.subtitle') }}</p>
     </div>
 
+    <!-- `title` and `retry-label` are passed explicitly: `AppErrorState`'s own
+         defaults are hardcoded English, so an Arabic user would otherwise read
+         "Something went wrong / Try again" here. -->
     <AppErrorState
       v-if="store.error"
+      :title="t('settings.errors.loadFailed')"
       :description="store.error ?? undefined"
+      :retry-label="t('settings.errors.retry')"
       @retry="store.fetchAll"
     />
 

@@ -129,7 +129,16 @@ async function handleMarkAll(): Promise<void> {
       />
     </div>
 
-    <AppErrorState v-if="error" :description="error ?? undefined" @retry="refresh" />
+    <!-- `title` and `retry-label` are passed explicitly: `AppErrorState`'s own
+         defaults are hardcoded English, so an Arabic user would otherwise read
+         "Something went wrong / Try again" here. -->
+    <AppErrorState
+      v-if="error"
+      :title="t('notifications.list.loadError')"
+      :description="error ?? undefined"
+      :retry-label="t('notifications.list.retry')"
+      @retry="refresh"
+    />
     <AppEmptyState
       v-else-if="isEmpty"
       :icon="Inbox"
