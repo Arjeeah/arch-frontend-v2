@@ -13,6 +13,17 @@
  *
  * A type with no matching key falls back to the server's string, so a new
  * notification class ships readable rather than blank.
+ *
+ * `notifications.types.*` covers eight of the backend's nine notification
+ * classes. The ninth, `WeeklyDigestNotification`, is deliberately absent: its
+ * `via()` returns `['mail']` only, so it is never written to the database and
+ * can never appear in this list. Add copy for it if it ever gains the
+ * `database` channel.
+ *
+ * `securityAlert.body` is a counted message. `notificationBodyParams` names
+ * the count `count`, which vue-i18n reads as the plural choice with no
+ * explicit index at the call site — verified against the six-form Arabic rule
+ * in `src/app/plugins/i18n.ts`: 7 selects `few`, 15 selects `many`.
  */
 
 /** `App\Notifications\BorrowingDueSoonNotification` → `borrowingDueSoon`. */

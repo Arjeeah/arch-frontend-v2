@@ -29,11 +29,18 @@ const auditStore = useAuditStore()
 const toasts = useToasts()
 
 /**
- * `AuditLogPolicy` splits this screen three ways: `viewAny` is open to all,
- * `viewStats`/`export` are SA + archivist, and `viewTimeline` is SA only.
- * `IndexAuditLogRequest::prepareForValidation` also strips the `role` filter
- * for anyone below super_admin. Rendering a control the server would refuse is
- * what produced the 403 that used to take the stat cards down with it.
+ * `AuditLogPolicy` splits this screen three ways: `viewAny` and `export` are
+ * open to every authenticated role, `viewStats` is SA + archivist, and
+ * `viewTimeline` is SA only — each confirmed against the live API, which
+ * answers an archivist 200 / 200 / 200 / 403 across index, export, stats and
+ * timeline. `IndexAuditLogRequest::prepareForValidation` also strips the
+ * `role` filter for anyone below super_admin. Rendering a control the server
+ * would refuse is what produced the 403 that used to take the stat cards down
+ * with it.
+ *
+ * The route itself (`meta.roles`) admits only SA and archivist, so the stats
+ * cards and the export button need no guard of their own — both roles that can
+ * reach this page may call both endpoints.
  */
 const sessionRole = readSessionRole()
 const canSeeTimeline = computed(() => sessionRole === 'super_admin')
