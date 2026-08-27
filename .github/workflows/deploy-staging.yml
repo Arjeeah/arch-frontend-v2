@@ -1,0 +1,451 @@
+name: Deploy Frontend to Staging
+
+# The SPA is BUILT on a GitHub-hosted runner and only PUBLISHED by the
+# self-hosted runner on the ARCH-OS box. That split is deliberate:
+#   * the server needs no Node.js, no npm registry access and no build cache;
+#   * the quality gates run on a clean machine, byte-for-byte as in ci.yml;
+#   * the only thing that ever reaches the server is an already-verified dist/.
+#
+# One-time server setup lives in docs/deploy/FRONTEND_DEPLOY.md. Until that
+# setup exists the `publish` job fails on its very first step with the exact
+# commands to run — it never copies a partial site.
+
+# TRIGGER: pushes to `staging`, NOT to `main`. This mirrors the backend repo,
+# and it exists so that merging a PR is not the same act as publishing to the
+# shared server. `ci.yml` runs the gates on `main` and on every PR; promoting to
+# staging is a second, deliberate step:
+#
+#     git push origin main:staging     # or open a main -> staging PR
+#
+# (The `workflow_dispatch` button only appears once this file is on the repo's
+# DEFAULT branch, so keep it merged into `main` as well as `staging`.)
+on:
+  push:
+    branches: [staging]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.env.example'
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'VITE_API_BASE_URL for this build (blank = repo variable VITE_API_BASE_URL, else /api)'
+        required: false
+        default: ''
+
+concurrency:
+  # Deliberately NOT cancel-in-progress (the backend workflow is): cancelling a
+  # publish mid-flight leaves a staged directory behind and skips the prune.
+  # Deploys are cheap and rare; queue them instead.
+  group: frontend-staging-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  # Where the SPA is mounted in the URL space. MUST match the nginx location in
+  # deploy/nginx/arch-frontend.conf and the `app/` subdirectory inside a
+  # release. Vite requires a leading AND trailing slash. Use `/` to serve the
+  # SPA at the origin root (see docs/deploy/FRONTEND_DEPLOY.md §10).
+  APP_BASE: /app/
+  # Release root on the server. Everything the pipeline writes lives under it.
+  DEPLOY_ROOT: /var/www/arch-frontend
+  # Only used as the Host header of the post-deploy checks, which go to
+  # 127.0.0.1 because Tailscale Funnel terminates TLS in front of nginx.
+  PUBLIC_HOST: arch-os-server.tailf7bd4c.ts.net
+  # Releases kept on disk besides the ones `current` and `previous` point at.
+  KEEP_RELEASES: '5'
+
+jobs:
+  build:
+    name: Gate and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # ci.yml uses `npm install`; a deploy wants the lockfile honoured exactly,
+      # so this is `npm ci`. package-lock.json is in sync with package.json
+      # today — if this ever fails with EUSAGE, run `npm install` locally and
+      # commit the refreshed lockfile rather than loosening this step.
+      - name: Install dependencies
+        run: npm ci
+
+      # ── The same four gates ci.yml runs, in the same order ────────────────
+      - name: Lint
+        run: npm run lint:check
+
+      - name: Format check
+        run: npx prettier --check src/
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Generator smoke test
+        run: npx tsx tools/scripts/smoke-test-gen.ts
+
+      - name: Resolve API base URL
+        id: api
+        env:
+          INPUT_URL: ${{ inputs.api_base_url }}
+          VAR_URL: ${{ vars.VITE_API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          URL="${INPUT_URL:-}"
+          if [ -z "$URL" ]; then URL="${VAR_URL:-}"; fi
+          # Default: root-relative. The SPA and the API share an origin (see
+          # docs/deploy/FRONTEND_DEPLOY.md §2), so a relative base needs no CORS
+          # and survives the hostname changing.
+          if [ -z "$URL" ]; then URL="/api"; fi
+          # Strict allowlist first: the value is later echoed into the job
+          # summary, and a dispatch input must never be able to smuggle shell
+          # metacharacters into any step.
+          case "$URL" in
+            *[!A-Za-z0-9:/._~-]*)
+              echo "::error::VITE_API_BASE_URL contains characters outside [A-Za-z0-9:/._~-] — got '$URL'."
+              exit 1
+              ;;
+          esac
+          case "$URL" in
+            //*)
+              echo "::error::VITE_API_BASE_URL '$URL' is protocol-relative; use /api or an https:// URL."
+              exit 1
+              ;;
+            /*) ;;
+            https://*) ;;
+            *)
+              echo "::error::VITE_API_BASE_URL must be root-relative (/api) or https://… — got '$URL'. Plain http:// is blocked as mixed content by the browser."
+              exit 1
+              ;;
+          esac
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Building against API base URL: $URL"
+
+      - name: Build SPA
+        env:
+          VITE_API_BASE_URL: ${{ steps.api.outputs.url }}
+        run: |
+          set -euo pipefail
+          # --base makes Vite emit /app/assets/… AND feeds
+          # import.meta.env.BASE_URL, which src/app/router/index.ts hands to
+          # createWebHistory(). Both must agree with the nginx location.
+          npm run build-only -- --base="$APP_BASE"
+
+      - name: Verify build output
+        run: |
+          set -euo pipefail
+          test -f dist/index.html || { echo "::error::dist/index.html missing after build"; exit 1; }
+          test -d dist/assets || { echo "::error::dist/assets missing after build"; exit 1; }
+          if ! grep -q "src=\"${APP_BASE}assets/" dist/index.html; then
+            echo "::error::dist/index.html does not reference ${APP_BASE}assets/ — the --base flag did not take effect, and every asset URL would 404 behind nginx."
+            exit 1
+          fi
+          echo "Build output looks right:"
+          grep -o "src=\"${APP_BASE}assets/[^\"]*\"" dist/index.html || true
+
+      - name: Write release manifest
+        env:
+          API_BASE_URL: ${{ steps.api.outputs.url }}
+        run: |
+          set -euo pipefail
+          # Kept OUTSIDE dist/ on purpose: it must not be reachable over HTTP.
+          {
+            echo "commit=$GITHUB_SHA"
+            echo "ref=$GITHUB_REF"
+            echo "run_id=$GITHUB_RUN_ID"
+            echo "run_attempt=$GITHUB_RUN_ATTEMPT"
+            echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "app_base=$APP_BASE"
+            echo "api_base_url=$API_BASE_URL"
+          } > RELEASE.txt
+          cat RELEASE.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spa-dist
+          path: |
+            dist
+            RELEASE.txt
+          retention-days: 7
+          if-no-files-found: error
+          # Pinned, not inherited: the action defaults this to `false`, and a
+          # dot-prefixed file would then vanish between build and publish with
+          # only a log warning. Nothing in dist/ is hidden today (the Vite
+          # manifest is off and public/ holds one favicon), but enabling either
+          # would silently break the release rather than fail the run.
+          include-hidden-files: true
+
+      - name: Build summary
+        env:
+          API_BASE_URL: ${{ steps.api.outputs.url }}
+        run: |
+          {
+            echo "## Frontend build ready"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Commit | \`${GITHUB_SHA:0:7}\` |"
+            echo "| Ref | \`$GITHUB_REF\` |"
+            echo "| API base URL | \`$API_BASE_URL\` |"
+            echo "| Mounted at | \`$APP_BASE\` |"
+            echo ""
+            echo "If the **Publish** job stays *Queued*, no self-hosted runner in this"
+            echo "repository matches \`[self-hosted, arch-frontend]\`. GitHub does not fail"
+            echo "an unclaimed job for 24 hours, so check"
+            echo "**Settings → Actions → Runners** and register it —"
+            echo "see \`docs/deploy/FRONTEND_DEPLOY.md\` §3.4."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    name: Publish to ARCH-OS server
+    needs: build
+    runs-on: [self-hosted, arch-frontend]
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      # FIRST step on purpose. Nothing has been copied yet, so a server that was
+      # never prepared fails clean instead of half-deployed.
+      - name: Preflight — the server must already be prepared
+        run: |
+          set -uo pipefail
+          FAILED=0
+          fail() { echo "::error::$1"; FAILED=1; }
+
+          # /app/ -> app ; / -> "" (SPA served straight from the release root)
+          SUBDIR="$(printf '%s' "$APP_BASE" | tr -d '/')"
+          echo "SUBDIR=$SUBDIR" >> "$GITHUB_ENV"
+
+          echo "Runner: $(id -un)@$(hostname) — release root $DEPLOY_ROOT"
+
+          mv --version >/dev/null 2>&1 || fail "GNU coreutils not found (the atomic flip needs 'mv -T'). This job must run on the Ubuntu server, not on macOS."
+
+          if [ ! -d "$DEPLOY_ROOT" ]; then
+            fail "Release root '$DEPLOY_ROOT' does not exist. Run the one-time setup in docs/deploy/FRONTEND_DEPLOY.md §3.1:  sudo install -d -o $(id -un) -g www-data -m 2755 $DEPLOY_ROOT $DEPLOY_ROOT/releases"
+          else
+            [ -d "$DEPLOY_ROOT/releases" ] || fail "'$DEPLOY_ROOT/releases' does not exist. Run:  sudo install -d -o $(id -un) -g www-data -m 2755 $DEPLOY_ROOT/releases"
+            [ -w "$DEPLOY_ROOT/releases" ] || fail "'$DEPLOY_ROOT/releases' is not writable by '$(id -un)' (the runner user). Run:  sudo chown -R $(id -un):www-data $DEPLOY_ROOT"
+            [ -w "$DEPLOY_ROOT" ] || fail "'$DEPLOY_ROOT' is not writable by '$(id -un)' — the current/previous symlinks live directly in it. Run:  sudo chown $(id -un):www-data $DEPLOY_ROOT"
+            if [ -e "$DEPLOY_ROOT/current" ] && [ ! -L "$DEPLOY_ROOT/current" ]; then
+              fail "'$DEPLOY_ROOT/current' exists but is not a symlink. The atomic flip replaces it with rename(2), which cannot replace a real directory. Move it aside and let the pipeline create the symlink."
+            fi
+          fi
+
+          command -v curl >/dev/null 2>&1 || fail "curl is not installed; the post-deploy verification needs it.  sudo apt-get install -y curl"
+
+          if [ -d "$DEPLOY_ROOT" ]; then
+            FREE_KB="$(df -Pk "$DEPLOY_ROOT" | awk 'NR==2 {print $4}')"
+            if [ -n "${FREE_KB:-}" ] && [ "$FREE_KB" -lt 262144 ]; then
+              fail "Less than 256 MB free on the filesystem holding '$DEPLOY_ROOT' (${FREE_KB} KB). Prune old releases before deploying."
+            fi
+          fi
+
+          # Advisory only: /etc/nginx may not be readable by the runner user.
+          if grep -Rqs "$DEPLOY_ROOT" /etc/nginx/ 2>/dev/null; then
+            echo "nginx configuration references $DEPLOY_ROOT — good."
+          else
+            echo "::warning::Could not confirm that any nginx site references '$DEPLOY_ROOT'. If this is the first deploy, install deploy/nginx/arch-frontend.conf as described in docs/deploy/FRONTEND_DEPLOY.md §3.3 — otherwise the verification step below will fail."
+          fi
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Server is not prepared for a frontend deploy — nothing was copied. Follow docs/deploy/FRONTEND_DEPLOY.md §3, then re-run this job."
+            exit 1
+          fi
+          echo "Preflight passed."
+
+      - name: Checkout deploy scripts
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: deploy
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: spa-dist
+          path: incoming
+
+      - name: Publish release (atomic symlink flip)
+        id: publish
+        run: |
+          set -euo pipefail
+          RELEASE_ID="$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA:0:7}"
+          bash deploy/scripts/publish-release.sh \
+            --root "$DEPLOY_ROOT" \
+            --source incoming/dist \
+            --meta incoming/RELEASE.txt \
+            --subdir "$SUBDIR" \
+            --release-id "$RELEASE_ID" \
+            --keep "$KEEP_RELEASES"
+
+      - name: Verify the deployed site
+        run: |
+          set -euo pipefail
+          ORIGIN="http://127.0.0.1"
+          # Tailscale Funnel terminates TLS in front of nginx, so the check is
+          # plain HTTP to the loopback with the public Host header — that picks
+          # the same server block a real visitor would land in.
+          CURL=(curl --fail --silent --show-error --max-time 20 --header "Host: $PUBLIC_HOST")
+          INDEX_PATH="$DEPLOY_ROOT/current${SUBDIR:+/$SUBDIR}/index.html"
+
+          test -f "$INDEX_PATH" || { echo "::error::'$INDEX_PATH' is missing after the flip."; exit 1; }
+
+          # Every command substitution below ends in `|| true` on purpose. A
+          # no-match grep or a failing curl exits non-zero, `pipefail` carries
+          # that out of the pipeline, and under `set -e` an assignment whose
+          # substitution failed kills the step ON THAT LINE — so the explicit,
+          # useful `::error::` on the next line would never be printed. Let the
+          # checks below do the reporting.
+
+          # The hashed entry chunk of the release we just published.
+          ASSET="$(grep -o 'src="[^"]*/assets/[^"]*\.js"' "$INDEX_PATH" | head -n 1 | sed -e 's/^src="//' -e 's/"$//' || true)"
+          [ -n "$ASSET" ] || { echo "::error::Could not find a hashed /assets/*.js reference in '$INDEX_PATH'."; exit 1; }
+          echo "Expecting the served index to reference: $ASSET"
+
+          # 1. The entry document is served, and it is the NEW one.
+          if ! BODY="$("${CURL[@]}" "$ORIGIN$APP_BASE")"; then
+            echo "::error::GET $APP_BASE did not return 2xx from nginx. A 403 here almost always means the snippet's 'index index.html;' is missing and the request fell through to the vhost's 'index index.php;'. Otherwise: is deploy/nginx/arch-frontend.conf installed and included in the backend vhost (docs/deploy/FRONTEND_DEPLOY.md §3.3)?"
+            exit 1
+          fi
+          printf '%s' "$BODY" | grep -qF "$ASSET" || {
+            echo "::error::The served index does not reference '$ASSET'. nginx is serving a different directory, or an open_file_cache is pinning the old release."
+            exit 1
+          }
+
+          # 2. index.html must never be cached — it is the only file naming the
+          #    current asset hashes.
+          IHDR="$("${CURL[@]}" --dump-header - --output /dev/null "$ORIGIN$APP_BASE" || true)"
+          printf '%s' "$IHDR" | grep -qi '^cache-control:.*no-store' || {
+            echo "::error::The entry document is served without 'Cache-Control: no-store'. Browsers would pin themselves to a dead release. Check the 'location = ${APP_BASE}index.html' block."
+            exit 1
+          }
+
+          # 3. The new hashed asset is reachable and cached forever.
+          AHDR="$("${CURL[@]}" --dump-header - --output /dev/null "$ORIGIN$ASSET" || true)"
+          printf '%s' "$AHDR" | grep -qi '^cache-control:.*immutable' || {
+            echo "::error::'$ASSET' is served without an immutable Cache-Control header. Check the 'location ^~ ${APP_BASE}assets/' block."
+            exit 1
+          }
+
+          # 4. SPA history fallback: a deep link must return the same document.
+          DEEP="$("${CURL[@]}" "${ORIGIN}${APP_BASE}students/1")" || {
+            echo "::error::Deep link ${APP_BASE}students/1 did not return 2xx — the try_files history fallback is not in place, so a page refresh would 404."
+            exit 1
+          }
+          printf '%s' "$DEEP" | grep -qF "$ASSET" || {
+            echo "::error::Deep link ${APP_BASE}students/1 did not return the SPA entry document."
+            exit 1
+          }
+
+          # 5. The login path the 401 interceptor navigates to. It is built as
+          #    BASE_URL + '/login' in src/app/plugins/axios.ts, so it lands
+          #    INSIDE the mount; if the mount and the base ever disagree, an
+          #    expired token would dump every user on the Laravel vhost's 404
+          #    instead of the login form, and checks 1-4 would not notice.
+          #    Deliberately no /api probe here: the backend pipeline can hold
+          #    Laravel in maintenance mode while this runs (docs/deploy/
+          #    FRONTEND_DEPLOY.md §3.7), and these checks must not fail for it.
+          LOGIN="$("${CURL[@]}" "${ORIGIN}${APP_BASE}login")" || {
+            echo "::error::GET ${APP_BASE}login did not return 2xx. The 401 interceptor sends expired sessions there; it must be inside the SPA mount, not on the Laravel vhost."
+            exit 1
+          }
+          printf '%s' "$LOGIN" | grep -qF "$ASSET" || {
+            echo "::error::GET ${APP_BASE}login did not return the SPA entry document."
+            exit 1
+          }
+
+          # 6. nginx REPLACES rather than merges `add_header` across levels, so
+          #    every security header the backend vhost sets is dropped for
+          #    /app/ unless the snippet restates it. Assert the ones it does
+          #    restate actually survive — that catches both a snippet that was
+          #    never updated on the server and a newly nested `add_header` that
+          #    wiped the set again.
+          for H in x-content-type-options x-frame-options referrer-policy; do
+            printf '%s' "$IHDR" | grep -qi "^${H}:" || {
+              echo "::error::'$H' is missing from the ${APP_BASE} response. The installed /etc/nginx/snippets/arch-frontend.conf is older than this commit, or another add_header in that location replaced the set. Re-run docs/deploy/FRONTEND_DEPLOY.md §3.3."
+              exit 1
+            }
+          done
+
+          echo "All six post-deploy checks passed."
+
+      - name: Roll back to the previous release
+        id: rollback
+        if: failure() && steps.publish.outputs.flipped == '1'
+        run: |
+          set -uo pipefail
+          echo "::warning::Verification failed after the flip — rolling back."
+          bash deploy/scripts/rollback.sh --root "$DEPLOY_ROOT" \
+            --reason "automatic: run $GITHUB_RUN_ID failed verification"
+
+      - name: Deployment summary
+        if: always()
+        env:
+          RELEASE_ID: ${{ steps.publish.outputs.release_id }}
+          PREVIOUS_RELEASE: ${{ steps.publish.outputs.previous }}
+          FLIPPED: ${{ steps.publish.outputs.flipped }}
+          ROLLBACK: ${{ steps.rollback.outcome }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          {
+            if [ "$JOB_STATUS" = "success" ]; then
+              echo "## Frontend deployed"
+            else
+              echo "## Frontend deploy FAILED"
+            fi
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Release | \`$RELEASE_ID\` |"
+            echo "| Previous | \`$PREVIOUS_RELEASE\` |"
+            echo "| Commit | \`${GITHUB_SHA:0:7}\` |"
+            echo "| URL | https://$PUBLIC_HOST$APP_BASE |"
+            echo ""
+            # Branch on what the rollback step ACTUALLY did, not merely on
+            # whether a rollback was attempted. `steps.rollback.outcome` is
+            # success / failure / skipped; it is empty only when the summary
+            # runs on the happy path. The failure that matters most is the very
+            # first deploy: there is no `previous` symlink, rollback.sh exits
+            # non-zero, and the broken release stays live.
+            if [ "$JOB_STATUS" != "success" ]; then
+              case "${ROLLBACK:-}" in
+                success)
+                  echo "The release was rolled back automatically. Nothing to do on the server."
+                  ;;
+                failure)
+                  echo "**ROLLBACK FAILED — the broken release is still live.**"
+                  echo ""
+                  echo "On the server, as the owner of \`$DEPLOY_ROOT\`:"
+                  echo ""
+                  echo "\`\`\`bash"
+                  echo "arch-frontend-rollback --list"
+                  echo "arch-frontend-rollback --release <ID>   # a known-good release id"
+                  echo "\`\`\`"
+                  echo ""
+                  echo "On a first-ever deploy there is nothing to roll back to; fix forward instead."
+                  ;;
+                *)
+                  if [ "$FLIPPED" = "1" ]; then
+                    echo "The new release is live and was **not** rolled back (the rollback step did not run). Check it by hand before leaving it."
+                  else
+                    echo "The live site was **not** touched — the failure happened before the symlink flip."
+                  fi
+                  ;;
+              esac
+            fi
+            echo ""
+            echo "Roll back by hand: \`sudo -u \$(stat -c %U $DEPLOY_ROOT) arch-frontend-rollback\` (docs/deploy/FRONTEND_DEPLOY.md §5)."
+          } >> "$GITHUB_STEP_SUMMARY"
