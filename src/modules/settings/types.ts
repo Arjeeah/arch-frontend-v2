@@ -12,6 +12,24 @@ export type SettingsGroupKey =
   | 'notifications'
   | 'backup'
 
+/**
+ * Groups the backend stores and validates but no code actually reads.
+ *
+ * Verified against `arch-backend/app/`: `BorrowingSettings`, `NotificationSettings`,
+ * `StorageSettings` and `GeneralSettings` each have real consumers, but
+ * `OcrSettings`, `SecuritySettings` and `BackupSettings` have zero outside their
+ * own request/controller/settings classes. Saving them succeeds and changes
+ * nothing, so the form is shown read-only with a notice rather than letting an
+ * admin set an "OCR confidence threshold" or "session timeout" that the system
+ * silently ignores. Remove a key from here the moment its settings class gains
+ * a consumer.
+ */
+export const SETTINGS_GROUPS_NOT_ENFORCED: readonly SettingsGroupKey[] = [
+  'ocr',
+  'security',
+  'backup',
+]
+
 export const SETTINGS_GROUP_KEYS: readonly SettingsGroupKey[] = [
   'general',
   'storage',

@@ -13,7 +13,6 @@ const { t } = useI18n()
 
 const credentials = reactive({ email: '', password: '' })
 const showPassword = ref(false)
-const rememberMe = ref(false)
 const loginError = ref('')
 const fieldErrors = reactive({ email: '', password: '' })
 
@@ -186,40 +185,14 @@ async function handleLogin() {
         </div>
       </div>
 
-      <!-- Remember me + Forgot Password — top:496, 49px below password -->
-      <div class="flex items-center justify-between" style="margin-top: 49px">
-        <label class="flex items-center gap-3 cursor-pointer select-none">
-          <div
-            class="flex items-center justify-center bg-white shrink-0"
-            style="width: 30.55px; height: 25.09px; border: 1px solid #000"
-          >
-            <input v-model="rememberMe" type="checkbox" class="w-4 h-4 accent-[#3974D5]" />
-          </div>
-          <span
-            class="font-display font-medium"
-            style="font-size: 14px; line-height: 21px; color: #3974d5"
-          >
-            {{ t('login.rememberMe') }}
-          </span>
-        </label>
-
-        <a
-          href="#"
-          class="font-display font-medium"
-          style="font-size: 14px; line-height: 21px; color: #3974d5"
-          @click.prevent
-        >
-          {{ t('login.forgotPassword') }}
-        </a>
-      </div>
-
-      <!-- Login button — top:593, 64px below remember -->
+      <!-- Login button — top:593. Keeps its designed baseline: the removed
+           Remember-me/Forgot-password row was 49px + 25px + 64px above it. -->
       <button
         type="submit"
         :disabled="authStore.loading"
         class="flex items-center justify-center gap-2 disabled:opacity-70 transition-opacity"
         style="
-          margin-top: 64px;
+          margin-top: 138px;
           width: 100%;
           height: 70.96px;
           background: #3974d5;
