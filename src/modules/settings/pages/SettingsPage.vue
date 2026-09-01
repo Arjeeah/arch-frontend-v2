@@ -14,7 +14,7 @@ import SettingsGroupForm from '../components/SettingsGroupForm.vue'
 import RoleEnableMapField from '../components/RoleEnableMapField.vue'
 import OverrideCapacityDialog from '../components/OverrideCapacityDialog.vue'
 import { SETTINGS_FIELDS } from '../settings-field-config'
-import { SETTINGS_GROUP_KEYS } from '../types'
+import { SETTINGS_GROUP_KEYS, SETTINGS_GROUPS_NOT_ENFORCED } from '../types'
 import type { OverrideCapacityInput, SettingsGroupKey } from '../types'
 
 const { t } = useI18n()
@@ -79,6 +79,10 @@ watch(
 const tabs = computed(() =>
   SETTINGS_GROUP_KEYS.map((key) => ({ key, label: t(`settings.groups.${key}`) })),
 )
+
+// The active group's backend class has no consumers yet, so the form is shown
+// read-only with a notice instead of accepting edits the system ignores.
+const groupNotEnforced = computed(() => SETTINGS_GROUPS_NOT_ENFORCED.includes(activeGroup.value))
 
 async function handleSave(): Promise<void> {
   try {
@@ -161,11 +165,29 @@ async function handleOverrideCapacity(input: OverrideCapacityInput): Promise<voi
           </div>
         </template>
         <template v-else>
-          <SettingsGroupForm v-model="draft" :fields="SETTINGS_FIELDS[activeGroup]">
-            <template #field-perRoleEnableMap="{ model, update }">
-              <RoleEnableMapField :model="model.perRoleEnableMap" @update="update" />
-            </template>
-          </SettingsGroupForm>
+          <div
+            v-if="groupNotEnforced"
+            class="mb-6 p-4 rounded-md border border-warning/40 bg-warning/10"
+            role="status"
+          >
+            <p class="text-sm font-sans font-medium text-text-primary">
+              {{ t('settings.notEnforced.title') }}
+            </p>
+            <p class="mt-1 text-sm font-sans text-text-secondary">
+              {{ t('settings.notEnforced.body') }}
+            </p>
+          </div>
+
+          <!-- A native `fieldset[disabled]` reaches every nested input, select
+               and button, including the custom field components, without
+               threading a `disabled` prop through `SettingsGroupForm`. -->
+          <fieldset :disabled="groupNotEnforced" :class="groupNotEnforced && 'opacity-60'">
+            <SettingsGroupForm v-model="draft" :fields="SETTINGS_FIELDS[activeGroup]">
+              <template #field-perRoleEnableMap="{ model, update }">
+                <RoleEnableMapField :model="model.perRoleEnableMap" @update="update" />
+              </template>
+            </SettingsGroupForm>
+          </fieldset>
 
           <div v-if="activeGroup === 'storage'" class="mt-5 pt-5 border-t border-border">
             <AppButton variant="ghost" size="sm" @click="overrideDialogOpen = true">
@@ -191,7 +213,10 @@ async function handleOverrideCapacity(input: OverrideCapacityInput): Promise<voi
             </p>
           </div>
 
-          <div class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-border">
+          <div
+            v-if="!groupNotEnforced"
+            class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-border"
+          >
             <AppButton
               variant="ghost"
               size="md"

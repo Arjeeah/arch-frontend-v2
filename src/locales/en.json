@@ -1422,6 +1422,10 @@
     "errors": {
       "loadFailed": "Couldn't load settings",
       "retry": "Try again"
+    },
+    "notEnforced": {
+      "title": "Not active yet",
+      "body": "These values are saved, but nothing in the system reads them yet. Editing is disabled so the screen does not promise behaviour the system will not deliver."
     }
   },
   "studentDocuments": {
